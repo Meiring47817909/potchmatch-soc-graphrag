@@ -34,6 +34,14 @@ var builder = WebApplication.CreateBuilder(args);
 // enriched with this service's name and, once the middleware below assigns
 // one, the request's CorrelationId - so a single request's logs can be
 // traced across every service it touches.
+// Surface Serilog sink failures (e.g. SocService rejecting the ingest key) in
+// `docker compose logs` instead of the durable sink retrying silently.
+Serilog.Debugging.SelfLog.Enable(Console.Error);
+
+// The durable sink's shipper polls <dir>/events.bookmark and fails (until the
+// first event creates the directory) if the directory doesn't exist yet.
+Directory.CreateDirectory(builder.Configuration["SocIngest:BufferPath"] ?? "/tmp/soc-buffer");
+
 builder.Host.UseSerilog((context, loggerConfig) => loggerConfig
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
@@ -128,6 +136,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+
+if (string.IsNullOrWhiteSpace(app.Configuration["SocIngest:Key"]))
+{
+    app.Logger.LogWarning("SocIngest:Key is not configured - SocService will reject this service's security events (401) and they will pile up in the durable buffer. Set SocIngest__Key.");
+}
 
 app.UseForwardedHeaders();
 
