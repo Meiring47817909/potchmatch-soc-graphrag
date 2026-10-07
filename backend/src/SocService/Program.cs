@@ -33,6 +33,8 @@ builder.Services.AddScoped<EventIngestionService>();
 
 builder.Services.Configure<DetectionOptions>(builder.Configuration.GetSection(DetectionOptions.SectionName));
 builder.Services.AddScoped<AlertWriter>();
+builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.MultipleFailedLoginsRule>();
+builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.UnauthorisedEndpointAccessRule>();
 builder.Services.AddScoped<DetectionEngine>();
 builder.Services.AddHostedService<DetectionWorker>();
 
