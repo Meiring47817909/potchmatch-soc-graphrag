@@ -410,7 +410,7 @@
                 "login"
               ]
             },
-            "description": "Send this 5 times (Runner with 5 iterations, or click Send 5 times) to trigger the 'Multiple Failed Logins' rule (5 failures in 5 minutes for one account). Sending 3 more later should add to the same alert."
+            "description": "Click Send 5 times (do not use the Runner: it would re-run the whole folder) to trigger the 'Multiple Failed Logins' rule (5 failures in 5 minutes for one account). Rule 1 raises TWO alerts for the same failed logins: one for the account and one for the source IP. Sending 3 more later should add to the same alerts."
           },
           "event": [
             {
@@ -457,7 +457,7 @@
                 }
               ]
             },
-            "description": "Wait ~15 s after the failed logins (the rule engine runs every 15 s). Stores the Multiple Failed Logins alert's id (or the first alert's) as {{alertId}}."
+            "description": "Wait ~15 s after the failed logins (the rule engine runs every 15 s). Stores the id of the first Multiple Failed Logins alert as {{alertId}} (Rule 1 raises two: account and IP)."
           },
           "event": [
             {
@@ -467,9 +467,9 @@
                 "exec": [
                   "pm.test('200 OK', () => pm.response.to.have.status(200));",
                   "const alerts = pm.response.json();",
-                  "pm.test('At least one open alert', () => pm.expect(alerts.length).to.be.above(0));",
-                  "const login = alerts.find(a => a.ruleName === 'Multiple Failed Logins') || alerts[0];",
-                  "pm.environment.set('alertId', login.alertId);"
+                  "const login = Array.isArray(alerts) ? alerts.find(a => a.ruleName === 'Multiple Failed Logins') : undefined;",
+                  "pm.test('An open Multiple Failed Logins alert exists', () => pm.expect(login, 'no open Multiple Failed Logins alert yet').to.exist);",
+                  "if (login) pm.environment.set('alertId', login.alertId);"
                 ]
               }
             }
@@ -513,6 +513,7 @@
                   "pm.test('200 OK', () => pm.response.to.have.status(200));",
                   "const alert = pm.response.json();",
                   "pm.test('Rule is Multiple Failed Logins', () => pm.expect(alert.ruleName).to.eql('Multiple Failed Logins'));",
+                  "pm.test('Severity is HIGH', () => pm.expect(alert.severity).to.eql('HIGH'));",
                   "pm.test('Has >= 5 related events', () => pm.expect(alert.relatedEvents.length).to.be.at.least(5));"
                 ]
               }
