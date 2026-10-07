@@ -1,4 +1,7 @@
+using System.Text;
 using Consul;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +46,25 @@ builder.Services.AddHostedService<DetectionWorker>();
 builder.Services.AddSingleton<SocService.Health.IConsulHealthSource, SocService.Health.ConsulHealthSource>();
 builder.Services.AddHostedService<SocService.Health.HealthPollerWorker>();
 
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateLifetime = true,
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -86,6 +108,9 @@ appLifetime.ApplicationStopping.Register(() =>
 {
     consulClient.Agent.ServiceDeregister(serviceId).Wait();
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 app.MapControllers();
