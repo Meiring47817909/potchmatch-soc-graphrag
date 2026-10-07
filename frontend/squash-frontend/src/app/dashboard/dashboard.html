@@ -1,0 +1,225 @@
+<div class="dashboard">
+  <div class="column left">
+    <div class="panel">
+      <h2>Balance</h2>
+      <p class="balance-amount">R{{ walletBalance() ?? '—' }}</p>
+      <button type="button" (click)="openDepositModal()">Add Funds</button>
+    </div>
+
+    <div class="panel">
+      <h2>My Information</h2>
+
+      @if (isLoadingProfile()) {
+        <p class="empty">Loading your profile…</p>
+      } @else {
+        @if (profileError()) {
+          <p class="error">{{ profileError() }}</p>
+        }
+        @if (profileSuccess()) {
+          <p class="success">{{ profileSuccess() }}</p>
+        }
+
+        <form (ngSubmit)="saveProfile()">
+          <label>
+            Name
+            <input type="text" [(ngModel)]="name" name="name" required />
+          </label>
+          <label>
+            Surname
+            <input type="text" [(ngModel)]="surname" name="surname" required />
+          </label>
+          <label>
+            Email
+            <input type="email" [(ngModel)]="email" name="email" required />
+          </label>
+          <label>
+            Club
+            <select [(ngModel)]="clubId" name="clubId">
+              @for (club of clubs; track club.clubId) {
+                <option [value]="club.clubId">{{ club.name }}</option>
+              }
+            </select>
+          </label>
+
+          @if (isCoach) {
+            <h3>Coach Information</h3>
+            <label>
+              Bio
+              <textarea [(ngModel)]="coachBio" name="coachBio" rows="3"></textarea>
+            </label>
+            <label>
+              Coaching level
+              <input type="text" [(ngModel)]="coachingLevel" name="coachingLevel" placeholder="e.g. SA Squash Level 2 Coach" />
+            </label>
+            <label>
+              Hourly rate (ZAR)
+              <input type="number" [(ngModel)]="hourlyRateZAR" name="hourlyRateZAR" min="0" />
+            </label>
+          }
+
+          <button type="submit" [disabled]="isSavingProfile()">
+            {{ isSavingProfile() ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </form>
+      }
+    </div>
+
+    <div class="panel">
+      <h2>Change Password</h2>
+
+      @if (passwordError()) {
+        <p class="error">{{ passwordError() }}</p>
+      }
+      @if (passwordSuccess()) {
+        <p class="success">{{ passwordSuccess() }}</p>
+      }
+
+      <form (ngSubmit)="changePassword()">
+        <label>
+          Current password
+          <input type="password" [(ngModel)]="currentPassword" name="currentPassword" required />
+        </label>
+        <label>
+          New password
+          <input type="password" [(ngModel)]="newPassword" name="newPassword" required />
+        </label>
+        <label>
+          Confirm new password
+          <input type="password" [(ngModel)]="confirmNewPassword" name="confirmNewPassword" required />
+        </label>
+        <button type="submit" [disabled]="isSavingPassword()">
+          {{ isSavingPassword() ? 'Saving…' : 'Change Password' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="column right">
+    <div class="panel">
+      <h2>My Challenges &amp; Coaching Sessions</h2>
+      @if (myHosted().length === 0) {
+        <p class="empty">You haven't hosted any challenges or coaching sessions yet.</p>
+      }
+      @for (item of myHosted(); track item.bookingId) {
+        <div class="card">
+          <p>{{ item.isCoachingSession ? 'Coaching Session' : 'Challenge' }} · R{{ item.feeZAR }} · <span class="status">{{ item.status }}</span></p>
+          <p>Scheduled for {{ item.scheduledAt | date: 'mediumDate' }}</p>
+          @if (item.opponent) {
+            <p>Accepted by {{ item.opponent.name }} {{ item.opponent.surname }}</p>
+          } @else {
+            <p class="empty">No one has accepted this yet.</p>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="panel">
+      <h2>Host a Challenge or Coaching Session</h2>
+
+      @if (hostError()) {
+        <p class="error">{{ hostError() }}</p>
+      }
+
+      <form (ngSubmit)="hostBooking()">
+        @if (isCoach) {
+          <label>
+            Type
+            <select [(ngModel)]="hostType" name="hostType">
+              <option value="challenge">Challenge</option>
+              <option value="coaching">Coaching Session</option>
+            </select>
+          </label>
+        }
+        <label>
+          Fee (ZAR)
+          <input type="number" name="fee" min="1" [(ngModel)]="newBookingFeeZAR" required />
+        </label>
+        <label>
+          Date
+          <input type="date" name="scheduledAt" [min]="today" [(ngModel)]="newBookingScheduledAt" required />
+        </label>
+        <button type="submit" [disabled]="isHosting()">
+          {{ isHosting() ? 'Posting…' : (isCoach && hostType === 'coaching' ? 'Post Coaching Session' : 'Host Challenge') }}
+        </button>
+      </form>
+      <p class="empty">This will be hosted at your registered club: {{ myClubName }}.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Accepted Challenges &amp; Coaching Sessions</h2>
+      @if (myAccepted().length === 0) {
+        <p class="empty">You haven't accepted or booked anything yet.</p>
+      }
+      @for (item of myAccepted(); track item.bookingId) {
+        <div class="card">
+          <p>
+            Hosted by {{ item.hostPlayer.name }} {{ item.hostPlayer.surname }}
+            @if (item.hostPlayer.email) {
+              , contact: {{ item.hostPlayer.email }} to arrange a specified time
+            }
+          </p>
+          <p>{{ item.isCoachingSession ? 'Coaching Session' : 'Challenge' }} · R{{ item.feeZAR }} · <span class="status">{{ item.status }}</span> · Paid</p>
+          <p>Scheduled for {{ item.scheduledAt | date: 'mediumDate' }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (isDepositModalOpen()) {
+  <div class="modal-backdrop" (click)="closeDepositModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Enter payment details</h3>
+        <button type="button" class="link-button" (click)="closeDepositModal()">Cancel</button>
+      </div>
+
+      @if (depositError()) {
+        <p class="error">{{ depositError() }}</p>
+      }
+
+      <form (ngSubmit)="submitDeposit()">
+        <label>
+          Amount to add (ZAR)
+          <input type="number" min="1" [(ngModel)]="depositAmount" name="depositAmount" required />
+        </label>
+
+        <h4>Card information</h4>
+        <div class="card-field-group">
+          <input
+            type="text"
+            placeholder="1234 1234 1234 1234"
+            [(ngModel)]="cardNumber"
+            name="cardNumber"
+            class="card-number"
+            required
+          />
+          <div class="card-field-row">
+            <input type="text" placeholder="MM / YY" [(ngModel)]="cardExpiry" name="cardExpiry" required />
+            <input type="text" placeholder="CVC" [(ngModel)]="cardCvc" name="cardCvc" required />
+          </div>
+        </div>
+
+        <label>
+          Cardholder name
+          <input type="text" [(ngModel)]="cardholderName" name="cardholderName" required />
+        </label>
+        <label>
+          Country or region
+          <select [(ngModel)]="country" name="country">
+            <option value="ZA">South Africa</option>
+            <option value="US">United States</option>
+            <option value="GB">United Kingdom</option>
+            <option value="AU">Australia</option>
+          </select>
+        </label>
+
+        <button type="submit" [disabled]="isProcessingDeposit()">
+          {{ isProcessingDeposit() ? 'Processing…' : 'Add Funds' }}
+        </button>
+      </form>
+
+      <p class="empty">Demo payment form - no real card is charged. This just credits your in-app balance.</p>
+    </div>
+  </div>
+}

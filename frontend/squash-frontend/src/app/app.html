@@ -1,0 +1,20 @@
+@if (auth.currentPlayer(); as player) {
+  <div class="top-bar">
+    <button type="button" class="nav-button" (click)="showMap()">Squash Platform</button>
+    <button type="button" class="nav-button" (click)="showDashboard()">Dashboard</button>
+    <span class="spacer"></span>
+    <span>Logged in as {{ player.name }} {{ player.surname }} ({{ player.role }})</span>
+    <button type="button" (click)="logout()">Log out</button>
+  </div>
+
+  @if (view() === 'dashboard') {
+    <app-dashboard></app-dashboard>
+  } @else {
+    <div class="main-content">
+      <app-map (clubSelected)="onClubSelected($event)"></app-map>
+      <app-club-detail [club]="selectedClub()" (dataChanged)="onDataChanged()"></app-club-detail>
+    </div>
+  }
+} @else {
+  <app-login></app-login>
+}

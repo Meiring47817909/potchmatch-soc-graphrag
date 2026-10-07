@@ -1,0 +1,361 @@
+{
+  "info": {
+    "name": "PotchMatch Demo Flow",
+    "description": "Pre-built requests for the ITRI623 Deliverable 1 demo video: register a coach, set up their profile and a coaching session, then register a player, fail on insufficient funds, add funds, and succeed. Run top to bottom inside each folder - Login requests capture the JWT into {{authToken}} automatically, and Create Coaching Session captures {{bookingId}} automatically, so nothing needs to be copy-pasted by hand during the recording.\n\nBefore recording: bump the scheduledAt date in 'Create Coaching Session' if you end up recording after 7 September 2026 (the backend rejects any date that isn't in the future).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5132" }
+  ],
+  "item": [
+    {
+      "name": "1. Coach - Register & Setup",
+      "item": [
+        {
+          "name": "Register Coach (Wickus)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickusvn@gmail.com\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"pcc\",\n  \"isCoach\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "isCoach must be true here - that's what unlocks the coaching-session option later. Club is PCC (Potchefstroom Country Club)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registered (200)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Login Coach",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"wickusvn@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logged in (200)', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('authToken', body.token);",
+                  "pm.environment.set('myPlayerId', body.playerId);",
+                  "console.log('Coach token + id captured:', body.playerId);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Update Coach Profile (Bio, Level, Rate)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickusvn@gmail.com\",\n  \"clubId\": \"pcc\",\n  \"rank\": \"Unranked\",\n  \"coachBio\": \"Level 2 SA Squash-certified coach with 8 years of experience developing club and provincial players. Focused on movement efficiency, shot accuracy, and match-day mental preparation.\",\n  \"coachingLevel\": \"SA Squash Level 2 Coach\",\n  \"hourlyRateZAR\": 100\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/players/{{myPlayerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "players", "{{myPlayerId}}"]
+            },
+            "description": "rank is just echoed back unchanged (it's not editable here) - 'Unranked' matches what a brand-new player is seeded with."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Profile updated (200)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Create Coaching Session (7 Sept, R100)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clubId\": \"pcc\",\n  \"feeZAR\": 100,\n  \"scheduledAt\": \"2026-09-07T09:00:00Z\",\n  \"proposedLocation\": \"PCC Court 1\",\n  \"isCoachingSession\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"]
+            },
+            "description": "IMPORTANT: scheduledAt must be a future date/time - if you're recording after 7 September 2026, bump this date first or the backend will 400 it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Coaching session created (201)', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('bookingId', body.id);",
+                  "console.log('Booking id captured:', body.id);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Player - Register & Pay",
+      "item": [
+        {
+          "name": "Register Player (Meiring)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Meiring\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"defence\",\n  \"isCoach\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Club is 'defence' (Potchefstroom Defence Squash Club) - a different club to the coach's, which is fine: coaching sessions and challenges are visible/joinable across clubs on the map."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registered (200)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Login Player",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logged in (200)', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('authToken', body.token);",
+                  "pm.environment.set('myPlayerId', body.playerId);",
+                  "console.log('Player token + id captured:', body.playerId);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Check Wallet Balance (before funds)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/wallet",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "wallet"]
+            },
+            "description": "A brand-new wallet always starts at R0 - this is here just to show that on screen before the accept attempt below fails."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Balance is R0', () => pm.expect(pm.response.json().balanceZAR).to.eql(0));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Accept Coaching Session - expect 402 Insufficient Funds",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "accept"]
+            },
+            "description": "This is expected to fail with 402 - the player's wallet is still R0. That's the deliberate business-rule rejection, not a bug (see BookingController.Accept -> PaymentService /api/payments/hold)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Insufficient funds (402) - this is expected!', () => pm.response.to.have.status(402));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Add Funds (Deposit R200)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amountZAR\": 200\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/wallet/deposit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "wallet", "deposit"]
+            },
+            "description": "This is the same demo top-up flow as the Dashboard's 'Add Funds' modal - no real card is charged either way."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deposit succeeded (200)', () => pm.response.to.have.status(200));",
+                  "pm.test('New balance is R200', () => pm.expect(pm.response.json().balanceZAR).to.eql(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Accept Coaching Session - expect 200 OK",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}/accept",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings", "{{bookingId}}", "accept"]
+            },
+            "description": "Now that the wallet has R200, this should succeed - watch the UI's dashboard update too, and check the booking-service/payment-service logs for the CorrelationId linking this one request across both services."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Accepted (200)', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "0. Reference (optional, not part of the main flow)",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/players/{{myPlayerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "players", "{{myPlayerId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Bookings at PCC",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }] },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings?clubId=pcc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookings"],
+              "query": [{ "key": "clubId", "value": "pcc" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

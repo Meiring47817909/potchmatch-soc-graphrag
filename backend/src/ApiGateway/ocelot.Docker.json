@@ -1,0 +1,14 @@
+/*
+Optional overlay loaded only when ASPNETCORE_ENVIRONMENT=Docker (see Program.cs).
+Only the Consul host needs to change here - "localhost" means something
+different inside a container (itself) than it does on the host machine, so
+docker-compose points this at the "consul" service by its container DNS name.
+Everything else (Routes, Scheme, Port, Type) is inherited from ocelot.json.
+*/
+{
+  "GlobalConfiguration": {
+    "ServiceDiscoveryProvider": {
+      "Host": "consul"
+    }
+  }
+}

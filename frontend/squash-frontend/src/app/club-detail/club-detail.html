@@ -1,0 +1,99 @@
+@if (club) {
+  <h2>{{ club.name }}</h2>
+  <p class="address">{{ club.address }}</p>
+
+  @if (club.phone) {
+    <p>Tel: {{ club.phone }}</p>
+  }
+  @if (club.website) {
+    <p><a [href]="club.website" target="_blank" rel="noopener">{{ club.website }}</a></p>
+  }
+  @if (club.contactPerson) {
+    <p>Contact: {{ club.contactPerson }}</p>
+  }
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <h3>Coaches ({{ coachPlayers.length }})</h3>
+  @if (coachPlayers.length === 0) {
+    <p class="empty">No registered coaches at this club yet.</p>
+  }
+  @for (coach of coachPlayers; track coach.id) {
+    <div class="card">
+      <strong>{{ coach.name }} {{ coach.surname }}</strong>
+      @if (coach.coachingLevel) {
+        — {{ coach.coachingLevel }}
+      }
+      @if (coach.coachBio) {
+        <p>{{ coach.coachBio }}</p>
+      }
+      @if (coach.hourlyRateZAR) {
+        <p>R{{ coach.hourlyRateZAR }}/hour</p>
+      }
+      <p class="empty">See Coaching Sessions below to book with this coach.</p>
+    </div>
+  }
+
+  <h3>Players ({{ club.players.length }})</h3>
+  @if (club.players.length === 0) {
+    <p class="empty">No players registered at this club yet.</p>
+  }
+  @for (player of club.players; track player.id) {
+    <div class="card">
+      {{ player.name }} {{ player.surname }} — rank {{ player.rank }}
+      @if (player.isCoach) {
+        <span class="badge">Coach</span>
+      }
+    </div>
+  }
+
+  <h3>Open Challenges ({{ openChallenges.length }})</h3>
+  @if (openChallenges.length === 0) {
+    <p class="empty">No open challenges right now.</p>
+  }
+  @for (challenge of openChallenges; track challenge.bookingId) {
+    <div class="card">
+      {{ challenge.hostPlayer.name }} {{ challenge.hostPlayer.surname }}
+      @if (challenge.opponent) {
+        vs {{ challenge.opponent.name }} {{ challenge.opponent.surname }}
+      }
+      <p>R{{ challenge.feeZAR }} · <span class="status">{{ challenge.status }}</span></p>
+      <p>Scheduled for {{ challenge.scheduledAt | date: 'mediumDate' }}</p>
+      @if (challenge.status === 'Open' && !isMine(challenge.hostPlayer)) {
+        <button type="button" [disabled]="acceptingId() === challenge.bookingId" (click)="acceptBooking(challenge)">
+          {{ acceptingId() === challenge.bookingId ? 'Accepting…' : 'Accept Challenge' }}
+        </button>
+      }
+      @if (challenge.status === 'Open' && isMine(challenge.hostPlayer)) {
+        <span class="badge">Your challenge</span>
+      }
+    </div>
+  }
+
+  <h3>Coaching Sessions ({{ coachingSessions.length }})</h3>
+  @if (coachingSessions.length === 0) {
+    <p class="empty">No coaching sessions available right now.</p>
+  }
+  @for (session of coachingSessions; track session.bookingId) {
+    <div class="card">
+      {{ session.hostPlayer.name }} {{ session.hostPlayer.surname }} <span class="badge">Coach</span>
+      @if (session.opponent) {
+        — booked by {{ session.opponent.name }} {{ session.opponent.surname }}
+      }
+      <p>R{{ session.feeZAR }} · <span class="status">{{ session.status }}</span></p>
+      <p>Scheduled for {{ session.scheduledAt | date: 'mediumDate' }}</p>
+      @if (session.status === 'Open' && !isMine(session.hostPlayer)) {
+        <button type="button" [disabled]="acceptingId() === session.bookingId" (click)="acceptBooking(session)">
+          {{ acceptingId() === session.bookingId ? 'Booking…' : 'Book Session' }}
+        </button>
+      }
+      @if (session.status === 'Open' && isMine(session.hostPlayer)) {
+        <span class="badge">Your session</span>
+      }
+    </div>
+  }
+} @else {
+  <p class="empty">Click a club marker on the map to see its details.</p>
+}

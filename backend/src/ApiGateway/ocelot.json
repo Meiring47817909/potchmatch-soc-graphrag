@@ -1,0 +1,65 @@
+﻿/*
+Every other route does, meaning the Gateway itself now rejects unauthenticated requests before they ever reach a downstream service
+  — a real, visible instance of the "access control to protected endpoints" requirement from your spec.
+*/
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/auth/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "identity-service",
+      "LoadBalancerOptions": { "Type":  "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/players/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/players/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "identity-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "SquashPlatformAuth",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/bookings/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/bookings/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "booking-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "SquashPlatformAuth",
+        "AllowedScopes": []
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/payments/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/payments/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "payment-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "SquashPlatformAuth",
+        "AllowedScopes": []
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:5000",
+    "ServiceDiscoveryProvider": {
+      "Scheme": "http",
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    }
+  }
+}
+/*
+Note its port (it'll be a normal ASP.NET Core dev port — the BaseUrl in ocelot.json is just used for constructing
+redirect headers, it doesn't control what port Kestrel actually binds to, so don't be surprised if it's not 5000).
+*/

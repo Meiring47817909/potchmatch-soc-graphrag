@@ -1,0 +1,195 @@
+name: squash-platform
+
+networks:
+  squash-net:
+    driver: bridge
+
+volumes:
+  identity-db-data:
+  booking-db-data:
+  payment-db-data:
+
+services:
+  # --- Infrastructure ---
+
+  consul:
+    image: consul:1.15
+    # Same class of bug as the original host-mode 502: with no -node/-advertise,
+    # Consul's dev-mode agent identifies itself by the container's auto-assigned
+    # hostname (e.g. "aaeb102b2c44"), and that unreachable hostname leaks into
+    # service resolution - the Gateway ends up trying to connect to Consul's own
+    # container instead of the actual service, and gets "Connection refused"
+    # since nothing listens on 8080 there. Pinning both explicitly fixes it, the
+    # same way "-node localhost -advertise 127.0.0.1" did on the host before.
+    # List form, not a plain string - Compose shell-splits a plain string command
+    # and would strip the quotes Consul's own template syntax below needs.
+    command:
+      - agent
+      - -dev
+      - -client=0.0.0.0
+      - -node=consul
+      - '-advertise={{ GetInterfaceIP "eth0" }}'
+    ports:
+      - "8500:8500" # Consul UI/API, exposed for convenience (http://localhost:8500/ui)
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - squash-net
+
+  identity-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: identity_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5433:5432" # same host port as the non-Docker dev setup, for familiarity
+    volumes:
+      - identity-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - squash-net
+
+  booking-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5434:5432"
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - squash-net
+
+  payment-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5435:5432"
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - squash-net
+
+  # --- Microservices ---
+  # Each service's Address/HealthCheckHost is set to its own container/service name,
+  # since that's what other containers on this network resolve it by. Connection
+  # strings point at the "-db" service names instead of localhost, and each Postgres
+  # instance is reached on its normal internal port 5432 (the 543x host ports above
+  # are only for connecting from tools on your own machine, e.g. psql or pgAdmin).
+
+  identity-service:
+    build:
+      context: ./src/IdentityService
+    depends_on:
+      consul:
+        condition: service_healthy
+      identity-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__IdentityDb: "Host=identity-db;Port=5432;Database=identity_db;Username=postgres;Password=devpassword"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "identity-service"
+      ServiceRegistration__HealthCheckHost: "identity-service"
+    networks:
+      - squash-net
+
+  booking-service:
+    build:
+      context: ./src/BookingService
+    depends_on:
+      consul:
+        condition: service_healthy
+      booking-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__BookingDb: "Host=booking-db;Port=5432;Database=booking_db;Username=postgres;Password=devpassword"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "booking-service"
+      ServiceRegistration__HealthCheckHost: "booking-service"
+      Services__PaymentServiceBaseUrl: "http://payment-service:8080"
+    networks:
+      - squash-net
+
+  payment-service:
+    build:
+      context: ./src/PaymentService
+    depends_on:
+      consul:
+        condition: service_healthy
+      payment-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__PaymentDb: "Host=payment-db;Port=5432;Database=payment_db;Username=postgres;Password=devpassword"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "payment-service"
+      ServiceRegistration__HealthCheckHost: "payment-service"
+    networks:
+      - squash-net
+
+  # --- Gateway ---
+  # The only backend container exposed to the host beyond Consul/the databases -
+  # reachable at http://localhost:5132. The frontend below is built to call it at
+  # exactly that address (see frontend/squash-frontend/src/app/core/api-config.ts),
+  # since that call is made by the browser on the host, not by another container -
+  # it doesn't matter that the frontend itself now also runs in a container.
+
+  api-gateway:
+    build:
+      context: ./src/ApiGateway
+    depends_on:
+      consul:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+      booking-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+    ports:
+      - "5132:8080"
+    networks:
+      - squash-net
+
+  # --- Frontend ---
+  # Built from source (ng build --configuration production) and served as
+  # static files by nginx - see frontend/squash-frontend/Dockerfile. This is
+  # a separate, one-off production build, not the "ng serve" dev server, so
+  # there's no live-reload here; that's still available on the host with
+  # `npm start` if you want it while actively developing.
+
+  frontend:
+    build:
+      context: ../frontend/squash-frontend
+    depends_on:
+      api-gateway:
+        condition: service_started
+    ports:
+      - "4200:80"
+    networks:
+      - squash-net

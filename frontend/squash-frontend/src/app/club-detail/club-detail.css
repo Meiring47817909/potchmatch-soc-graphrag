@@ -1,0 +1,97 @@
+:host {
+  display: block;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-family: sans-serif;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.address {
+  color: #555;
+  margin-top: -8px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #1565c0;
+  color: white;
+  font-size: 0.75rem;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.empty {
+  color: #888;
+  font-style: italic;
+}
+
+.error {
+  background: #fdecea;
+  color: #b3261e;
+  border: 1px solid #f5c2c0;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+button {
+  border: none;
+  border-radius: 4px;
+  background: #1565c0;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0d47a1;
+}
+
+button:disabled {
+  background: #90a4ae;
+  cursor: not-allowed;
+}
+
+.host-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 16px;
+}
+
+.host-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.host-form input {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

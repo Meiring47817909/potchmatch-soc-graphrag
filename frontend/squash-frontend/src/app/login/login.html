@@ -1,0 +1,50 @@
+<div class="login-card">
+  <h1>Squash Platform</h1>
+  <p class="subtitle">{{ mode() === 'login' ? 'Log in to continue' : 'Create an account' }}</p>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <form (ngSubmit)="submit()">
+    @if (mode() === 'register') {
+      <label>
+        Name
+        <input type="text" [(ngModel)]="name" name="name" required />
+      </label>
+      <label>
+        Surname
+        <input type="text" [(ngModel)]="surname" name="surname" required />
+      </label>
+      <label>
+        Club
+        <select [(ngModel)]="clubId" name="clubId">
+          @for (club of clubs; track club.clubId) {
+            <option [value]="club.clubId">{{ club.name }}</option>
+          }
+        </select>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="isCoach" name="isCoach" />
+        Are you a coach?
+      </label>
+    }
+
+    <label>
+      Email
+      <input type="email" [(ngModel)]="email" name="email" required />
+    </label>
+    <label>
+      Password
+      <input type="password" [(ngModel)]="password" name="password" required />
+    </label>
+
+    <button type="submit" [disabled]="isSubmitting()">
+      {{ isSubmitting() ? 'Please wait...' : (mode() === 'login' ? 'Log In' : 'Register') }}
+    </button>
+  </form>
+
+  <button type="button" class="link-button" (click)="toggleMode()">
+    {{ mode() === 'login' ? "Don't have an account? Register" : 'Already have an account? Log in' }}
+  </button>
+</div>
