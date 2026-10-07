@@ -133,6 +133,8 @@ services:
       Consul__Address: "http://consul:8500"
       ServiceRegistration__Address: "identity-service"
       ServiceRegistration__HealthCheckHost: "identity-service"
+      SocIngest__Url: "http://soc-service:8080/api/events"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
     networks:
       - squash-net
 
@@ -150,6 +152,8 @@ services:
       Consul__Address: "http://consul:8500"
       ServiceRegistration__Address: "booking-service"
       ServiceRegistration__HealthCheckHost: "booking-service"
+      SocIngest__Url: "http://soc-service:8080/api/events"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
       Services__PaymentServiceBaseUrl: "http://payment-service:8080"
     networks:
       - squash-net
@@ -168,6 +172,8 @@ services:
       Consul__Address: "http://consul:8500"
       ServiceRegistration__Address: "payment-service"
       ServiceRegistration__HealthCheckHost: "payment-service"
+      SocIngest__Url: "http://soc-service:8080/api/events"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
     networks:
       - squash-net
 
@@ -208,6 +214,9 @@ services:
         condition: service_started
       payment-service:
         condition: service_started
+    environment:
+      SocIngest__Url: "http://soc-service:8080/api/events"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
     ports:
       - "5132:8080"
     networks:

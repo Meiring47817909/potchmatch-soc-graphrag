@@ -100,4 +100,31 @@ public class SerilogEventMapperTests
         Assert.False(SerilogEventMapper.TryMap(env, Received, out _, out var error));
         Assert.NotNull(error);
     }
+
+    // Captured verbatim from a real Serilog.Sinks.Http 9.2.1 durable buffer line
+    // (NormalRenderedTextFormatter) written by api-gateway: flat Properties, null
+    // values for unset fields, extra bookkeeping properties, SecurityEvent as a bool.
+    private const string RealSinkLine =
+        """{"Timestamp":"2026-10-07T21:01:36.2204213Z","Level":"Information","MessageTemplate":"{EventType} [{Severity}] {Message}","RenderedMessage":"\"REQUEST_RECEIVED\" [\"LOW\"] \"POST /api/auth/login received\"","TraceId":"ed69893a28e9e587b8f73c7c77a28ca4","SpanId":"de4a32d4343a384f","Properties":{"EventType":"REQUEST_RECEIVED","Severity":"LOW","Message":"POST /api/auth/login received","UserId":null,"SourceIp":"172.18.0.1","Endpoint":"/api/auth/login","HttpMethod":"POST","StatusCode":null,"AffectedEntity":null,"SourceContext":"Program","RequestId":"0HNP4MOMAC706:00000001","SecurityEvent":true,"EventId":"f5d21c3b-4f35-460f-9ff5-e4a266a118d5","ClientIp":"172.18.0.1","CorrelationId":"93aef766-3e1c-47fe-a0ce-662992bbbeba","ServiceName":"api-gateway"}}""";
+
+    [Fact]
+    public void Mapper_MapsRealSerilogSinkHttpPayload()
+    {
+        var batch = System.Text.Json.JsonSerializer.Deserialize<List<SerilogEnvelope>>(
+            "[" + RealSinkLine + "]",
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+
+        Assert.True(SerilogEventMapper.TryMap(batch![0], Received, out var evt, out var error), error);
+        Assert.Equal(Guid.Parse("f5d21c3b-4f35-460f-9ff5-e4a266a118d5"), evt!.EventId);
+        Assert.Equal("REQUEST_RECEIVED", evt.EventType);
+        Assert.Equal("LOW", evt.Severity);
+        Assert.Equal("api-gateway", evt.ServiceName);
+        Assert.Equal("172.18.0.1", evt.SourceIp);
+        Assert.Equal("/api/auth/login", evt.Endpoint);
+        Assert.Equal("POST", evt.HttpMethod);
+        Assert.Null(evt.UserId);
+        Assert.Null(evt.StatusCode);
+        Assert.Equal("93aef766-3e1c-47fe-a0ce-662992bbbeba", evt.CorrelationId);
+        Assert.Equal(DateTimeOffset.Parse("2026-10-07T21:01:36.2204213Z"), evt.Timestamp);
+    }
 }

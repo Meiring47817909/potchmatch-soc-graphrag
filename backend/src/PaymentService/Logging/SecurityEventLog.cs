@@ -1,3 +1,5 @@
+using Serilog.Context;
+
 namespace PaymentService.Logging;
 
 // See IdentityService's identical copy of this class for the full rationale.
@@ -18,9 +20,15 @@ public static class SecurityEventLog
         int? statusCode = null,
         string? affectedEntity = null)
     {
-        logger.Log(
-            level,
-            "{EventType} [{Severity}] {Message} (UserId={UserId}, SourceIp={SourceIp}, Endpoint={Endpoint}, HttpMethod={HttpMethod}, StatusCode={StatusCode}, AffectedEntity={AffectedEntity})",
-            eventType, severity, message, userId, sourceIp, endpoint, httpMethod, statusCode, affectedEntity);
+        // EventId + SecurityEvent let the SOC sink (see Program.cs) pick out exactly
+        // these events and give each a stable id for idempotent ingestion.
+        using (LogContext.PushProperty("EventId", Guid.NewGuid().ToString()))
+        using (LogContext.PushProperty("SecurityEvent", true))
+        {
+            logger.Log(
+                level,
+                "{EventType} [{Severity}] {Message} (UserId={UserId}, SourceIp={SourceIp}, Endpoint={Endpoint}, HttpMethod={HttpMethod}, StatusCode={StatusCode}, AffectedEntity={AffectedEntity})",
+                eventType, severity, message, userId, sourceIp, endpoint, httpMethod, statusCode, affectedEntity);
+        }
     }
 }

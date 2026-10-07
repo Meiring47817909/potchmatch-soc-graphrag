@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +15,8 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
 using Serilog.Context;
 using Serilog.Formatting.Compact;
+using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Filters;
 
 // Consul's own client library also defines a LogLevel type (Consul.LogLevel),
 // which collides with the ASP.NET Core one this file actually uses for its
@@ -35,7 +38,17 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .Enrich.WithProperty("ServiceName", "payment-service")
-    .WriteTo.Console(new RenderedCompactJsonFormatter()));
+    .WriteTo.Console(new RenderedCompactJsonFormatter())
+    // Ship security events to SocService. Durable: events are buffered on disk
+    // and retried if SocService is down. Buffer location is configurable via
+    // SocIngest:BufferPath (default /tmp/soc-buffer - writable in the container).
+    .WriteTo.Logger(lc => lc
+        .Filter.ByIncludingOnly(Matching.WithProperty("SecurityEvent"))
+        .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
+            requestUri: context.Configuration["SocIngest:Url"] ?? "http://soc-service:8080/api/events",
+            bufferBaseFileName: (context.Configuration["SocIngest:BufferPath"] ?? "/tmp/soc-buffer") + "/events",
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new SocIngestHttpClient(context.Configuration))));
 
 // Register with Consul. Consul:Address lets docker-compose point this at the
 // "consul" container by name instead of localhost - defaults to localhost so
@@ -98,7 +111,19 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Behind the Gateway, the TCP peer is the Gateway container. Trust the
+// X-Forwarded-For it sets ({RemoteIpAddress} via Ocelot) so Connection.RemoteIpAddress
+// is the real client. Networks/proxies are cleared because the Gateway's Docker IP isn't fixed.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Apply any pending EF Core migrations automatically on startup, so a fresh
 // database (e.g. a brand-new Postgres container in docker-compose) gets its
@@ -171,6 +196,7 @@ app.Use(async (context, next) =>
     context.Response.Headers[CorrelationIdHeader] = correlationId;
 
     using (LogContext.PushProperty("CorrelationId", correlationId))
+    using (LogContext.PushProperty("ClientIp", context.Connection.RemoteIpAddress?.ToString()))
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         SecurityEventLog.Emit(logger, LogLevel.Information, "REQUEST_RECEIVED", "LOW",

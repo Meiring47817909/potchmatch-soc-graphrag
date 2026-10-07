@@ -9,6 +9,8 @@ using Ocelot.Provider.Consul;
 using Serilog;
 using Serilog.Context;
 using Serilog.Formatting.Compact;
+using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +24,17 @@ builder.Host.UseSerilog((context, loggerConfig) => loggerConfig
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .Enrich.WithProperty("ServiceName", "api-gateway")
-    .WriteTo.Console(new RenderedCompactJsonFormatter()));
+    .WriteTo.Console(new RenderedCompactJsonFormatter())
+    // Ship security events to SocService. Durable: events are buffered on disk
+    // and retried if SocService is down. Buffer location is configurable via
+    // SocIngest:BufferPath (default /tmp/soc-buffer - writable in the container).
+    .WriteTo.Logger(lc => lc
+        .Filter.ByIncludingOnly(Matching.WithProperty("SecurityEvent"))
+        .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
+            requestUri: context.Configuration["SocIngest:Url"] ?? "http://soc-service:8080/api/events",
+            bufferBaseFileName: (context.Configuration["SocIngest:BufferPath"] ?? "/tmp/soc-buffer") + "/events",
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new SocIngestHttpClient(context.Configuration))));
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 // In docker-compose, ASPNETCORE_ENVIRONMENT=Docker triggers this optional overlay
@@ -122,6 +134,7 @@ app.Use(async (context, next) =>
     context.Response.Headers[CorrelationIdHeader] = correlationId;
 
     using (LogContext.PushProperty("CorrelationId", correlationId))
+    using (LogContext.PushProperty("ClientIp", context.Connection.RemoteIpAddress?.ToString()))
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         SecurityEventLog.Emit(logger, LogLevel.Information, "REQUEST_RECEIVED", "LOW",

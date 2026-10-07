@@ -6,6 +6,7 @@ Every other route does, meaning the Gateway itself now rejects unauthenticated r
   "Routes": [
     {
       "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamHeaderTransform": { "X-Forwarded-For": "{RemoteIpAddress}" },
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/auth/{everything}",
       "DownstreamScheme": "http",
@@ -14,6 +15,7 @@ Every other route does, meaning the Gateway itself now rejects unauthenticated r
     },
     {
       "UpstreamPathTemplate": "/api/players/{everything}",
+      "UpstreamHeaderTransform": { "X-Forwarded-For": "{RemoteIpAddress}" },
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/players/{everything}",
       "DownstreamScheme": "http",
@@ -26,6 +28,7 @@ Every other route does, meaning the Gateway itself now rejects unauthenticated r
     },
     {
       "UpstreamPathTemplate": "/api/bookings/{everything}",
+      "UpstreamHeaderTransform": { "X-Forwarded-For": "{RemoteIpAddress}" },
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/bookings/{everything}",
       "DownstreamScheme": "http",
@@ -38,6 +41,7 @@ Every other route does, meaning the Gateway itself now rejects unauthenticated r
     },
     {
       "UpstreamPathTemplate": "/api/payments/{everything}",
+      "UpstreamHeaderTransform": { "X-Forwarded-For": "{RemoteIpAddress}" },
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/payments/{everything}",
       "DownstreamScheme": "http",
