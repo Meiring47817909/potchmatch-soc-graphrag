@@ -52,6 +52,21 @@ public class AlertWriterTests
     }
 
     [Fact]
+    public async Task Writer_OpenAlert_NoNewEvents_UpdatedAtUnchanged()
+    {
+        using var db = TestDb.Create();
+        var writer = new AlertWriter(db);
+        Guid e1 = Guid.NewGuid(), e2 = Guid.NewGuid();
+
+        await writer.ApplyAsync(new FakeRule(), Match("k", e1, e2), Now, default);
+        await writer.ApplyAsync(new FakeRule(), Match("k", e1, e2), Now.AddMinutes(1), default);
+
+        var alert = await db.Alerts.SingleAsync();
+        Assert.Equal(Now, alert.UpdatedAt);
+        Assert.Equal(2, await db.AlertEvents.CountAsync());
+    }
+
+    [Fact]
     public async Task Writer_AcknowledgedAlert_AlsoAbsorbs()
     {
         using var db = TestDb.Create();

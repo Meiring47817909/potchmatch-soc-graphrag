@@ -35,19 +35,25 @@ public class AlertWriter(SocDbContext db)
             };
             db.Alerts.Add(alert);
         }
-        else
-        {
-            alert.UpdatedAt = now;
-        }
 
+        var isNew = db.Entry(alert).State == EntityState.Added;
         var existing = alert.AlertEvents.Select(ae => ae.EventId).ToHashSet();
+        var added = 0;
         foreach (var eventId in match.EventIds.Distinct())
         {
             if (existing.Add(eventId))
+            {
                 alert.AlertEvents.Add(new AlertEvent { AlertId = alert.AlertId, EventId = eventId });
+                added++;
+            }
         }
 
-        await db.SaveChangesAsync(ct);
+        // Only touch an existing alert when it actually absorbed new events.
+        if (!isNew && added > 0)
+            alert.UpdatedAt = now;
+
+        if (isNew || added > 0)
+            await db.SaveChangesAsync(ct);
         return alert;
     }
 
