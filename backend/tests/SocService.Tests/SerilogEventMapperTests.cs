@@ -127,4 +127,14 @@ public class SerilogEventMapperTests
         Assert.Equal("93aef766-3e1c-47fe-a0ce-662992bbbeba", evt.CorrelationId);
         Assert.Equal(DateTimeOffset.Parse("2026-10-07T21:01:36.2204213Z"), evt.Timestamp);
     }
+
+    [Fact]
+    public void Mapper_StripsNulCharacters()
+    {
+        var env = EnvelopeBuilder.Make(overrides: new() { ["Message"] = "bad\0msg", ["Endpoint"] = "/a\0b" });
+
+        Assert.True(SerilogEventMapper.TryMap(env, Received, out var evt, out _));
+        Assert.Equal("badmsg", evt!.Message);
+        Assert.Equal("/ab", evt.Endpoint);
+    }
 }

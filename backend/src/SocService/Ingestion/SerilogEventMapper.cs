@@ -84,11 +84,13 @@ public static class SerilogEventMapper
     private static string? GetString(Dictionary<string, JsonElement> props, string key)
     {
         if (!props.TryGetValue(key, out var el)) return null;
-        return el.ValueKind switch
+        var value = el.ValueKind switch
         {
             JsonValueKind.String => el.GetString(),
             JsonValueKind.Null or JsonValueKind.Undefined => null,
             _ => el.GetRawText(),
         };
+        // Npgsql rejects NUL in text; one bad event must not block a whole batch/sink.
+        return value?.Replace("\0", string.Empty);
     }
 }

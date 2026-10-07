@@ -19,6 +19,10 @@ public static class EventsQuery
         pageSize = NormalisePageSize(pageSize);
         page = Math.Max(page, 1);
 
+        // Npgsql only accepts UTC offsets for timestamptz parameters.
+        from = from?.ToUniversalTime();
+        to = to?.ToUniversalTime();
+
         var q = db.Events.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(type)) q = q.Where(e => e.EventType == type);
         if (!string.IsNullOrWhiteSpace(user)) q = q.Where(e => e.UserId == user);

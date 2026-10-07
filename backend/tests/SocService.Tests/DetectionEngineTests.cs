@@ -189,4 +189,41 @@ public class DetectionEngineTests
         Assert.Equal(SocConstants.Status.Open, alerts[1].Status);
         Assert.Equal(c2.EventId, Assert.Single(alerts[1].AlertEvents).EventId);
     }
+
+    [Fact]
+    public async Task Engine_ResolvingOneSiblingAlert_DoesNotStopOtherFromAbsorbing()
+    {
+        using var db = TestDb.Create();
+        var shared = new[] { Ev(Now.AddMinutes(-2)), Ev(Now.AddMinutes(-3)) };
+        db.Events.AddRange(shared);
+        await db.SaveChangesAsync();
+        // Like Rule 1: the same events feed an account match and an IP match.
+        var rule = new FakeRule
+        {
+            Matcher = evs => evs.Count < 2 ? [] : // threshold of 2 events
+            [
+                new RuleMatch("account:a", "d", null, null, null, evs.Select(e => e.EventId).ToList()),
+                new RuleMatch("ip:1", "d", null, null, null, evs.Select(e => e.EventId).ToList()),
+            ],
+        };
+        var engine = Engine(db, rule);
+        await engine.RunOnceAsync(Now, default);
+        (await db.Alerts.SingleAsync(a => a.DedupKey == "account:a")).Status = SocConstants.Status.Resolved;
+        await db.SaveChangesAsync();
+
+        var fresh = Ev(Now.AddSeconds(5));
+        db.Events.Add(fresh);
+        await db.SaveChangesAsync();
+        await engine.RunOnceAsync(Now.AddSeconds(15), default);
+
+        db.ChangeTracker.Clear();
+        var alerts = await db.Alerts.Include(a => a.AlertEvents).ToListAsync();
+        Assert.Equal(2, alerts.Count); // resolved one was not reopened or duplicated
+        var ip = alerts.Single(a => a.DedupKey == "ip:1");
+        Assert.Equal(SocConstants.Status.Open, ip.Status);
+        Assert.Contains(ip.AlertEvents, ae => ae.EventId == fresh.EventId);
+        var account = alerts.Single(a => a.DedupKey == "account:a");
+        Assert.Equal(SocConstants.Status.Resolved, account.Status);
+        Assert.DoesNotContain(account.AlertEvents, ae => ae.EventId == fresh.EventId);
+    }
 }

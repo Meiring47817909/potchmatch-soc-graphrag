@@ -41,4 +41,23 @@ public class AlertsQueryTests
         Assert.Equal(200, EventsQuery.NormalisePageSize(10_000));
         Assert.Equal(50, EventsQuery.NormalisePageSize(0));
     }
+
+    [Fact]
+    public async Task EventsQuery_AcceptsNonUtcOffsetBounds()
+    {
+        using var db = TestDb.Create();
+        var t = new DateTimeOffset(2026, 10, 7, 10, 0, 0, TimeSpan.Zero);
+        var before = Ev("X", null, t.AddMinutes(-30));
+        var inside = Ev("X", null, t.AddMinutes(10));
+        var after = Ev("X", null, t.AddHours(2));
+        db.Events.AddRange(before, inside, after);
+        await db.SaveChangesAsync();
+
+        // 12:00+02:00 == 10:00Z ; 13:00+02:00 == 11:00Z
+        var from = new DateTimeOffset(2026, 10, 7, 12, 0, 0, TimeSpan.FromHours(2));
+        var to = new DateTimeOffset(2026, 10, 7, 13, 0, 0, TimeSpan.FromHours(2));
+        var result = await EventsQuery.RunAsync(db, null, null, from, to, 1, 50);
+
+        Assert.Equal(inside.EventId, Assert.Single(result).EventId);
+    }
 }

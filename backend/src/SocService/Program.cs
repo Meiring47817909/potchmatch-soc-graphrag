@@ -100,6 +100,8 @@ appLifetime.ApplicationStarted.Register(() =>
             HTTP = $"http://{healthCheckHost}:{listeningUrl.Port}/health",
             Interval = TimeSpan.FromSeconds(10),
             Timeout = TimeSpan.FromSeconds(5),
+            // Drop registrations left behind by a non-graceful exit (kill/crash).
+            DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
         }
     }).Wait();
 });

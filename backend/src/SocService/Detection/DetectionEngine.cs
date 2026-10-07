@@ -61,18 +61,48 @@ public class DetectionEngine(
         var types = rule.InputEventTypes.ToList();
         var ruleName = rule.RuleName;
 
-        // Events already linked to a RESOLVED alert of this rule must not be re-evaluated,
-        // otherwise a resolved alert would be re-opened from the same events.
+        // Events linked only to RESOLVED alerts of this rule must not be re-evaluated,
+        // otherwise a resolved alert would be re-opened from the same events. Events that
+        // are also linked to a still-active alert of the rule stay visible: a rule can link
+        // the same events to several alerts (Rule 1: account alert + IP alert), and
+        // resolving one must not stop its sibling from absorbing new events.
         var events = await db.Events.AsNoTracking()
             .Where(e => types.Contains(e.EventType) && e.Timestamp >= from)
             .Where(e => !db.AlertEvents.Any(ae => ae.EventId == e.EventId &&
                 db.Alerts.Any(a => a.AlertId == ae.AlertId
                     && a.Status == SocConstants.Status.Resolved
+                    && a.RuleName == ruleName))
+                || db.AlertEvents.Any(ae => ae.EventId == e.EventId &&
+                db.Alerts.Any(a => a.AlertId == ae.AlertId
+                    && a.Status != SocConstants.Status.Resolved
                     && a.RuleName == ruleName)))
             .OrderBy(e => e.Timestamp)
             .ToListAsync(ct);
 
         foreach (var match in rule.Evaluate(events, now).ToList())
-            await writer.ApplyAsync(rule, match, now, ct);
+        {
+            // Per dedup key: events already in a RESOLVED alert with this key are consumed.
+            var resolvedForKey = (await db.AlertEvents
+                .Where(ae => db.Alerts.Any(a => a.AlertId == ae.AlertId
+                    && a.DedupKey == match.DedupKey
+                    && a.Status == SocConstants.Status.Resolved))
+                .Select(ae => ae.EventId)
+                .ToListAsync(ct)).ToHashSet();
+
+            var effective = match;
+            if (match.EventIds.Any(resolvedForKey.Contains))
+            {
+                // Re-evaluate without the consumed events; the match survives only if
+                // the rule's condition still holds for what remains.
+                var remaining = events.Where(e => !resolvedForKey.Contains(e.EventId)).ToList();
+                var again = remaining.Count == 0
+                    ? null
+                    : rule.Evaluate(remaining, now).FirstOrDefault(m => m.DedupKey == match.DedupKey);
+                if (again is null) continue;
+                effective = again;
+            }
+
+            await writer.ApplyAsync(rule, effective, now, ct);
+        }
     }
 }
