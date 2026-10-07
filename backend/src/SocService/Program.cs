@@ -40,6 +40,9 @@ builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.Service
 builder.Services.AddScoped<DetectionEngine>();
 builder.Services.AddHostedService<DetectionWorker>();
 
+builder.Services.AddSingleton<SocService.Health.IConsulHealthSource, SocService.Health.ConsulHealthSource>();
+builder.Services.AddHostedService<SocService.Health.HealthPollerWorker>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
