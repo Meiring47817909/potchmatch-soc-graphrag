@@ -1,4 +1,4 @@
-name: squash-platform
+name: squash-platform-phase2
 
 networks:
   squash-net:
@@ -8,6 +8,7 @@ volumes:
   identity-db-data:
   booking-db-data:
   payment-db-data:
+  soc-db-data:
 
 services:
   # --- Infrastructure ---
@@ -93,6 +94,24 @@ services:
     networks:
       - squash-net
 
+  soc-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: soc_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5436:5432"
+    volumes:
+      - soc-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - squash-net
+
   # --- Microservices ---
   # Each service's Address/HealthCheckHost is set to its own container/service name,
   # since that's what other containers on this network resolve it by. Connection
@@ -149,6 +168,24 @@ services:
       Consul__Address: "http://consul:8500"
       ServiceRegistration__Address: "payment-service"
       ServiceRegistration__HealthCheckHost: "payment-service"
+    networks:
+      - squash-net
+
+  soc-service:
+    build:
+      context: ./src/SocService
+    depends_on:
+      consul:
+        condition: service_healthy
+      soc-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__SocDb: "Host=soc-db;Port=5432;Database=soc_db;Username=postgres;Password=devpassword"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "soc-service"
+      ServiceRegistration__HealthCheckHost: "soc-service"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
     networks:
       - squash-net
 
