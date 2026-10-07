@@ -85,4 +85,31 @@ public class DetectionEngineTests
         var passed = Assert.Single(rule.Received);
         Assert.Equal(inside.EventId, Assert.Single(passed).EventId);
     }
+
+    [Fact]
+    public async Task Engine_RecoveredEvent_ResolvesServiceFailureAlert()
+    {
+        using var db = TestDb.Create();
+        var rule = new SocService.Detection.Rules.ServiceFailureRule(
+            Microsoft.Extensions.Options.Options.Create(new DetectionOptions()));
+        var critical = Ev(Now.AddSeconds(-40), "SERVICE_HEALTH_CRITICAL");
+        critical.AffectedEntity = "payment-service";
+        db.Events.Add(critical);
+        await db.SaveChangesAsync();
+        var engine = Engine(db, rule);
+
+        await engine.RunOnceAsync(Now.AddSeconds(-30), default);
+        Assert.Equal(SocConstants.Status.Open, (await db.Alerts.SingleAsync()).Status);
+
+        var recovered = Ev(Now.AddSeconds(-10), "SERVICE_HEALTH_RECOVERED");
+        recovered.AffectedEntity = "payment-service";
+        db.Events.Add(recovered);
+        await db.SaveChangesAsync();
+        await engine.RunOnceAsync(Now, default);
+
+        db.ChangeTracker.Clear();
+        var alert = await db.Alerts.Include(a => a.AlertEvents).SingleAsync();
+        Assert.Equal(SocConstants.Status.Resolved, alert.Status);
+        Assert.DoesNotContain(alert.AlertEvents, ae => ae.EventId == recovered.EventId);
+    }
 }

@@ -35,6 +35,8 @@ builder.Services.Configure<DetectionOptions>(builder.Configuration.GetSection(De
 builder.Services.AddScoped<AlertWriter>();
 builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.MultipleFailedLoginsRule>();
 builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.UnauthorisedEndpointAccessRule>();
+builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.AbnormalRequestRateRule>();
+builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.ServiceFailureRule>();
 builder.Services.AddScoped<DetectionEngine>();
 builder.Services.AddHostedService<DetectionWorker>();
 

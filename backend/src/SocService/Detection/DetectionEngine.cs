@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SocService.Data;
+using SocService.Detection.Rules;
 using SocService.Models;
 
 namespace SocService.Detection;
@@ -25,7 +26,30 @@ public class DetectionEngine(
             }
         }
 
-        // Post-rules step (e.g. service-failure recovery auto-resolve) is added here.
+        try
+        {
+            await ResolveRecoveredServicesAsync(now, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Service-failure recovery auto-resolve failed; skipping this cycle");
+            db.ChangeTracker.Clear();
+        }
+    }
+
+    private async Task ResolveRecoveredServicesAsync(DateTimeOffset now, CancellationToken ct)
+    {
+        var rule = rules.OfType<ServiceFailureRule>().FirstOrDefault();
+        if (rule is null) return;
+
+        // Loaded directly: recovered events are never linked to alerts, and must not be hidden.
+        var from = now - rule.Window;
+        var recovered = await db.Events.AsNoTracking()
+            .Where(e => e.EventType == ServiceFailureRule.HealthRecovered && e.Timestamp >= from)
+            .ToListAsync(ct);
+
+        foreach (var (service, at) in rule.FindRecoveries(recovered))
+            await writer.ResolveAsync($"{rule.RuleName}:{service}", at, ct);
     }
 
     private async Task RunRuleAsync(IDetectionRule rule, DateTimeOffset now, CancellationToken ct)
