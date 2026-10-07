@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
 using SocService.Data;
+using SocService.Ingestion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,8 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddDbContext<SocDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("SocDb")));
+
+builder.Services.AddScoped<EventIngestionService>();
 
 builder.Services.AddControllers();
 
