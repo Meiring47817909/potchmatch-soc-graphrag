@@ -176,6 +176,8 @@ appLifetime.ApplicationStarted.Register(() =>
             HTTP = $"http://{healthCheckHost}:{listeningUrl.Port}/health",
             Interval = TimeSpan.FromSeconds(10),
             Timeout = TimeSpan.FromSeconds(5),
+            // Drop registrations left behind by a non-graceful exit (kill/crash).
+            DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
         }
     }).Wait();
 });
@@ -212,11 +214,15 @@ app.Use(async (context, next) =>
     using (LogContext.PushProperty("ClientIp", context.Connection.RemoteIpAddress?.ToString()))
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        SecurityEventLog.Emit(logger, LogLevel.Information, "REQUEST_RECEIVED", "LOW",
-            $"{context.Request.Method} {context.Request.Path} received",
-            sourceIp: context.Connection.RemoteIpAddress?.ToString(),
-            endpoint: context.Request.Path,
-            httpMethod: context.Request.Method);
+        // Consul polls /health every 10 s; skip it so health checks don't flood the SOC.
+        if (!context.Request.Path.Equals("/health", StringComparison.OrdinalIgnoreCase))
+        {
+            SecurityEventLog.Emit(logger, LogLevel.Information, "REQUEST_RECEIVED", "LOW",
+                $"{context.Request.Method} {context.Request.Path} received",
+                sourceIp: context.Connection.RemoteIpAddress?.ToString(),
+                endpoint: context.Request.Path,
+                httpMethod: context.Request.Method);
+        }
 
         await next();
     }

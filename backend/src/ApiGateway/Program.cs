@@ -61,9 +61,10 @@ Note the string "SquashPlatformAuth" here matches the AuthenticationProviderKey 
 builder.Services.AddAuthentication()
     .AddJwtBearer("SquashPlatformAuth", options =>
     {
-        // Keep the token's short claim names (e.g. "role") instead of remapping them to
-        // long ClaimTypes URIs: Ocelot's RouteClaimsRequirement compares claim type
-        // strings exactly, so ocelot.json can say { "role": "Admin" }.
+        // Do not remap inbound claim names: claims keep exactly the type strings they have
+        // in the token (IdentityService's tokens carry the role under the long
+        // ClaimTypes.Role URI; "sub" stays "sub"). The short "role" claim that ocelot.json's
+        // RouteClaimsRequirement uses is added in OnTokenValidated below.
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -99,6 +100,8 @@ builder.Services.AddAuthentication()
             },
             OnAuthenticationFailed = authContext =>
             {
+                // Tells the middleware below that this 401 was already logged as AUTH_TOKEN_REJECTED.
+                authContext.HttpContext.Items["soc.authFailed"] = true;
                 var logger = authContext.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
                 SecurityEventLog.Emit(logger, LogLevel.Warning, "AUTH_TOKEN_REJECTED", "MEDIUM",
                     authContext.Exception.Message,
@@ -181,14 +184,14 @@ app.Use(async (context, next) =>
                 statusCode: 403);
         }
 
-        // 401 from the gateway itself for a request that carried NO credentials.
-        // (Ocelot authenticates and writes this 401 itself, so JwtBearer's OnChallenge
-        // never fires - it was removed.) Requests that DID carry a bad token are already
-        // logged as AUTH_TOKEN_REJECTED by OnAuthenticationFailed, so they are skipped
-        // here to avoid double counting.
+        // 401 from the gateway itself that was not an authentication failure with a token
+        // (no header, empty header, non-Bearer scheme...). (Ocelot authenticates and writes
+        // this 401 itself, so JwtBearer's OnChallenge never fires - it was removed.)
+        // Rejected tokens set soc.authFailed in OnAuthenticationFailed and are already
+        // logged as AUTH_TOKEN_REJECTED, so they are skipped here: one event per request.
         if (context.Response.StatusCode == StatusCodes.Status401Unauthorized
             && context.Items.DownstreamResponse() is null
-            && !context.Request.Headers.ContainsKey("Authorization"))
+            && !context.Items.ContainsKey("soc.authFailed"))
         {
             SecurityEventLog.Emit(logger, LogLevel.Warning, "UNAUTHORISED_ACCESS", "MEDIUM",
                 "Request to protected endpoint without a valid token",

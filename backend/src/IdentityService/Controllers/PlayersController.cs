@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using IdentityService.Data;
 using IdentityService.Logging;
+using IdentityService.Models;
 using IdentityService.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,9 @@ public class PlayersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PlayerResponse>>> GetAll()
     {
+        // The seeded SOC admin is not a player: keep it out of listings.
         var players = await _db.Players
+            .Where(p => p.Role != PlayerRole.Admin)
             .Select(p => new PlayerResponse(p.Id, p.Name, p.Surname, p.Email, p.ClubId, p.Rank, p.Role.ToString(), p.CoachBio, p.CoachingLevel, p.HourlyRateZAR))
             .ToListAsync();
 
