@@ -16,7 +16,7 @@ public class SerilogEventMapperTests
         Assert.Null(error);
         Assert.NotNull(evt);
         Assert.Equal(id, evt!.EventId);
-        Assert.Equal(env.Timestamp, evt.Timestamp);
+        Assert.Equal(env.Timestamp!.Value, evt.Timestamp);
         Assert.Equal(Received, evt.ReceivedAt);
         Assert.Equal("LOGIN_FAILED", evt.EventType);
         Assert.Equal("HIGH", evt.Severity);
@@ -60,6 +60,43 @@ public class SerilogEventMapperTests
     public void Mapper_Rejects_UnknownSeverity()
     {
         var env = EnvelopeBuilder.Make(overrides: new() { ["Severity"] = "CRITICAL" });
+        Assert.False(SerilogEventMapper.TryMap(env, Received, out _, out var error));
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void Mapper_NormalisesTimestampToUtc()
+    {
+        var env = EnvelopeBuilder.Make();
+        env.Timestamp = new DateTimeOffset(2026, 10, 7, 14, 0, 0, TimeSpan.FromHours(2));
+        Assert.True(SerilogEventMapper.TryMap(env, Received, out var evt, out _));
+        Assert.Equal(TimeSpan.Zero, evt!.Timestamp.Offset);
+        Assert.Equal(new DateTimeOffset(2026, 10, 7, 12, 0, 0, TimeSpan.Zero), evt.Timestamp);
+    }
+
+    [Fact]
+    public void Mapper_Rejects_MissingTimestamp()
+    {
+        var env = EnvelopeBuilder.Make();
+        env.Timestamp = null;
+        Assert.False(SerilogEventMapper.TryMap(env, Received, out _, out var error));
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void Mapper_Rejects_DefaultTimestamp()
+    {
+        var env = EnvelopeBuilder.Make();
+        env.Timestamp = default(DateTimeOffset);
+        Assert.False(SerilogEventMapper.TryMap(env, Received, out _, out var error));
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void Mapper_Rejects_NullProperties()
+    {
+        var env = EnvelopeBuilder.Make();
+        env.Properties = null!;
         Assert.False(SerilogEventMapper.TryMap(env, Received, out _, out var error));
         Assert.NotNull(error);
     }

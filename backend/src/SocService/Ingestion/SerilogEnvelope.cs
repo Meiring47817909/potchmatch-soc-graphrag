@@ -8,7 +8,7 @@ namespace SocService.Ingestion;
 /// </summary>
 public class SerilogEnvelope
 {
-    public DateTimeOffset Timestamp { get; set; }
+    public DateTimeOffset? Timestamp { get; set; }
     public string? Level { get; set; }
     public string? RenderedMessage { get; set; }
     public Dictionary<string, JsonElement> Properties { get; set; } = new();

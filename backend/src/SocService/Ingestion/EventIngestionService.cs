@@ -25,7 +25,7 @@ public class EventIngestionService
 
         foreach (var env in batch)
         {
-            if (SerilogEventMapper.TryMap(env, receivedAt, out var evt, out var error))
+            if (SerilogEventMapper.TryMap(env!, receivedAt, out var evt, out var error))
             {
                 mapped.Add(evt!);
             }

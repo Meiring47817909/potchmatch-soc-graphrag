@@ -9,6 +9,18 @@ public static class SerilogEventMapper
     {
         evt = null;
         error = null;
+        if (env is null)
+        {
+            error = "Envelope is null";
+            return false;
+        }
+
+        if (env.Timestamp is null || env.Timestamp.Value == default)
+        {
+            error = "Timestamp missing";
+            return false;
+        }
+
         var props = env.Properties ?? new Dictionary<string, JsonElement>();
 
         if (!Guid.TryParse(GetString(props, "EventId"), out var eventId))
@@ -52,7 +64,7 @@ public static class SerilogEventMapper
         evt = new SocEvent
         {
             EventId = eventId,
-            Timestamp = env.Timestamp,
+            Timestamp = env.Timestamp.Value.ToUniversalTime(),
             ReceivedAt = receivedAt,
             ServiceName = serviceName,
             EventType = eventType,

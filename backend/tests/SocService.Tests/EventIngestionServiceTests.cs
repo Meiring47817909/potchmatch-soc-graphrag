@@ -53,4 +53,15 @@ public class EventIngestionServiceTests
         Assert.Equal(new IngestResult(2, 1), result);
         Assert.Equal(2, await db.Events.CountAsync());
     }
+
+    [Fact]
+    public async Task Ingest_NullEntry_CountedRejected()
+    {
+        using var db = TestDb.Create();
+        var svc = new EventIngestionService(db, NullLogger<EventIngestionService>.Instance);
+        var batch = new List<SerilogEnvelope> { EnvelopeBuilder.Make(), null! };
+        var result = await svc.IngestAsync(batch, CancellationToken.None);
+        Assert.Equal(new IngestResult(1, 1), result);
+        Assert.Equal(1, await db.Events.CountAsync());
+    }
 }
