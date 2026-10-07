@@ -13,6 +13,18 @@ public class DetectionEngine(
 {
     public async Task RunOnceAsync(DateTimeOffset now, CancellationToken ct)
     {
+        // Recovery runs first so a failure arriving in the same cycle opens a fresh alert
+        // instead of being absorbed into an alert that is about to be resolved.
+        try
+        {
+            await ResolveRecoveredServicesAsync(now, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Service-failure recovery auto-resolve failed; skipping this cycle");
+            db.ChangeTracker.Clear();
+        }
+
         foreach (var rule in rules)
         {
             try
@@ -26,15 +38,6 @@ public class DetectionEngine(
             }
         }
 
-        try
-        {
-            await ResolveRecoveredServicesAsync(now, ct);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            logger.LogError(ex, "Service-failure recovery auto-resolve failed; skipping this cycle");
-            db.ChangeTracker.Clear();
-        }
     }
 
     private async Task ResolveRecoveredServicesAsync(DateTimeOffset now, CancellationToken ct)
