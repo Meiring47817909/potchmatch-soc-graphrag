@@ -151,6 +151,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<IdentityDbContext>();
     db.Database.Migrate();
+
+    var seedEmail = app.Configuration["Seed:AdminEmail"];
+    var seedPassword = app.Configuration["Seed:AdminPassword"];
+    if (!string.IsNullOrWhiteSpace(seedEmail) && !string.IsNullOrWhiteSpace(seedPassword))
+    {
+        await AdminSeeder.EnsureAdminAsync(db, seedEmail, seedPassword, CancellationToken.None);
+    }
 }
 
 // Register service with Consul

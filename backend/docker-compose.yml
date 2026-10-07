@@ -133,6 +133,8 @@ services:
       Consul__Address: "http://consul:8500"
       ServiceRegistration__Address: "identity-service"
       ServiceRegistration__HealthCheckHost: "identity-service"
+      Seed__AdminEmail: "admin@potchmatch.local"
+      Seed__AdminPassword: "Admin@12345"
       SocIngest__Url: "http://soc-service:8080/api/events"
       SocIngest__Key: "dev-soc-ingest-key-change-me"
     networks:

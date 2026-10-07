@@ -61,6 +61,10 @@ Note the string "SquashPlatformAuth" here matches the AuthenticationProviderKey 
 builder.Services.AddAuthentication()
     .AddJwtBearer("SquashPlatformAuth", options =>
     {
+        // Keep the token's short claim names (e.g. "role") instead of remapping them to
+        // long ClaimTypes URIs: Ocelot's RouteClaimsRequirement compares claim type
+        // strings exactly, so ocelot.json can say { "role": "Admin" }.
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -78,6 +82,21 @@ builder.Services.AddAuthentication()
         // regardless of which downstream service the route targets.
         options.Events = new JwtBearerEvents
         {
+            // IdentityService's tokens carry the role under the long ClaimTypes.Role URI,
+            // and Ocelot cannot be configured with that as a RouteClaimsRequirement key
+            // (the ':' in "http://..." is a configuration-path separator and splits the key).
+            // So expose it under the short name "role" as well, for ocelot.json.
+            OnTokenValidated = validated =>
+            {
+                if (validated.Principal?.Identity is ClaimsIdentity identity && !identity.HasClaim(c => c.Type == "role"))
+                {
+                    foreach (var role in identity.FindAll(ClaimTypes.Role).ToList())
+                    {
+                        identity.AddClaim(new Claim("role", role.Value));
+                    }
+                }
+                return Task.CompletedTask;
+            },
             OnAuthenticationFailed = authContext =>
             {
                 var logger = authContext.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
@@ -157,6 +176,21 @@ app.Use(async (context, next) =>
             httpMethod: context.Request.Method);
 
         await next();
+
+        // 403 from the gateway itself (RouteClaimsRequirement failed: authenticated but
+        // not an Admin). Only emitted when no downstream response exists, i.e. the
+        // request never reached a service, so a service's own 403 is not double-counted.
+        if (context.Response.StatusCode == StatusCodes.Status403Forbidden
+            && context.Items.DownstreamResponse() is null)
+        {
+            SecurityEventLog.Emit(logger, LogLevel.Warning, "UNAUTHORISED_ACCESS", "MEDIUM",
+                "Forbidden: caller lacks the required role",
+                userId: context.User.FindFirstValue("sub"),
+                sourceIp: context.Connection.RemoteIpAddress?.ToString(),
+                endpoint: context.Request.Path,
+                httpMethod: context.Request.Method,
+                statusCode: 403);
+        }
     }
 });
 
