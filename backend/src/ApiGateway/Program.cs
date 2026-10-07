@@ -107,17 +107,6 @@ builder.Services.AddAuthentication()
                     httpMethod: authContext.HttpContext.Request.Method);
                 return Task.CompletedTask;
             },
-            OnChallenge = challengeContext =>
-            {
-                var logger = challengeContext.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                SecurityEventLog.Emit(logger, LogLevel.Warning, "UNAUTHORISED_ACCESS", "MEDIUM",
-                    "Request to protected endpoint rejected: " + (challengeContext.ErrorDescription ?? challengeContext.Error ?? "no valid token"),
-                    sourceIp: challengeContext.HttpContext.Connection.RemoteIpAddress?.ToString(),
-                    endpoint: challengeContext.HttpContext.Request.Path,
-                    httpMethod: challengeContext.HttpContext.Request.Method,
-                    statusCode: 401);
-                return Task.CompletedTask;
-            },
         };
     });
 
@@ -190,6 +179,23 @@ app.Use(async (context, next) =>
                 endpoint: context.Request.Path,
                 httpMethod: context.Request.Method,
                 statusCode: 403);
+        }
+
+        // 401 from the gateway itself for a request that carried NO credentials.
+        // (Ocelot authenticates and writes this 401 itself, so JwtBearer's OnChallenge
+        // never fires - it was removed.) Requests that DID carry a bad token are already
+        // logged as AUTH_TOKEN_REJECTED by OnAuthenticationFailed, so they are skipped
+        // here to avoid double counting.
+        if (context.Response.StatusCode == StatusCodes.Status401Unauthorized
+            && context.Items.DownstreamResponse() is null
+            && !context.Request.Headers.ContainsKey("Authorization"))
+        {
+            SecurityEventLog.Emit(logger, LogLevel.Warning, "UNAUTHORISED_ACCESS", "MEDIUM",
+                "Request to protected endpoint without a valid token",
+                sourceIp: context.Connection.RemoteIpAddress?.ToString(),
+                endpoint: context.Request.Path,
+                httpMethod: context.Request.Method,
+                statusCode: 401);
         }
     }
 });
