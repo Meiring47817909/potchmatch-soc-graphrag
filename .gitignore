@@ -6,3 +6,4 @@ dist/
 .vs/
 *.user
 docker-compose.log
+.superpowers/
