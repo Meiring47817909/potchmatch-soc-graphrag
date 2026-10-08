@@ -1,0 +1,313 @@
+{
+  "nodes": [
+    {
+      "label": "Threat",
+      "key": "T1110",
+      "properties": {
+        "origin": "fixture",
+        "name": "Brute Force",
+        "description": "Adversaries guess passwords to gain access to accounts.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078",
+      "properties": {
+        "origin": "fixture",
+        "name": "Valid Accounts",
+        "description": "Adversaries use legitimate credentials to gain or keep access.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499",
+      "properties": {
+        "origin": "fixture",
+        "name": "Endpoint Denial of Service",
+        "description": "Adversaries exhaust endpoint resources to deny availability.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1036",
+      "properties": {
+        "origin": "fixture",
+        "name": "Account Use Policies",
+        "description": "Configure lockout and login restrictions.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1032",
+      "properties": {
+        "origin": "fixture",
+        "name": "Multi-factor Authentication",
+        "description": "Require more than one factor to authenticate.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1027",
+      "properties": {
+        "origin": "fixture",
+        "name": "Password Policies",
+        "description": "Enforce strong password length and complexity.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1037",
+      "properties": {
+        "origin": "fixture",
+        "name": "Filter Network Traffic",
+        "description": "Block or rate-limit traffic from abusive sources.",
+        "source": "MITRE ATT&CK"
+      }
+    },
+    {
+      "label": "Vulnerability",
+      "key": "VULN-WEAK-PASSWORDS",
+      "properties": {
+        "origin": "fixture",
+        "name": "Weak passwords",
+        "description": "Guessable passwords allow brute force."
+      }
+    },
+    {
+      "label": "Vulnerability",
+      "key": "VULN-BROKEN-ACCESS-CONTROL",
+      "properties": {
+        "origin": "fixture",
+        "name": "Broken access control",
+        "description": "OWASP A01:2021; missing authorisation checks."
+      }
+    },
+    {
+      "label": "Vulnerability",
+      "key": "VULN-NO-RATE-LIMIT",
+      "properties": {
+        "origin": "fixture",
+        "name": "No rate limiting",
+        "description": "Unbounded request rates allow resource exhaustion."
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1110",
+      "properties": {
+        "origin": "fixture",
+        "title": "MITRE ATT&CK T1110 Brute Force",
+        "kind": "MITRE"
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-PASSWORD-RESET",
+      "properties": {
+        "origin": "fixture",
+        "title": "Password Reset Procedure",
+        "kind": "Procedure"
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-SESSION-REVOCATION",
+      "properties": {
+        "origin": "fixture",
+        "title": "Session Revocation Procedure",
+        "kind": "Procedure"
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-IP-BLOCKING",
+      "properties": {
+        "origin": "fixture",
+        "title": "IP Blocking Procedure",
+        "kind": "Procedure"
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-SERVICE-OUTAGE",
+      "properties": {
+        "origin": "fixture",
+        "title": "Service Outage Runbook",
+        "kind": "Procedure"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1037"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-WEAK-PASSWORDS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-BROKEN-ACCESS-CONTROL"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-NO-RATE-LIMIT"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-PASSWORD-RESET"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1027"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1032"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1037"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-PASSWORD-RESET"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SERVICE-OUTAGE"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499"
+      }
+    }
+  ]
+}

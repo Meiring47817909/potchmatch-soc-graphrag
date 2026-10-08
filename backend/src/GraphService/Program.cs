@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
 using Serilog.Formatting.Compact;
 using GraphService.Graph;
+using GraphService.Seeding;
 using Neo4j.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,7 @@ builder.Services.AddSingleton<IDriver>(_ => GraphDatabase.Driver(
         builder.Configuration["Neo4j:User"] ?? "neo4j",
         builder.Configuration["Neo4j:Password"] ?? "potchmatch-dev")));
 builder.Services.AddSingleton<Neo4jConnector>();
+builder.Services.AddSingleton<SeedLoader>();
 builder.Services.AddSingleton<GraphStartupGate>();
 builder.Services.AddHostedService<GraphStartupService>();
 

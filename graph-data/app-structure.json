@@ -1,0 +1,1175 @@
+{
+  "nodes": [
+    {
+      "label": "Service",
+      "key": "api-gateway",
+      "properties": {
+        "kind": "gateway"
+      }
+    },
+    {
+      "label": "Service",
+      "key": "identity-service",
+      "properties": {
+        "kind": "domain"
+      }
+    },
+    {
+      "label": "Service",
+      "key": "booking-service",
+      "properties": {
+        "kind": "domain"
+      }
+    },
+    {
+      "label": "Service",
+      "key": "payment-service",
+      "properties": {
+        "kind": "domain"
+      }
+    },
+    {
+      "label": "Service",
+      "key": "soc-service",
+      "properties": {
+        "kind": "soc"
+      }
+    },
+    {
+      "label": "Service",
+      "key": "graph-service",
+      "properties": {
+        "kind": "graph"
+      }
+    },
+    {
+      "label": "Role",
+      "key": "Player",
+      "properties": {}
+    },
+    {
+      "label": "Role",
+      "key": "Coach",
+      "properties": {}
+    },
+    {
+      "label": "Role",
+      "key": "Admin",
+      "properties": {}
+    },
+    {
+      "label": "Asset",
+      "key": "identity_db",
+      "properties": {
+        "type": "database"
+      }
+    },
+    {
+      "label": "Asset",
+      "key": "booking_db",
+      "properties": {
+        "type": "database"
+      }
+    },
+    {
+      "label": "Asset",
+      "key": "payment_db",
+      "properties": {
+        "type": "database"
+      }
+    },
+    {
+      "label": "Asset",
+      "key": "soc_db",
+      "properties": {
+        "type": "database"
+      }
+    },
+    {
+      "label": "Asset",
+      "key": "neo4j",
+      "properties": {
+        "type": "database"
+      }
+    },
+    {
+      "label": "Asset",
+      "key": "consul",
+      "properties": {
+        "type": "registry"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1110",
+      "properties": {
+        "name": "Brute Force"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078",
+      "properties": {
+        "name": "Valid Accounts"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499",
+      "properties": {
+        "name": "Endpoint Denial of Service"
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/auth/register",
+      "properties": {
+        "method": "POST",
+        "path": "/api/auth/register",
+        "protected": false,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/auth/login",
+      "properties": {
+        "method": "POST",
+        "path": "/api/auth/login",
+        "protected": false,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/players",
+      "properties": {
+        "method": "GET",
+        "path": "/api/players",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/players/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/players/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PUT /api/players/{id}",
+      "properties": {
+        "method": "PUT",
+        "path": "/api/players/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PUT /api/players/{id}/password",
+      "properties": {
+        "method": "PUT",
+        "path": "/api/players/{id}/password",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/bookings",
+      "properties": {
+        "method": "GET",
+        "path": "/api/bookings",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/bookings",
+      "properties": {
+        "method": "POST",
+        "path": "/api/bookings",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/bookings/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/bookings/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PUT /api/bookings/{id}/accept",
+      "properties": {
+        "method": "PUT",
+        "path": "/api/bookings/{id}/accept",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/payments/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/payments/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/payments/by-booking/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/payments/by-booking/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/payments/wallet",
+      "properties": {
+        "method": "GET",
+        "path": "/api/payments/wallet",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/payments/wallet/deposit",
+      "properties": {
+        "method": "POST",
+        "path": "/api/payments/wallet/deposit",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/payments/hold",
+      "properties": {
+        "method": "POST",
+        "path": "/api/payments/hold",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PUT /api/payments/{id}/release",
+      "properties": {
+        "method": "PUT",
+        "path": "/api/payments/{id}/release",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PUT /api/payments/{id}/refund",
+      "properties": {
+        "method": "PUT",
+        "path": "/api/payments/{id}/refund",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/soc/alerts",
+      "properties": {
+        "method": "GET",
+        "path": "/api/soc/alerts",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/soc/alerts/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/soc/alerts/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "PATCH /api/soc/alerts/{id}/status",
+      "properties": {
+        "method": "PATCH",
+        "path": "/api/soc/alerts/{id}/status",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/soc/events",
+      "properties": {
+        "method": "GET",
+        "path": "/api/soc/events",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/soc/rules",
+      "properties": {
+        "method": "GET",
+        "path": "/api/soc/rules",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/services/{name}/alerts",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/services/{name}/alerts",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/users/high-severity",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/users/high-severity",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/services/{name}/threats",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/services/{name}/threats",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/alerts/{id}/controls",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/alerts/{id}/controls",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/services/{name}/impact",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/services/{name}/impact",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/incidents",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/incidents",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/graph/incidents/{id}",
+      "properties": {
+        "method": "GET",
+        "path": "/api/graph/incidents/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/auth/register"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/auth/login"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/players"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/players/{id}"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PUT /api/players/{id}"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PUT /api/players/{id}/password"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/bookings"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/bookings"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/bookings/{id}"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PUT /api/bookings/{id}/accept"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/payments/{id}"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/payments/by-booking/{id}"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/payments/wallet"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/payments/wallet/deposit"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/payments/hold"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PUT /api/payments/{id}/release"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PUT /api/payments/{id}/refund"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/alerts"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/alerts"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/alerts/{id}"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/alerts/{id}"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "PATCH /api/soc/alerts/{id}/status"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "PATCH /api/soc/alerts/{id}/status"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/events"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/events"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/rules"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/soc/rules"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/alerts"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/alerts"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/users/high-severity"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/users/high-severity"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/threats"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/threats"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/alerts/{id}/controls"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/alerts/{id}/controls"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/impact"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/services/{name}/impact"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/incidents"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/incidents"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/incidents/{id}"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/graph/incidents/{id}"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "identity_db"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "booking_db"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "payment_db"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "soc_db"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "neo4j"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "identity-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "payment-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "soc-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "USES",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Asset",
+        "key": "consul"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "identity-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "booking-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "payment-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "soc-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "graph-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "booking-service"
+      },
+      "to": {
+        "label": "Service",
+        "key": "payment-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Service",
+        "key": "soc-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "graph-service"
+      },
+      "to": {
+        "label": "Service",
+        "key": "identity-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110"
+      },
+      "to": {
+        "label": "Service",
+        "key": "identity-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Service",
+        "key": "api-gateway"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Service",
+        "key": "identity-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Service",
+        "key": "soc-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Service",
+        "key": "graph-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499"
+      },
+      "to": {
+        "label": "Service",
+        "key": "api-gateway"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499"
+      },
+      "to": {
+        "label": "Service",
+        "key": "identity-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499"
+      },
+      "to": {
+        "label": "Service",
+        "key": "booking-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499"
+      },
+      "to": {
+        "label": "Service",
+        "key": "payment-service"
+      }
+    }
+  ]
+}
