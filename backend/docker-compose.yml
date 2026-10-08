@@ -9,6 +9,7 @@ volumes:
   booking-db-data:
   payment-db-data:
   soc-db-data:
+  neo4j-data:
 
 services:
   # --- Infrastructure ---
@@ -112,6 +113,23 @@ services:
     networks:
       - squash-net
 
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: "neo4j/potchmatch-dev"
+    ports:
+      - "7474:7474" # Neo4j Browser (http://localhost:7474)
+      - "7687:7687" # Bolt
+    volumes:
+      - neo4j-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - squash-net
+
   # --- Microservices ---
   # Each service's Address/HealthCheckHost is set to its own container/service name,
   # since that's what other containers on this network resolve it by. Connection
@@ -137,6 +155,7 @@ services:
       Seed__AdminPassword: "Admin@12345"
       SocIngest__Url: "http://soc-service:8080/api/events"
       SocIngest__Key: "dev-soc-ingest-key-change-me"
+      GraphSync__Key: "dev-graph-sync-key-change-me"
     networks:
       - squash-net
 
@@ -194,6 +213,32 @@ services:
       ServiceRegistration__Address: "soc-service"
       ServiceRegistration__HealthCheckHost: "soc-service"
       SocIngest__Key: "dev-soc-ingest-key-change-me"
+      GraphSync__Key: "dev-graph-sync-key-change-me"
+    networks:
+      - squash-net
+
+  graph-service:
+    build:
+      context: ./src/GraphService
+    depends_on:
+      consul:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Neo4j__Uri: "bolt://neo4j:7687"
+      Neo4j__User: "neo4j"
+      Neo4j__Password: "potchmatch-dev"
+      GraphSync__Key: "dev-graph-sync-key-change-me"
+      GraphSync__SocUrl: "http://soc-service:8080"
+      GraphSync__IdentityUrl: "http://identity-service:8080"
+      GraphSeed__Directory: "/app/graph-data"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "graph-service"
+      ServiceRegistration__HealthCheckHost: "graph-service"
+    volumes:
+      - ../graph-data:/app/graph-data:ro
     networks:
       - squash-net
 

@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/ApiGateway/ApiGateway.csproj" />
     <Project Path="src/BookingService/BookingService.csproj" />
+    <Project Path="src/GraphService/GraphService.csproj" />
     <Project Path="src/IdentityService/IdentityService.csproj" />
     <Project Path="src/PaymentService/PaymentService.csproj" />
     <Project Path="src/SocService/SocService.csproj" />
@@ -9,5 +10,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/SocService.Tests/SocService.Tests.csproj" />
     <Project Path="tests/IdentityService.Tests/IdentityService.Tests.csproj" />
+    <Project Path="tests/GraphService.Tests/GraphService.Tests.csproj" />
   </Folder>
 </Solution>
