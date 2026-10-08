@@ -5,6 +5,15 @@ namespace SocService.Tests;
 
 public class SyncQueryTests
 {
+    private sealed class FixedTime(DateTimeOffset now) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => now;
+    }
+
+    // Test data sits in the past relative to this clock, so the settle lag never hides it.
+    private static SyncQuery Query(SocService.Data.SocDbContext db, DateTimeOffset? now = null) =>
+        new(db, new FixedTime(now ?? DateTimeOffset.UtcNow.AddHours(1)));
+
     private static SocEvent Ev(string type, DateTimeOffset ts, DateTimeOffset? received = null) => new()
     {
         EventId = Guid.NewGuid(), Timestamp = ts, ReceivedAt = received ?? ts, ServiceName = "svc",
@@ -32,7 +41,7 @@ public class SyncQueryTests
         db.Alerts.AddRange(a3, a1, a2);
         await db.SaveChangesAsync();
 
-        var result = await new SyncQuery(db).GetAlertsAsync(t1, null, 200, default);
+        var result = await Query(db).GetAlertsAsync(t1, null, 200, default);
 
         Assert.Equal(new[] { a2.AlertId, a3.AlertId }, result.Select(r => r.AlertId));
         Assert.Equal(new[] { e2.EventId, e1.EventId }, result[0].RelatedEvents.Select(e => e.EventId));
@@ -47,7 +56,7 @@ public class SyncQueryTests
         var t = DateTimeOffset.UtcNow;
         db.Alerts.AddRange(Al(t), Al(t), Al(t));
         await db.SaveChangesAsync();
-        var q = new SyncQuery(db);
+        var q = Query(db);
 
         var page1 = await q.GetAlertsAsync(null, null, 2, default);
         var last = page1[^1];
@@ -66,9 +75,9 @@ public class SyncQueryTests
         for (var i = 0; i < 510; i++) db.Alerts.Add(Al(t.AddSeconds(i)));
         await db.SaveChangesAsync();
 
-        var result = await new SyncQuery(db).GetAlertsAsync(null, null, 10000, default);
+        var result = await Query(db).GetAlertsAsync(null, null, 10000, default);
         Assert.Equal(500, result.Count);
-        var one = await new SyncQuery(db).GetAlertsAsync(null, null, 0, default);
+        var one = await Query(db).GetAlertsAsync(null, null, 0, default);
         Assert.Single(one);
     }
 
@@ -84,7 +93,7 @@ public class SyncQueryTests
         db.Alerts.Add(Al(t, linked));
         await db.SaveChangesAsync();
 
-        var result = await new SyncQuery(db).GetEventsAsync(null, null, 500, default);
+        var result = await Query(db).GetEventsAsync(null, null, 500, default);
 
         var only = Assert.Single(result);
         Assert.Equal(free.EventId, only.Event.EventId);
@@ -98,7 +107,7 @@ public class SyncQueryTests
         var t = DateTimeOffset.UtcNow;
         db.Events.AddRange(Ev("X", t), Ev("X", t), Ev("X", t));
         await db.SaveChangesAsync();
-        var q = new SyncQuery(db);
+        var q = Query(db);
 
         var page1 = await q.GetEventsAsync(null, null, 2, default);
         var page2 = await q.GetEventsAsync(page1[^1].ReceivedAt, page1[^1].Event.EventId, 2, default);
@@ -118,8 +127,39 @@ public class SyncQueryTests
         await db.SaveChangesAsync();
 
         var cursor = new DateTimeOffset(2026, 1, 1, 12, 0, 0, TimeSpan.FromHours(2)); // == 10:00Z
-        var result = await new SyncQuery(db).GetEventsAsync(cursor, null, 500, default);
+        var result = await Query(db).GetEventsAsync(cursor, null, 500, default);
 
         Assert.Equal(new[] { after.EventId }, result.Select(r => r.Event.EventId));
+    }
+
+    [Fact]
+    public async Task SyncAlerts_RowsNewerThanSettleLag_Withheld()
+    {
+        using var db = TestDb.Create();
+        var now = new DateTimeOffset(2026, 10, 8, 12, 0, 0, TimeSpan.Zero);
+        var settled = Al(now.AddSeconds(-6));
+        var fresh = Al(now.AddSeconds(-2));
+        db.Alerts.AddRange(settled, fresh);
+        await db.SaveChangesAsync();
+
+        var result = await Query(db, now).GetAlertsAsync(null, null, 200, default);
+        Assert.Equal(new[] { settled.AlertId }, result.Select(r => r.AlertId));
+
+        var later = await Query(db, now.AddSeconds(5)).GetAlertsAsync(settled.UpdatedAt, settled.AlertId, 200, default);
+        Assert.Equal(new[] { fresh.AlertId }, later.Select(r => r.AlertId));
+    }
+
+    [Fact]
+    public async Task SyncEvents_RowsNewerThanSettleLag_Withheld()
+    {
+        using var db = TestDb.Create();
+        var now = new DateTimeOffset(2026, 10, 8, 12, 0, 0, TimeSpan.Zero);
+        var settled = Ev("X", now.AddSeconds(-30), now.AddSeconds(-5));
+        var fresh = Ev("X", now.AddSeconds(-30), now.AddSeconds(-4));
+        db.Events.AddRange(settled, fresh);
+        await db.SaveChangesAsync();
+
+        var result = await Query(db, now).GetEventsAsync(null, null, 500, default);
+        Assert.Equal(new[] { settled.EventId }, result.Select(r => r.Event.EventId));
     }
 }

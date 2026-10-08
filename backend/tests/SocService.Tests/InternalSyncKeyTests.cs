@@ -14,7 +14,7 @@ public class InternalSyncKeyTests
             .AddInMemoryCollection(new Dictionary<string, string?> { ["GraphSync:Key"] = configuredKey }).Build();
         var http = new DefaultHttpContext();
         if (header is not null) http.Request.Headers["X-Graph-Sync-Key"] = header;
-        return new InternalSyncController(new SyncQuery(TestDb.Create()), config)
+        return new InternalSyncController(new SyncQuery(TestDb.Create(), TimeProvider.System), config)
         {
             ControllerContext = new ControllerContext { HttpContext = http },
         };

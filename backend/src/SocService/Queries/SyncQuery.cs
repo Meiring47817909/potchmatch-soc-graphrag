@@ -6,17 +6,30 @@ namespace SocService.Queries;
 
 /// <summary>
 /// Tie-safe keyset pages for the graph sync: (timestamp, id) strictly greater than the cursor.
+/// Rows newer than now minus <see cref="SettleLag"/> are withheld so a transaction that commits late with an
+/// earlier timestamp is not skipped once the cursor has moved past it.
 /// </summary>
 public class SyncQuery
 {
+    public static readonly TimeSpan SettleLag = TimeSpan.FromSeconds(5);
+
     private readonly SocDbContext _db;
-    public SyncQuery(SocDbContext db) => _db = db;
+    private readonly TimeProvider _clock;
+
+    public SyncQuery(SocDbContext db, TimeProvider clock)
+    {
+        _db = db;
+        _clock = clock;
+    }
+
+    private DateTimeOffset SettledBefore() => _clock.GetUtcNow().ToUniversalTime() - SettleLag;
 
     public async Task<IReadOnlyList<SyncAlertResponse>> GetAlertsAsync(
         DateTimeOffset? since, Guid? afterId, int limit, CancellationToken ct)
     {
         limit = Math.Clamp(limit, 1, 500);
-        var q = _db.Alerts.AsNoTracking().AsQueryable();
+        var settled = SettledBefore();
+        var q = _db.Alerts.AsNoTracking().Where(a => a.UpdatedAt <= settled);
         if (since is not null && afterId is null)
         {
             // No tiebreaker supplied: strictly after the instant.
@@ -52,8 +65,10 @@ public class SyncQuery
         DateTimeOffset? since, Guid? afterId, int limit, CancellationToken ct)
     {
         limit = Math.Clamp(limit, 1, 1000);
+        var settled = SettledBefore();
         var q = _db.Events.AsNoTracking()
-            .Where(e => e.EventType != "REQUEST_RECEIVED"
+            .Where(e => e.ReceivedAt <= settled
+                        && e.EventType != "REQUEST_RECEIVED"
                         && !_db.AlertEvents.Any(ae => ae.EventId == e.EventId));
         if (since is not null && afterId is null)
         {
