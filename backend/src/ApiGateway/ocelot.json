@@ -67,6 +67,21 @@ Every other route does, meaning the Gateway itself now rejects unauthenticated r
       },
       "RouteClaimsRequirement": { "role": "Admin" }
     }
+    ,
+    {
+      "UpstreamPathTemplate": "/api/graph/{everything}",
+      "UpstreamHeaderTransform": { "X-Forwarded-For": "{RemoteIpAddress}" },
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamPathTemplate": "/api/graph/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "graph-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" },
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "SquashPlatformAuth",
+        "AllowedScopes": []
+      },
+      "RouteClaimsRequirement": { "role": "Admin" }
+    }
   ],
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5000",
