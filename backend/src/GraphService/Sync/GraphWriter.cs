@@ -15,6 +15,7 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
             ["email"] = UserMatcher.EmailKey(p.Email),
             ["name"] = $"{p.Name} {p.Surname}",
             ["role"] = p.Role,
+            ["unknownId"] = UserMatcher.UnknownUserId(p.Email),
         }).ToList();
 
         await using var session = driver.AsyncSession();
@@ -25,11 +26,18 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
                 MERGE (u:User {userId: p.id})
                 SET u.email = p.email, u.name = p.name, u.unknownAccount = false
                 """, new { rows });
-            // Replace HAS_ROLE with the current role.
+            var missingCursor = await tx.RunAsync("""
+                UNWIND $rows AS p
+                WITH p WHERE NOT EXISTS { MATCH (:Role {name: p.role}) }
+                RETURN DISTINCT p.role AS role
+                """, new { rows });
+            foreach (var m in await missingCursor.ToListAsync())
+                log.LogWarning("Role {Role} has no Role node; keeping existing HAS_ROLE for affected players", m["role"].As<string>());
+            // Replace HAS_ROLE with the current role (only when that Role node exists).
             await tx.RunAsync("""
                 UNWIND $rows AS p
                 MATCH (u:User {userId: p.id})-[old:HAS_ROLE]->(r:Role)
-                WHERE r.name <> p.role
+                WHERE r.name <> p.role AND EXISTS { MATCH (:Role {name: p.role}) }
                 DELETE old
                 """, new { rows });
             await tx.RunAsync("""
@@ -146,6 +154,7 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
             ["endpointKey"] = EndpointNormaliser.ToKey(e.HttpMethod, e.Endpoint),
             ["guidUserId"] = Guid.TryParse(e.UserId?.Trim(), out var g) ? g.ToString() : null,
             ["emailKey"] = UserMatcher.LooksLikeEmail(e.UserId) ? UserMatcher.EmailKey(e.UserId!) : null,
+            ["unknownId"] = UserMatcher.LooksLikeEmail(e.UserId) ? UserMatcher.UnknownUserId(e.UserId!) : null,
         }).ToList();
 
         await tx.RunAsync("""
@@ -179,9 +188,9 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
             """, new { rows });
         await tx.RunAsync("""
             UNWIND [e IN $rows WHERE e.emailKey IS NOT NULL] AS e
-            WITH DISTINCT e.emailKey AS key
+            WITH DISTINCT e.emailKey AS key, e.unknownId AS unknownId
             WHERE NOT EXISTS { MATCH (:User {email: key}) }
-            MERGE (u:User {userId: 'email:' + key})
+            MERGE (u:User {userId: unknownId})
               ON CREATE SET u.email = key, u.unknownAccount = true
             """, new { rows });
         await tx.RunAsync("""

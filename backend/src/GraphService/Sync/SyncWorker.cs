@@ -68,7 +68,7 @@ public class SyncWorker(
         {
             await correlation.CorrelateAsync(ct);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (!ct.IsCancellationRequested)
         {
             log.LogError(ex, "Incident correlation failed");
         }
@@ -83,7 +83,7 @@ public class SyncWorker(
             await writer.UpsertPlayersAsync(players, ct);
             _lastPlayers = now;
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (!ct.IsCancellationRequested)
         {
             log.LogError(ex, "Player sync failed");
         }
@@ -106,7 +106,7 @@ public class SyncWorker(
                 if (page.Count < _opt.AlertPageSize) break;
             }
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (!ct.IsCancellationRequested)
         {
             log.LogError(ex, "Alert sync failed");
         }
@@ -130,7 +130,7 @@ public class SyncWorker(
                 if (page.Count < _opt.EventPageSize) break;
             }
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex) when (!ct.IsCancellationRequested)
         {
             log.LogError(ex, "Event sync failed");
         }

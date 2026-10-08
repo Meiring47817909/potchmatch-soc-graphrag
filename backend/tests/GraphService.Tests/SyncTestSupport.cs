@@ -41,9 +41,11 @@ internal sealed class FakeIdentityClient : IIdentitySyncClient
 {
     public List<SyncPlayer> Players { get; } = [];
     public bool Throw { get; set; }
+    public bool Timeout { get; set; }
 
     public Task<IReadOnlyList<SyncPlayer>> GetPlayersAsync(CancellationToken ct)
     {
+        if (Timeout) throw new TaskCanceledException("simulated HttpClient timeout");
         if (Throw) throw new HttpRequestException("boom");
         return Task.FromResult<IReadOnlyList<SyncPlayer>>(Players.ToList());
     }

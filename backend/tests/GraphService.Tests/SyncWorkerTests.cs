@@ -154,4 +154,33 @@ public class SyncWorkerTests(Neo4jFixture fx)
         Assert.Equal(1, await h.CountAsync(
             "MATCH (:Event)-[:TARGETED]->(e:Endpoint {key:'POST /api/mystery/{id}', discovered:true}) RETURN count(e)"));
     }
+
+    [Fact]
+    public async Task Sync_IdentityTimesOut_AlertsEventsAndCorrelationStillRun()
+    {
+        var h = await FreshAsync();
+        h.Identity.Timeout = true;
+        h.Soc.Alerts.Add(SyncHarness.Alert());
+        h.Soc.Events.Add(new SyncEventEnvelope(SyncHarness.FailedLogin(9, null), SyncHarness.T0));
+
+        await h.Worker.RunOnceAsync(Now, default);
+
+        Assert.Equal(1, await h.CountAsync("MATCH (a:Alert) RETURN count(a)"));
+        Assert.Equal(6, await h.CountAsync("MATCH (e:Event) RETURN count(e)"));
+        Assert.Equal(1, h.Correlation.Calls);
+    }
+
+    [Fact]
+    public async Task Sync_RoleNodeMissing_KeepsExistingHasRole()
+    {
+        var h = await FreshAsync();
+        h.Identity.Players.Add(SyncHarness.Player("Player"));
+        await h.Worker.RunOnceAsync(Now, default);
+        h.Identity.Players.Clear();
+        h.Identity.Players.Add(SyncHarness.Player("Referee"));
+        await h.Worker.RunOnceAsync(Now.AddMinutes(2), default);
+
+        var roles = await h.QueryAsync("MATCH (:User)-[:HAS_ROLE]->(r:Role) RETURN r.name AS n");
+        Assert.Equal("Player", Assert.Single(roles)["n"].As<string>());
+    }
 }
