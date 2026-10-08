@@ -56,12 +56,30 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
                 MERGE (u)-[:TRIGGERED]->(ev)
                 DELETE t
                 """, new { rows });
+            // Incidents opened against the placeholder now belong to the real user, so later alerts join them.
+            await tx.RunAsync("""
+                UNWIND $rows AS p
+                MATCH (x:User {email: p.email, unknownAccount: true})
+                WHERE x.userId <> p.id
+                MATCH (i:Incident {subject: 'user:' + x.userId})
+                SET i.subject = 'user:' + p.id
+                """, new { rows });
             await tx.RunAsync("""
                 UNWIND $rows AS p
                 MATCH (x:User {email: p.email, unknownAccount: true})
                 WHERE x.userId <> p.id
                 DETACH DELETE x
                 """, new { rows });
+        });
+    }
+
+    public async Task<bool> HasPlaceholderUsersAsync(CancellationToken ct)
+    {
+        await using var session = driver.AsyncSession();
+        return await session.ExecuteReadAsync(async tx =>
+        {
+            var cursor = await tx.RunAsync("RETURN EXISTS { MATCH (u:User {unknownAccount: true}) } AS any");
+            return (await cursor.SingleAsync())["any"].As<bool>();
         });
     }
 

@@ -95,4 +95,38 @@ public class IncidentWriterTests(Neo4jFixture fx)
         Assert.Equal("user:email:nobody@x.com",
             (await h.QueryAsync("MATCH (i:Incident) RETURN i.subject"))[0][0].As<string>());
     }
+
+    [Fact]
+    public async Task Correlate_PlaceholderUserLaterRegisters_SingleEscalatedIncidentOnRealUser()
+    {
+        var h = await FreshAsync();
+        const string email = "late@x.com";
+        var realId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+        // Failed logins for an email that is not yet known to the graph -> placeholder subject.
+        await h.Writer.UpsertAlertAsync(SyncHarness.Alert(userId: email) with { AffectedUser = email }, default);
+        var w = NewWriter(fx.Driver);
+        await w.CorrelateAsync(default);
+        Assert.Equal("user:email:" + email, (await h.QueryAsync("MATCH (i:Incident) RETURN i.subject"))[0][0].As<string>());
+
+        // Players sync now includes the email: placeholder merges into the real user.
+        await h.Writer.UpsertPlayersAsync([SyncHarness.Player(email: email, id: realId)], default);
+
+        // Unauthorised access 5 min later, identified by GUID.
+        var ev = SyncHarness.FailedLogin(50, realId.ToString(), "/api/graph/incidents") with
+        {
+            EventType = "UNAUTHORISED_ACCESS", HttpMethod = "GET", StatusCode = 403, Timestamp = SyncHarness.T0.AddMinutes(5),
+        };
+        var unauthorised = new SyncAlert(Guid.Parse("aaaaaaaa-0000-0000-0000-000000000050"), SyncHarness.T0.AddMinutes(5),
+            SyncHarness.T0.AddMinutes(5), "Unauthorised Endpoint Access", "Medium", "OPEN", "d", "identity-service",
+            realId.ToString(), null, "act", [ev]);
+        await h.Writer.UpsertAlertAsync(unauthorised, default);
+        await w.CorrelateAsync(default);
+
+        var rows = await h.QueryAsync("MATCH (i:Incident) RETURN i.subject AS s, i.escalated AS e");
+        var row = Assert.Single(rows);
+        Assert.True(row["e"].As<bool>());
+        Assert.Equal("user:" + realId, row["s"].As<string>());
+        Assert.Equal(2, await h.CountAsync("MATCH (:Incident)-[c:CONTAINS]->(:Alert) RETURN count(c)"));
+    }
 }

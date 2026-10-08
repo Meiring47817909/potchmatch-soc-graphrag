@@ -183,4 +183,36 @@ public class SyncWorkerTests(Neo4jFixture fx)
         var roles = await h.QueryAsync("MATCH (:User)-[:HAS_ROLE]->(r:Role) RETURN r.name AS n");
         Assert.Equal("Player", Assert.Single(roles)["n"].As<string>());
     }
+
+    [Fact]
+    public async Task Sync_PlaceholderCreatedBetweenPlayerSyncs_RunsPlayersPhaseBeforeCorrelation()
+    {
+        var h = await FreshAsync();
+        await h.Worker.RunOnceAsync(Now, default); // players synced now (none registered yet)
+
+        var id = Guid.NewGuid();
+        h.Identity.Players.Add(SyncHarness.Player(email: "ghost@example.com", id: id));
+        h.Soc.Events.Add(new SyncEventEnvelope(SyncHarness.FailedLogin(1, "ghost@example.com"), SyncHarness.T0));
+        await h.Worker.RunOnceAsync(Now.AddSeconds(15), default); // regular players interval not yet due
+
+        Assert.Equal(0, await h.CountAsync("MATCH (u:User {unknownAccount:true}) RETURN count(u)"));
+        Assert.Equal(1, await h.CountAsync($"MATCH (:User {{userId:'{id}'}})-[:TRIGGERED]->(:Event) RETURN count(*)"));
+        Assert.Equal(2, h.Correlation.Calls);
+    }
+
+    [Fact]
+    public async Task Sync_PlaceholderCatchUpFails_OtherPhasesStillRun()
+    {
+        var h = await FreshAsync();
+        await h.Worker.RunOnceAsync(Now, default);
+
+        h.Identity.Throw = true;
+        h.Soc.Events.Add(new SyncEventEnvelope(SyncHarness.FailedLogin(1, "ghost@example.com"), SyncHarness.T0));
+        h.Soc.Alerts.Add(SyncHarness.Alert(userId: "ghost@example.com"));
+        await h.Worker.RunOnceAsync(Now.AddSeconds(15), default);
+
+        Assert.Equal(1, await h.CountAsync("MATCH (u:User {unknownAccount:true}) RETURN count(u)"));
+        Assert.Equal(1, await h.CountAsync("MATCH (a:Alert) RETURN count(a)"));
+        Assert.Equal(2, h.Correlation.Calls);
+    }
 }

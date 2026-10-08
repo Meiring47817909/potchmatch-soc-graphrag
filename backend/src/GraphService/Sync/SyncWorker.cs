@@ -61,9 +61,10 @@ public class SyncWorker(
 
     public async Task RunOnceAsync(DateTimeOffset now, CancellationToken ct)
     {
-        await SyncPlayersAsync(now, ct);
+        var playersSynced = await SyncPlayersAsync(now, force: false, ct);
         await SyncAlertsAsync(ct);
         await SyncEventsAsync(ct);
+        await CatchUpPlaceholderUsersAsync(now, playersSynced, ct);
         try
         {
             await correlation.CorrelateAsync(ct);
@@ -74,9 +75,29 @@ public class SyncWorker(
         }
     }
 
-    private async Task SyncPlayersAsync(DateTimeOffset now, CancellationToken ct)
+    /// <summary>
+    /// A placeholder user (failed logins for an email not yet seen in Identity) may belong to someone who registered
+    /// since the last players sync. Sync players now, before correlation, so incidents get the real user as subject.
+    /// </summary>
+    private async Task CatchUpPlaceholderUsersAsync(DateTimeOffset now, bool playersSynced, CancellationToken ct)
     {
-        if (_lastPlayers is not null && now - _lastPlayers < TimeSpan.FromSeconds(_opt.PlayersIntervalSeconds)) return;
+        if (playersSynced) return;
+        try
+        {
+            if (!await writer.HasPlaceholderUsersAsync(ct)) return;
+        }
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            log.LogError(ex, "Placeholder user check failed");
+            return;
+        }
+        await SyncPlayersAsync(now, force: true, ct);
+    }
+
+    /// <summary>Returns true when players were attempted in this call (whether or not the fetch succeeded).</summary>
+    private async Task<bool> SyncPlayersAsync(DateTimeOffset now, bool force, CancellationToken ct)
+    {
+        if (!force && _lastPlayers is not null && now - _lastPlayers < TimeSpan.FromSeconds(_opt.PlayersIntervalSeconds)) return false;
         try
         {
             var players = await identity.GetPlayersAsync(ct);
@@ -87,6 +108,7 @@ public class SyncWorker(
         {
             log.LogError(ex, "Player sync failed");
         }
+        return true;
     }
 
     private async Task SyncAlertsAsync(CancellationToken ct)
