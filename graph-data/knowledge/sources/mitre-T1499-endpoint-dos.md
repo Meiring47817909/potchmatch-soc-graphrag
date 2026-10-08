@@ -4,7 +4,7 @@ Attribution/licence: MITRE ATT&CK(R) (c) The MITRE Corporation; paraphrased here
 
 # Endpoint Denial of Service (T1499)
 
-Endpoint Denial of Service (T1499) is a Threat. An adversary floods or exhausts a service, application or host so legitimate users cannot use it. For PotchMatch this means booking, gateway or identity services becoming slow or unavailable. Variants include network flood, service exhaustion flood, application exhaustion flood and application or system exploitation.
+Endpoint Denial of Service (T1499) is a Threat. An adversary floods or exhausts a service, application or host so legitimate users cannot use it. For PotchMatch this means booking, gateway or identity services becoming slow or unavailable. Variants include OS exhaustion flood, service exhaustion flood, application exhaustion flood and application or system exploitation.
 
 Endpoint Denial of Service exploits the absence of rate limiting. The vulnerability No Rate Limit (VULN-NO-RATE-LIMIT) lets an attacker send unbounded request volume to an endpoint without being throttled.
 
