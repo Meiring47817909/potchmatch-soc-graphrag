@@ -56,7 +56,25 @@ public static class IncidentCorrelator
         return result;
     }
 
-    public static IncidentDerived Derive(string subject, IReadOnlyList<AlertForCorrelation> alerts)
+    /// <summary>
+    /// Human-readable subject for titles (spec 7): a user's email, else name, else the raw subject;
+    /// "IP x" for ip:x; "service x" for service:x; anything else unchanged.
+    /// </summary>
+    public static string SubjectDisplay(string subject, string? userEmail, string? userName)
+    {
+        if (subject.StartsWith("user:", StringComparison.Ordinal))
+        {
+            if (!string.IsNullOrWhiteSpace(userEmail)) return userEmail;
+            if (!string.IsNullOrWhiteSpace(userName)) return userName;
+            return subject;
+        }
+        if (subject.StartsWith("ip:", StringComparison.Ordinal)) return "IP " + subject["ip:".Length..];
+        if (subject.StartsWith("service:", StringComparison.Ordinal)) return "service " + subject["service:".Length..];
+        return subject;
+    }
+
+    /// <param name="subjectDisplay">Display text for the title; defaults to <see cref="SubjectDisplay"/> without user details.</param>
+    public static IncidentDerived Derive(string subject, IReadOnlyList<AlertForCorrelation> alerts, string? subjectDisplay = null)
     {
         var rules = alerts.Select(a => a.RuleName).Distinct(StringComparer.Ordinal).OrderBy(r => r, StringComparer.Ordinal).ToList();
         var severity = alerts.OrderByDescending(a => SeverityRank(a.Severity)).First().Severity;
@@ -65,7 +83,7 @@ public static class IncidentCorrelator
         var escalated = rules.Count >= 2;
         return new IncidentDerived(
             subject, severity, open ? "OPEN" : "RESOLVED",
-            $"Activity from {subject}: {string.Join(", ", rules)}",
+            $"Activity from {subjectDisplay ?? SubjectDisplay(subject, null, null)}: {string.Join(", ", rules)}",
             escalated, escalated ? "HIGH" : severity,
             alerts.Min(a => a.Timestamp), alerts.Max(a => a.Timestamp));
     }

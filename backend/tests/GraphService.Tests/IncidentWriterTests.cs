@@ -43,7 +43,7 @@ public class IncidentWriterTests(Neo4jFixture fx)
         Assert.Equal("HIGH", row["p"].As<string>());
         Assert.Equal("ip:" + Ip, row["s"].As<string>());
         Assert.Equal("OPEN", row["st"].As<string>());
-        Assert.Equal("Activity from ip:9.9.9.9: Multiple Failed Logins, Unauthorised Endpoint Access", row["t"].As<string>());
+        Assert.Equal("Activity from IP 9.9.9.9: Multiple Failed Logins, Unauthorised Endpoint Access", row["t"].As<string>());
     }
 
     [Fact]
@@ -84,6 +84,8 @@ public class IncidentWriterTests(Neo4jFixture fx)
         await NewWriter(fx.Driver).CorrelateAsync(default);
         Assert.Equal("user:" + SyncHarness.PlayerId,
             (await h.QueryAsync("MATCH (i:Incident) RETURN i.subject"))[0][0].As<string>());
+        Assert.Equal("Activity from wickusvn@gmail.com: Multiple Failed Logins",
+            (await h.QueryAsync("MATCH (i:Incident) RETURN i.title"))[0][0].As<string>());
     }
 
     [Fact]

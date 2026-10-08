@@ -85,8 +85,27 @@ public class IncidentCorrelatorTests
         Assert.Equal("HIGH", d.Priority);
         Assert.Equal("Medium", d.Severity);
         Assert.Equal("OPEN", d.Status);
-        Assert.Equal("Activity from ip:1.1.1.1: Multiple Failed Logins, Unauthorised Endpoint Access", d.Title);
+        Assert.Equal("Activity from IP 1.1.1.1: Multiple Failed Logins, Unauthorised Endpoint Access", d.Title);
         Assert.Equal(T0, d.OpenedAt);
         Assert.Equal(T0.AddMinutes(5), d.LastAlertAt);
+    }
+
+    [Theory]
+    [InlineData("user:abc", "a@b.com", "Ann Bee", "a@b.com")]
+    [InlineData("user:abc", null, "Ann Bee", "Ann Bee")]
+    [InlineData("user:abc", null, null, "user:abc")]
+    [InlineData("ip:1.2.3.4", null, null, "IP 1.2.3.4")]
+    [InlineData("service:payment-service", null, null, "service payment-service")]
+    [InlineData("unknown", null, null, "unknown")]
+    public void SubjectDisplay_PerSubjectKind(string subject, string? email, string? name, string expected) =>
+        Assert.Equal(expected, IncidentCorrelator.SubjectDisplay(subject, email, name));
+
+    [Fact]
+    public void Derive_WithDisplay_TitleUsesDisplay_SubjectStaysRaw()
+    {
+        var d = IncidentCorrelator.Derive("user:abc",
+            [new("a", T0, "Multiple Failed Logins", "High", "OPEN", "user:abc")], "a@b.com");
+        Assert.Equal("Activity from a@b.com: Multiple Failed Logins", d.Title);
+        Assert.Equal("user:abc", d.Subject);
     }
 }

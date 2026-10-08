@@ -153,8 +153,9 @@ public class IncidentWriter(IDriver driver, IOptions<IncidentOptions> options, I
         {
             var cursor = await tx.RunAsync("""
                 MATCH (i:Incident)-[:CONTAINS]->(a:Alert)
-                RETURN i.incidentId AS id, i.subject AS subject,
-                       collect({alertId: a.alertId, ts: a.timestamp, rule: a.ruleName, severity: a.severity, status: a.status}) AS alerts
+                WITH i, collect({alertId: a.alertId, ts: a.timestamp, rule: a.ruleName, severity: a.severity, status: a.status}) AS alerts
+                OPTIONAL MATCH (u:User {userId: CASE WHEN i.subject STARTS WITH 'user:' THEN substring(i.subject, 5) END})
+                RETURN i.incidentId AS id, i.subject AS subject, u.email AS email, u.name AS name, alerts
                 """);
             return await cursor.ToListAsync();
         });
@@ -166,7 +167,8 @@ public class IncidentWriter(IDriver driver, IOptions<IncidentOptions> options, I
             var alerts = r["alerts"].As<List<Dictionary<string, object>>>().Select(m => new AlertForCorrelation(
                 (string)m["alertId"], ((ZonedDateTime)m["ts"]).ToDateTimeOffset(),
                 (string)m["rule"], (string)m["severity"], (string)m["status"], subject)).ToList();
-            var d = IncidentCorrelator.Derive(subject, alerts);
+            var display = IncidentCorrelator.SubjectDisplay(subject, r["email"].As<string?>(), r["name"].As<string?>());
+            var d = IncidentCorrelator.Derive(subject, alerts, display);
             updates.Add(new Dictionary<string, object?>
             {
                 ["id"] = r["id"].As<string>(), ["subject"] = d.Subject, ["severity"] = d.Severity, ["status"] = d.Status,
