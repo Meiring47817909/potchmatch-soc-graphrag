@@ -27,9 +27,14 @@ public static class SeedValidator
             }
             if (!declared.Add(new NodeRef(node.Label!, node.Key)))
                 errors.Add($"Duplicate {name}");
+            var keyProperty = GraphSchema.KeyProperty[node.Label!];
             foreach (var (prop, value) in node.Properties ?? new Dictionary<string, JsonElement>())
+            {
+                if (prop == keyProperty)
+                    errors.Add($"Property '{prop}' on {name} repeats the key property; put the value in 'key' only");
                 if (value.ValueKind == JsonValueKind.Object)
                     errors.Add($"Property '{prop}' on {name} is a nested object, which Neo4j cannot store");
+            }
         }
 
         foreach (var rel in file.Relationships ?? [])

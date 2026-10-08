@@ -69,4 +69,14 @@ public class SeedValidatorTests
         var file = new SeedFile([Node("Service", " ")], []);
         Assert.NotEmpty(SeedValidator.Validate(file, None));
     }
+
+    [Fact]
+    public void PropertiesContainKeyProperty_Error()
+    {
+        var props = new Dictionary<string, JsonElement> { ["id"] = JsonDocument.Parse("\"T9999\"").RootElement };
+        var file = new SeedFile([new SeedNode("Threat", "T1110", props)], []);
+        var error = Assert.Single(SeedValidator.Validate(file, None));
+        Assert.Contains("'id'", error);
+        Assert.Contains("Threat/'T1110'", error);
+    }
 }
