@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Serilog;
 using Serilog.Formatting.Compact;
 using GraphService.Graph;
+using GraphService.Incidents;
 using GraphService.Seeding;
+using GraphService.Sync;
+using Microsoft.Extensions.Options;
 using Neo4j.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +40,15 @@ builder.Services.AddSingleton<Neo4jConnector>();
 builder.Services.AddSingleton<SeedLoader>();
 builder.Services.AddSingleton<GraphStartupGate>();
 builder.Services.AddHostedService<GraphStartupService>();
+
+builder.Services.Configure<GraphSyncOptions>(builder.Configuration.GetSection("GraphSync"));
+builder.Services.AddHttpClient<ISocSyncClient, SocSyncClient>((sp, http) =>
+    http.BaseAddress = new Uri(sp.GetRequiredService<IOptions<GraphSyncOptions>>().Value.SocUrl));
+builder.Services.AddHttpClient<IIdentitySyncClient, IdentitySyncClient>((sp, http) =>
+    http.BaseAddress = new Uri(sp.GetRequiredService<IOptions<GraphSyncOptions>>().Value.IdentityUrl));
+builder.Services.AddSingleton<GraphWriter>();
+builder.Services.AddSingleton<IIncidentCorrelation, NoOpIncidentCorrelation>();
+builder.Services.AddHostedService<SyncWorker>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 
