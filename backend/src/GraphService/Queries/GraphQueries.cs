@@ -53,7 +53,8 @@ public static class GraphQueries
 
     public const string DependencyImpact = """
         MATCH p = (dep:Service)-[:DEPENDS_ON*1..]->(s:Service {name: $name})
-        RETURN p, dep.name AS service, length(p) AS depth
+        WITH dep, collect(p) AS paths, min(length(p)) AS depth
+        RETURN paths, dep.name AS service, depth
         ORDER BY depth, service
         """;
 

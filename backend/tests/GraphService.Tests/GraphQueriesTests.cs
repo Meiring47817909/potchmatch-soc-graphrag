@@ -98,7 +98,12 @@ public class GraphQueriesTests(Neo4jFixture fx)
         var r = await Runner().RunAsync("dependency-impact", GraphQueries.DependencyImpact, P("name", "payment-service"), default);
         Assert.Contains(r.Rows, x => (string)x["service"]! == "booking-service" && (long)x["depth"]! == 1);
         Assert.Contains(r.Rows, x => (string)x["service"]! == "api-gateway" && (long)x["depth"]! == 1);
-        Assert.Contains(r.Rows, x => (string)x["service"]! == "api-gateway" && (long)x["depth"]! == 2); // via booking-service
+        // One row per dependent service, at its shortest depth (api-gateway also reaches payment via booking-service).
+        Assert.Equal(r.Rows.Count, r.Rows.Select(x => (string)x["service"]!).Distinct().Count());
+        // Evidence still includes the longer path through booking-service.
+        Assert.Contains(r.Relationships, x => x.Type == "DEPENDS_ON"
+            && r.Nodes.Any(n => n.Id == x.Start && (string?)n.Properties.GetValueOrDefault("name") == "api-gateway")
+            && r.Nodes.Any(n => n.Id == x.End && (string?)n.Properties.GetValueOrDefault("name") == "booking-service"));
         Assert.All(r.Relationships, x => Assert.Equal("DEPENDS_ON", x.Type));
     }
 
