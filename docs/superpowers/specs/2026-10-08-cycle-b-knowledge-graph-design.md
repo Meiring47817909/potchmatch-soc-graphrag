@@ -174,6 +174,7 @@ The 30-minute window is configurable (`Incidents:WindowMinutes`).
 ## 9. Docker Compose changes
 
 - `neo4j`: image `neo4j:5-community`, ports `7474:7474` and `7687:7687`, `NEO4J_AUTH=neo4j/<dev password>`, volume `neo4j-data`, healthcheck.
+- **Viewing the graph:** the user views and explores the graph with **Neo4j Desktop** via a remote connection to `bolt://localhost:7687` using the credentials in `docker-compose.yml` (Neo4j Browser on `http://localhost:7474` also works). Neo4j Desktop is a viewer only; the database itself always runs in the compose container. `graph-data/README.md` documents the connection steps.
 - `graph-service`: depends on healthy `neo4j` and `consul`; env `Neo4j__Uri=bolt://neo4j:7687`, `Neo4j__User`, `Neo4j__Password`, `GraphSync__Key`, `GraphSync__SocUrl=http://soc-service:8080`, `GraphSync__IdentityUrl=http://identity-service:8080`, Consul and Jwt settings as the other services.
 - `GraphSync__Key` also added to `soc-service` and `identity-service`.
 - Gateway `ocelot.json` gains the `/api/graph/*` route.
@@ -197,7 +198,7 @@ The 30-minute window is configurable (`Incidents:WindowMinutes`).
 - **Unit (no database):** endpoint normalisation; rule→threat mapping; email/user matching; subject derivation; incident correlation (window boundary, resolved incidents not reused, escalation at ≥2 rules, deterministic IDs); seed-file validation (unknown label, dangling relationship).
 - **Integration (real Neo4j via Testcontainers):** each of the 5 queries + incidents endpoint against a fixture graph; sync idempotency (same input twice → identical node and relationship counts); seed loading creates the expected counts; constraints exist.
 - **Cross-service:** SocService and IdentityService sync endpoints — key validation, filtering (`updatedSince`, `receivedAfter`, `REQUEST_RECEIVED` and alert-linked exclusion), ordering, limit caps.
-- **End to end** (new Postman folder "Phase 2 — Graph"): 5 failed logins → within ~30 s the user appears in `users-high-severity`; `controls-for-alert` for that alert returns T1110 with M1036, M1032, M1027 and the Password Reset Procedure; Neo4j Browser shows the chain; 3 unauthorised requests from the same IP → incident escalated.
+- **End to end** (new Postman folder "Phase 2 — Graph"): 5 failed logins → within ~30 s the user appears in `users-high-severity`; `controls-for-alert` for that alert returns T1110 with M1036, M1032, M1027 and the Password Reset Procedure; Neo4j Desktop (remote connection) shows the chain; 3 unauthorised requests from the same IP → incident escalated.
 - **Knowledge fixture:** until the user's Graph Builder export is curated, GraphService and its tests use a small hand-written fixture with the same format; the curated file replaces it in a dedicated plan step.
 
 ## 12. Handover to Cycle C
