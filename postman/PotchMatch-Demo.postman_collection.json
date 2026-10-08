@@ -891,7 +891,13 @@
               "path": [
                 "api",
                 "soc",
-                "alerts?status=OPEN"
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                }
               ]
             },
             "description": "Stores the id of the first Multiple Failed Logins alert as {{graphAlertId}} for the controls query below."
@@ -991,7 +997,13 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const rows = (pm.response.json().rows) || [];",
+                  "pm.test('Alert indicates T1110', () => pm.expect(rows.map(r => r.threatId)).to.include('T1110'));",
+                  "const controls = rows.map(r => r.controlId);",
+                  "pm.test('Controls include M1036, M1032, M1027', () => pm.expect(controls).to.include.members(['M1036', 'M1032', 'M1027']));",
+                  "const docs = rows.flatMap(r => (r.responseDocuments || []).concat(r.controlDocuments || []));",
+                  "pm.test('Response document DOC-PASSWORD-RESET', () => pm.expect(docs).to.include('DOC-PASSWORD-RESET'));"
                 ]
               }
             }
@@ -1109,7 +1121,7 @@
                 "incidents"
               ]
             },
-            "description": "Correlated incidents. Stores the first incident id as {{incidentId}}. An incident is escalated when it holds 2+ distinct rules for the same subject."
+            "description": "Correlated incidents. Stores the escalated incident id (else the first) as {{incidentId}}. An incident is escalated when it holds 2+ distinct rules for the same subject."
           },
           "event": [
             {
@@ -1118,10 +1130,19 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('200 OK', () => pm.response.to.have.status(200));",
-                  "const body = pm.response.json();",
-                  "const rows = Array.isArray(body) ? body : (body.results || body.rows || body.data || []);",
+                  "const rows = pm.response.json().rows || [];",
                   "pm.test('At least one incident', () => pm.expect(rows.length).to.be.at.least(1));",
-                  "if (rows.length) pm.environment.set('incidentId', rows[0].incidentId);"
+                  "const escalated = rows.find(r => r.escalated === true);",
+                  "if (escalated) {",
+                  "  pm.test('Escalated incident (2+ rules) has HIGH priority', () => {",
+                  "    pm.expect(escalated.escalated).to.eql(true);",
+                  "    pm.expect(escalated.priority).to.eql('HIGH');",
+                  "  });",
+                  "} else {",
+                  "  console.warn('No escalated incident yet: run the failed logins and the player-calls-SOC (403) step, then wait ~15 s for the graph sync.');",
+                  "}",
+                  "const chosen = escalated || rows[0];",
+                  "if (chosen) pm.environment.set('incidentId', chosen.incidentId);"
                 ]
               }
             }
