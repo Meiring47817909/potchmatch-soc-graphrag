@@ -33,6 +33,7 @@ builder.Services.AddDbContext<SocDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("SocDb")));
 
 builder.Services.AddScoped<EventIngestionService>();
+builder.Services.AddScoped<SocService.Queries.SyncQuery>();
 
 builder.Services.Configure<DetectionOptions>(builder.Configuration.GetSection(DetectionOptions.SectionName));
 builder.Services.AddScoped<AlertWriter>();
