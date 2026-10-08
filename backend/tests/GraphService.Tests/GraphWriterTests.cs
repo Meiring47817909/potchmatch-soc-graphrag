@@ -36,4 +36,20 @@ public class GraphWriterTests(Neo4jFixture fx)
         Assert.Equal(1, await h.CountAsync("MATCH (:User {userId: '" + uid + "'})-[:TRIGGERED]->(:Event) RETURN count(*)"));
         Assert.Equal(1, await h.CountAsync("MATCH (:Event)-[:GENERATED_BY]->(s:Service {name:'brand-new-svc', discovered:true}) RETURN count(s)"));
     }
+
+    [Fact]
+    public async Task UpsertEvents_PathMatchingSeededTemplate_TargetsSeededEndpoint_DiscoveredLeavesProtectedUnset()
+    {
+        var h = await FreshAsync();
+        var seeded = SyncHarness.FailedLogin(1, null, "/api/graph/services/identity-service/alerts") with { HttpMethod = "GET" };
+        var unknown = SyncHarness.FailedLogin(2, null, "/api/mystery/thing") with { HttpMethod = "GET" };
+        await h.Writer.UpsertEventsAsync([seeded, unknown], default);
+
+        Assert.Equal(1, await h.CountAsync(
+            "MATCH (:Event)-[:TARGETED]->(e:Endpoint {key:'GET /api/graph/services/{name}/alerts', protected:true}) RETURN count(e)"));
+        Assert.Equal(0, await h.CountAsync("MATCH (e:Endpoint {key:'GET /api/graph/services/identity-service/alerts'}) RETURN count(e)"));
+        var discovered = (await h.QueryAsync(
+            "MATCH (e:Endpoint {key:'GET /api/mystery/thing', discovered:true}) RETURN e.protected AS p"));
+        Assert.Null(Assert.Single(discovered)["p"].As<object?>());
+    }
 }

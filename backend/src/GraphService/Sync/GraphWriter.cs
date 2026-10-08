@@ -6,6 +6,9 @@ namespace GraphService.Sync;
 /// <summary>Idempotent MERGE-based writer for live data (players, alerts, events, sync cursors).</summary>
 public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
 {
+    // Seeded (non-discovered) Endpoint keys, used to map concrete paths onto their {x} templates. Reloaded while empty.
+    private IReadOnlyList<string> _seededEndpoints = [];
+
     public async Task UpsertPlayersAsync(IReadOnlyList<SyncPlayer> players, CancellationToken ct)
     {
         if (players.Count == 0) return;
@@ -154,9 +157,27 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
         await session.ExecuteWriteAsync(tx => WriteEventsAsync(tx, events));
     }
 
-    private static async Task WriteEventsAsync(IAsyncQueryRunner tx, IReadOnlyList<SyncEvent> events)
+    private async Task<IReadOnlyList<string>> SeededEndpointsAsync(IAsyncQueryRunner tx)
+    {
+        if (_seededEndpoints.Count > 0) return _seededEndpoints;
+        var cursor = await tx.RunAsync("MATCH (e:Endpoint) WHERE coalesce(e.discovered, false) = false RETURN e.key AS key");
+        _seededEndpoints = (await cursor.ToListAsync()).Select(r => r["key"].As<string>()).ToList();
+        return _seededEndpoints;
+    }
+
+    /// <summary>Normalises the event's endpoint and maps it onto a seeded template when one matches.</summary>
+    private static string? EndpointKey(SyncEvent e, IReadOnlyList<string> seeded)
+    {
+        var key = EndpointNormaliser.ToKey(e.HttpMethod, e.Endpoint);
+        return key is null ? null : EndpointTemplateMatcher.Match(key, seeded) ?? key;
+    }
+
+    private async Task WriteEventsAsync(IAsyncQueryRunner tx, IReadOnlyList<SyncEvent> events)
     {
         if (events.Count == 0) return;
+        var seeded = events.Any(e => EndpointNormaliser.ToKey(e.HttpMethod, e.Endpoint) is not null)
+            ? await SeededEndpointsAsync(tx)
+            : [];
         var rows = events.Select(e => new Dictionary<string, object?>
         {
             ["eventId"] = e.EventId.ToString(),
@@ -169,7 +190,7 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
             ["message"] = e.Message,
             ["correlationId"] = e.CorrelationId,
             ["affectedEntity"] = e.AffectedEntity,
-            ["endpointKey"] = EndpointNormaliser.ToKey(e.HttpMethod, e.Endpoint),
+            ["endpointKey"] = EndpointKey(e, seeded),
             ["guidUserId"] = Guid.TryParse(e.UserId?.Trim(), out var g) ? g.ToString() : null,
             ["emailKey"] = UserMatcher.LooksLikeEmail(e.UserId) ? UserMatcher.EmailKey(e.UserId!) : null,
             ["unknownId"] = UserMatcher.LooksLikeEmail(e.UserId) ? UserMatcher.UnknownUserId(e.UserId!) : null,
@@ -194,8 +215,7 @@ public class GraphWriter(IDriver driver, ILogger<GraphWriter> log)
             MERGE (ep:Endpoint {key: e.endpointKey})
               ON CREATE SET ep.discovered = true,
                             ep.method = split(e.endpointKey, ' ')[0],
-                            ep.path = substring(e.endpointKey, size(split(e.endpointKey, ' ')[0]) + 1),
-                            ep.protected = false
+                            ep.path = substring(e.endpointKey, size(split(e.endpointKey, ' ')[0]) + 1)
             MERGE (ev)-[:TARGETED]->(ep)
             """, new { rows });
         await tx.RunAsync("""
