@@ -4,10 +4,12 @@ namespace GraphService.Graph;
 
 /// <summary>
 /// Background startup: waits for Neo4j, ensures constraints, loads the seed files, then opens the gate. Does not block host startup.
-/// Invalid seeds are terminal (gate failed); any other error is treated as transient and the sequence is retried with backoff.
+/// Invalid seeds are terminal: the gate fails and the application stops with exit code 1 (fail fast, spec section 10).
+/// Any other error is treated as transient and the sequence is retried with backoff.
 /// </summary>
 public class GraphStartupService(
-    Neo4jConnector connector, SeedLoader seedLoader, GraphStartupGate gate, IConfiguration config, ILogger<GraphStartupService> log)
+    Neo4jConnector connector, SeedLoader seedLoader, GraphStartupGate gate, IConfiguration config,
+    IHostApplicationLifetime lifetime, ILogger<GraphStartupService> log)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,8 +33,12 @@ public class GraphStartupService(
             }
             catch (SeedValidationException ex)
             {
-                log.LogError("Seed file {Path} is invalid ({Count} errors): {Errors}", ex.Path, ex.Errors.Count, string.Join(" | ", ex.Errors));
+                log.LogCritical("Seed file {Path} is invalid ({Count} errors); stopping graph-service", ex.Path, ex.Errors.Count);
+                foreach (var error in ex.Errors)
+                    log.LogCritical("Seed error in {Path}: {Error}", ex.Path, error);
                 gate.MarkFailed(ex);
+                Environment.ExitCode = 1;
+                lifetime.StopApplication();
                 return;
             }
             catch (Exception ex)
