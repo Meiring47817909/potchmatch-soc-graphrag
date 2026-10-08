@@ -5,9 +5,3 @@ public interface IIncidentCorrelation
 {
     Task CorrelateAsync(CancellationToken ct);
 }
-
-/// <summary>Placeholder until the real incident writer is registered.</summary>
-public class NoOpIncidentCorrelation : IIncidentCorrelation
-{
-    public Task CorrelateAsync(CancellationToken ct) => Task.CompletedTask;
-}
