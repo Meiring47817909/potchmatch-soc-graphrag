@@ -4,142 +4,747 @@
       "label": "Threat",
       "key": "T1110",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Brute Force",
-        "description": "Adversaries guess passwords to gain access to accounts.",
-        "source": "MITRE ATT&CK"
+        "description": "Adversaries attempt to guess passwords to gain access to accounts; repeated attempts can also lock accounts out and cause a denial of service condition.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1110",
+          "Brute Force",
+          "Brute Force (T1110)",
+          "T1110 Brute Force",
+          "Brute Force Attacks",
+          "Brute-Force Attacks",
+          "Brute Force Attempts",
+          "Bruteforce Attempts",
+          "Multiple Failed Logins",
+          "Guessed Credentials"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1110.001",
+      "properties": {
+        "origin": "extracted",
+        "name": "Password Guessing",
+        "description": "Adversaries attempt to guess passwords to gain unauthorized access to accounts without prior knowledge of the credentials.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1110.001",
+          "T1110.001 Password Guessing",
+          "Brute Force: Password Guessing (T1110.001)",
+          "001 Sub-Technique Of: T1110",
+          "Password Guessing",
+          "Password Guessing Attempts",
+          "Password Guessing T1110.002"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1110.002",
+      "properties": {
+        "origin": "extracted",
+        "name": "Password Cracking",
+        "description": "Adversaries attempt to crack obtained password hashes offline to recover usable plaintext credentials.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1110.002",
+          "T1110.002 Password Cracking",
+          "Password Cracking",
+          "Password Cracking T1110.003"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1110.003",
+      "properties": {
+        "origin": "extracted",
+        "name": "Password Spraying",
+        "description": "A technique where attackers attempt a single password or a small list of common passwords against many different accounts to avoid account lockouts.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1110.003",
+          "T1110.003 Password Spraying",
+          "Brute Force: Password Spraying",
+          "Password Spraying",
+          "Distributed Password Spraying",
+          "Throttled Password Spraying"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1110.004",
+      "properties": {
+        "origin": "extracted",
+        "name": "Credential Stuffing",
+        "description": "Adversaries use credentials obtained from breach dumps of unrelated accounts to gain access to accounts where users reused the same passwords.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1110.004 Credential Stuffing",
+          "Credential Stuffing",
+          "Credential Stuffing Attacks"
+        ]
       }
     },
     {
       "label": "Threat",
       "key": "T1078",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Valid Accounts",
-        "description": "Adversaries use legitimate credentials to gain or keep access.",
-        "source": "MITRE ATT&CK"
+        "description": "Adversaries obtain and abuse the credentials of existing accounts to gain initial access, escalate privileges, maintain persistence or evade defenses.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1078",
+          "T1078 Valid Accounts",
+          "Valid Accounts",
+          "Valid Accounts (T1078)",
+          "Abusing Valid Accounts",
+          "Valid Account Abuse",
+          "Valid Account Misuse",
+          "Compromised Or Misused Valid Accounts",
+          "Unauthorized Access",
+          "Unauthorised Endpoint Access",
+          "Account Or Token Theft"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078.001",
+      "properties": {
+        "origin": "extracted",
+        "name": "Default Accounts",
+        "description": "Adversaries obtain and abuse credentials of default accounts (built-in accounts or vendor default username/password pairs) to gain access.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1078.001",
+          "Default Accounts (T1078.001)",
+          "Default Accounts",
+          "Abuse Of Default Accounts",
+          "Default Account Exploitation",
+          "Use Of Default Credentials"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078.002",
+      "properties": {
+        "origin": "extracted",
+        "name": "Domain Accounts",
+        "description": "Adversaries obtain and abuse credentials of domain accounts as a means of gaining initial access, persistence, privilege escalation or defense evasion.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1078.002",
+          "Domain Accounts (T1078.002)",
+          "Domain Account",
+          "Exploitation Of Domain Accounts"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078.003",
+      "properties": {
+        "origin": "extracted",
+        "name": "Local Accounts",
+        "description": "Adversaries obtain and abuse credentials of local accounts as a means of gaining initial access, persistence, privilege escalation or defense evasion.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1078.003",
+          "Local Accounts (T1078.003)"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1078.004",
+      "properties": {
+        "origin": "extracted",
+        "name": "Cloud Accounts",
+        "description": "Adversaries obtain and abuse credentials of cloud accounts as a means of gaining initial access, persistence, privilege escalation or defense evasion.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1078.004",
+          "Cloud Accounts (T1078.004)",
+          "Cloud Accounts",
+          "Cloud Account"
+        ]
       }
     },
     {
       "label": "Threat",
       "key": "T1499",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Endpoint Denial of Service",
-        "description": "Adversaries exhaust endpoint resources to deny availability.",
-        "source": "MITRE ATT&CK"
+        "description": "Attacks aimed at degrading or blocking the availability of services to users by exhausting system resources or exploiting the system to cause a persistent crash condition.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1499",
+          "Endpoint Denial Of Service",
+          "Endpoint Denial Of Service (T1499)",
+          "Endpoint Dos",
+          "Possible_Dos",
+          "Traffic Flood",
+          "Abusive Traffic",
+          "Service Outage",
+          "Service Outage Attack"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499.001",
+      "properties": {
+        "origin": "extracted",
+        "name": "OS Exhaustion Flood",
+        "description": "Adversaries exhaust operating system resources (for example with SYN or ACK floods) so the endpoint can no longer serve requests.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1499.001",
+          "T1499.001 Os",
+          "Os Exhaustion Flood"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499.002",
+      "properties": {
+        "origin": "extracted",
+        "name": "Service Exhaustion Flood",
+        "description": "Adversaries flood a specific network service (such as a web server) with requests to exhaust it and deny its availability.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1499.002",
+          "Service Exhaustion Flood"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499.003",
+      "properties": {
+        "origin": "extracted",
+        "name": "Application Exhaustion Flood",
+        "description": "Adversaries send floods of requests to resource-intensive application features to exhaust the application and deny its availability.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1499.003",
+          "Application Exhaustion Flood"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "T1499.004",
+      "properties": {
+        "origin": "extracted",
+        "name": "Application or System Exploitation",
+        "description": "Adversaries exploit software vulnerabilities to crash an application or system and deny its availability.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "T1499.004",
+          "Application Or System Exploitation"
+        ]
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "OWASP-A01-2025",
+      "properties": {
+        "origin": "extracted",
+        "name": "A01:2025 Broken Access Control",
+        "description": "Access control failures let users act outside their intended permissions, leading to unauthorized information disclosure, modification or destruction of data, or performing business functions outside the user's limits.",
+        "source": "OWASP Top 10:2025",
+        "rawNames": [
+          "A01:2025 Broken Access Control",
+          "A01 Broken Access Control",
+          "Broken Access Control"
+        ]
       }
     },
     {
       "label": "Control",
       "key": "M1036",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Account Use Policies",
-        "description": "Configure lockout and login restrictions.",
-        "source": "MITRE ATT&CK"
+        "description": "Configure features related to account use: lock accounts after a number of failed login attempts, and use conditional access policies to block logins from non-compliant devices, outside defined IP ranges or from anonymizing services.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "Account Use Policies",
+          "Account Use Policies (M1036)",
+          "M1036 Account Use Policies",
+          "M1036: Account Use Policies",
+          "1036 Account Use Policies",
+          "Account Lockout Policies",
+          "Account Lockout Policy",
+          "Login Failure Policies",
+          "Limit Failed Login Attempts",
+          "Conditional Access Policies",
+          "Location-Based Conditional Access Policies",
+          "Blocking Risky Authentication Requests",
+          "Block Risky Authentication Requests",
+          "Restricting Login Times"
+        ]
       }
     },
     {
       "label": "Control",
       "key": "M1032",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Multi-factor Authentication",
-        "description": "Require more than one factor to authenticate.",
-        "source": "MITRE ATT&CK"
+        "description": "Use multi-factor authentication. Where possible, also enable multi-factor authentication on externally facing services.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "Multi-Factor Authentication",
+          "Multi-Factor Authentication (M1032)",
+          "M1032 Multi-Factor Authentication",
+          "M1032: Multi-Factor Authentication",
+          "Mfa",
+          "Multi-Factor Authentication (Mfa)",
+          "Require Mfa For All Delegated Administrator Accounts"
+        ]
       }
     },
     {
       "label": "Control",
       "key": "M1027",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Password Policies",
-        "description": "Enforce strong password length and complexity.",
-        "source": "MITRE ATT&CK"
+        "description": "Set and enforce secure password policies (length, complexity, no default or reused passwords); change default credentials immediately after installation.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "Password Policies",
+          "Password Policies (M1027)",
+          "Password Complexity Policy",
+          "Enforce Secure Password Policies",
+          "Secure Password Policies",
+          "Strong Password Policies For Domain Accounts",
+          "Change Default Credentials",
+          "Changing Default Credentials",
+          "M1026"
+        ]
       }
     },
     {
       "label": "Control",
       "key": "M1037",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Filter Network Traffic",
-        "description": "Block or rate-limit traffic from abusive sources.",
-        "source": "MITRE ATT&CK"
+        "description": "Filter traffic upstream of services using CDNs or DoS mitigation providers, and filter boundary traffic by blocking attacking source addresses, targeted ports or abused protocols.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "Filter Network Traffic",
+          "Filter Network Traffic (M1037)",
+          "M1037 Filter Network Traffic",
+          "Filter Boundary Traffic",
+          "Boundary Traffic Filtering",
+          "Upstream Traffic Filtering",
+          "Cdn And Dos Mitigation Services",
+          "Cdn Or Dos Mitigation Services",
+          "Content Delivery Network (Cdn)",
+          "Content Delivery Networks (Cdn)",
+          "Dos Mitigation Providers"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1018",
+      "properties": {
+        "origin": "extracted",
+        "name": "User Account Management",
+        "description": "Proactively reset accounts that are known to be part of breached credentials either immediately, or after detecting bruteforce attempts.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "M1018 User Account Management",
+          "User Account Management"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1017",
+      "properties": {
+        "origin": "extracted",
+        "name": "User Training",
+        "description": "Train users to only accept valid push notifications and to report suspicious push notifications.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "User Training",
+          "M1017 User Training"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "M1051",
+      "properties": {
+        "origin": "extracted",
+        "name": "Update Software",
+        "description": "Upgrade management services to the latest supported version, specifically any version that adds password complexity or policy enforcement preventing default or weak passwords.",
+        "source": "MITRE ATT&CK",
+        "rawNames": [
+          "M1051"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "CTRL-IP-BLOCKING",
+      "properties": {
+        "origin": "extracted",
+        "name": "Gateway IP blocking",
+        "description": "Confirm the alert, identify the source IP, check it is not a legitimate shared address, add it to the gateway block list and monitor that the flood stops.",
+        "source": "PotchMatch procedure",
+        "rawNames": [
+          "Gateway Blocking",
+          "Ip Blocking"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "CTRL-SESSION-REVOCATION",
+      "properties": {
+        "origin": "extracted",
+        "name": "Session and account revocation",
+        "description": "Revoke all active tokens and sessions for the user and disable the account until ownership is verified.",
+        "source": "PotchMatch procedure",
+        "rawNames": [
+          "Session And Account Revocation Control"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "CTRL-PASSWORD-RESET",
+      "properties": {
+        "origin": "extracted",
+        "name": "Password reset",
+        "description": "Issuing a password reset link with short expiry and requiring a new password that meets the password policy.",
+        "source": "PotchMatch procedure",
+        "rawNames": [
+          "Password Reset"
+        ]
+      }
+    },
+    {
+      "label": "Control",
+      "key": "CTRL-SERVICE-RESTART",
+      "properties": {
+        "origin": "extracted",
+        "name": "Service restart and redeployment",
+        "description": "Restarting or redeploying the service and verifying health checks.",
+        "source": "PotchMatch procedure",
+        "rawNames": [
+          "Service Restart And Redeployment"
+        ]
       }
     },
     {
       "label": "Vulnerability",
       "key": "VULN-WEAK-PASSWORDS",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Weak passwords",
-        "description": "Guessable passwords allow brute force."
+        "description": "Weak, common or guessable passwords (including patterns such as Welcome2023) that make guessing, spraying and stuffing attacks succeed.",
+        "rawNames": [
+          "Weak Passwords",
+          "Default Or Weak Passwords",
+          "Weak Credentials",
+          "Weak Or Static Credentials",
+          "Commonly Used Passwords",
+          "Common Password Patterns",
+          "Common Passwords On Local Accounts",
+          "Lazy Passwords"
+        ]
       }
     },
     {
       "label": "Vulnerability",
       "key": "VULN-BROKEN-ACCESS-CONTROL",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "name": "Broken access control",
-        "description": "OWASP A01:2021; missing authorisation checks."
+        "description": "Missing or bypassable server-side authorization checks (OWASP A01:2025), for example an API that does not enforce access control on POST, PUT or DELETE.",
+        "rawNames": [
+          "Access Control Vulnerabilities",
+          "Missing Access Control",
+          "Missing Access Controls"
+        ]
       }
     },
     {
       "label": "Vulnerability",
       "key": "VULN-NO-RATE-LIMIT",
       "properties": {
-        "origin": "fixture",
+        "origin": "curated",
         "name": "No rate limiting",
-        "description": "Unbounded request rates allow resource exhaustion."
+        "description": "Unbounded request rates from a single source let an attacker exhaust endpoint resources or make unlimited login attempts."
       }
     },
     {
-      "label": "Document",
-      "key": "DOC-T1110",
+      "label": "Vulnerability",
+      "key": "VULN-DEFAULT-CREDENTIALS",
       "properties": {
-        "origin": "fixture",
-        "title": "MITRE ATT&CK T1110 Brute Force",
-        "kind": "MITRE"
+        "origin": "extracted",
+        "name": "Default credentials",
+        "description": "Applications, appliances and devices still using vendor default usernames and passwords, or default accounts left enabled.",
+        "rawNames": [
+          "Default Username And Password",
+          "Default Username And Password Configuration",
+          "Default Passwords",
+          "Default Manufacturer Passwords",
+          "Default Manufacturers Passwords",
+          "Default Accounts Enabled"
+        ]
+      }
+    },
+    {
+      "label": "Vulnerability",
+      "key": "VULN-EXPOSED-PASSWORD-HASHES",
+      "properties": {
+        "origin": "extracted",
+        "name": "Exposed password hashes",
+        "description": "Password hashes obtained by an adversary, enabling offline cracking.",
+        "rawNames": [
+          "Exposed Password Hashes",
+          "Obtained Password Hashes"
+        ]
+      }
+    },
+    {
+      "label": "Vulnerability",
+      "key": "VULN-LEAKED-CREDENTIALS",
+      "properties": {
+        "origin": "extracted",
+        "name": "Compromised or leaked credentials",
+        "description": "Credentials of existing accounts that were stolen, leaked in breaches or reused across services, available to attackers for stuffing or direct login.",
+        "rawNames": [
+          "Leaked Credentials",
+          "Breached Credentials",
+          "Credential Overlap",
+          "Credentials Of Existing Accounts",
+          "Compromised Credentials"
+        ]
       }
     },
     {
       "label": "Document",
       "key": "DOC-PASSWORD-RESET",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "title": "Password Reset Procedure",
-        "kind": "Procedure"
+        "kind": "Procedure",
+        "description": "Incident response procedure to return control of a possibly compromised account to its owner and make guessed credentials useless.",
+        "rawNames": [
+          "Doc-Password-Reset",
+          "Password Reset (Doc-Password-Reset)",
+          "Reset"
+        ]
       }
     },
     {
       "label": "Document",
       "key": "DOC-SESSION-REVOCATION",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "title": "Session Revocation Procedure",
-        "kind": "Procedure"
+        "kind": "Procedure",
+        "description": "Incident response procedure to cut off an attacker using a valid account or stolen token and force the legitimate user to authenticate again.",
+        "rawNames": [
+          "Doc-Session-Revocation",
+          "Session Revocation (Doc-Session-Revocation)"
+        ]
       }
     },
     {
       "label": "Document",
       "key": "DOC-IP-BLOCKING",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "title": "IP Blocking Procedure",
-        "kind": "Procedure"
+        "kind": "Procedure",
+        "description": "Incident response procedure to stop abusive traffic from a hostile source address so services stay available.",
+        "rawNames": [
+          "Doc-Ip-Blocking",
+          "Ip Blocking (Doc-Ip-Blocking)",
+          "Blocking"
+        ]
       }
     },
     {
       "label": "Document",
       "key": "DOC-SERVICE-OUTAGE",
       "properties": {
-        "origin": "fixture",
+        "origin": "extracted",
         "title": "Service Outage Runbook",
-        "kind": "Procedure"
+        "kind": "Procedure",
+        "description": "Runbook to restore a failed PotchMatch service and determine whether the outage is an attack.",
+        "rawNames": [
+          "Doc-Service-Outage",
+          "Service Outage Runbook (Doc-Service-Outage)"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1110",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK T1110 Brute Force",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1110/",
+        "description": "MITRE ATT&CK technique page for Brute Force and its four sub-techniques, with mitigations and detection guidance.",
+        "rawNames": [
+          "Techniques Of Brute Force (4)"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1110-001",
+      "properties": {
+        "origin": "curated",
+        "title": "MITRE ATT&CK T1110.001 Password Guessing",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1110/001/",
+        "description": "MITRE ATT&CK sub-technique page for Password Guessing."
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1110-003",
+      "properties": {
+        "origin": "curated",
+        "title": "MITRE ATT&CK T1110.003 Password Spraying",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1110/003/",
+        "description": "MITRE ATT&CK sub-technique page for Password Spraying."
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1110-004",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK T1110.004 Credential Stuffing",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1110/004/",
+        "description": "MITRE ATT&CK sub-technique page for Credential Stuffing.",
+        "rawNames": [
+          "T1110.004"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1078",
+      "properties": {
+        "origin": "curated",
+        "title": "MITRE ATT&CK T1078 Valid Accounts",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1078/",
+        "description": "MITRE ATT&CK technique page for Valid Accounts and its four sub-techniques."
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-T1499",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK T1499 Endpoint Denial of Service",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/techniques/T1499/",
+        "description": "MITRE ATT&CK technique page for Endpoint Denial of Service and its four sub-techniques.",
+        "rawNames": [
+          "Technique T1499"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-M1036",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK M1036 Account Use Policies",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/mitigations/M1036/",
+        "description": "MITRE ATT&CK mitigation page for Account Use Policies.",
+        "rawNames": [
+          "M1036"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-M1032",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK M1032 Multi-factor Authentication",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/mitigations/M1032/",
+        "description": "MITRE ATT&CK mitigation page for Multi-factor Authentication.",
+        "rawNames": [
+          "M1032"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-M1027",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK M1027 Password Policies",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/mitigations/M1027/",
+        "description": "MITRE ATT&CK mitigation page for Password Policies (refers to NIST guidelines).",
+        "rawNames": [
+          "M1027",
+          "M1027 Password Policies"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-M1037",
+      "properties": {
+        "origin": "extracted",
+        "title": "MITRE ATT&CK M1037 Filter Network Traffic",
+        "kind": "MITRE",
+        "url": "https://attack.mitre.org/mitigations/M1037/",
+        "description": "MITRE ATT&CK mitigation page for Filter Network Traffic.",
+        "rawNames": [
+          "M1037"
+        ]
+      }
+    },
+    {
+      "label": "Document",
+      "key": "DOC-OWASP-A01",
+      "properties": {
+        "origin": "extracted",
+        "title": "OWASP Top 10:2025 A01 Broken Access Control",
+        "kind": "OWASP",
+        "url": "https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/",
+        "description": "OWASP Top 10:2025 category page for A01 Broken Access Control: description, mapped CWEs, prevention and attack scenarios.",
+        "rawNames": [
+          "A01:2025 Broken Access Control Background",
+          "Owasp Top 10:2025",
+          "List Of Mapped Cwes"
+        ]
       }
     }
   ],
@@ -159,6 +764,61 @@
       "type": "MITIGATES",
       "from": {
         "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1036"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
         "key": "M1032"
       },
       "to": {
@@ -170,11 +830,44 @@
       "type": "MITIGATES",
       "from": {
         "label": "Control",
-        "key": "M1027"
+        "key": "M1032"
       },
       "to": {
         "label": "Threat",
-        "key": "T1110"
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.004"
       }
     },
     {
@@ -192,11 +885,352 @@
       "type": "MITIGATES",
       "from": {
         "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1032"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1027"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
         "key": "M1037"
       },
       "to": {
         "label": "Threat",
         "key": "T1499"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1037"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1037"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1037"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1037"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.003"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1017"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1017"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.002"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1017"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078.004"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "M1051"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "CTRL-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "CTRL-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "CTRL-PASSWORD-RESET"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
       }
     },
     {
@@ -214,6 +1248,83 @@
       "type": "EXPLOITS",
       "from": {
         "label": "Threat",
+        "key": "T1110"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-EXPOSED-PASSWORD-HASHES"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110.001"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-WEAK-PASSWORDS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110.002"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-EXPOSED-PASSWORD-HASHES"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110.003"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-WEAK-PASSWORDS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110.004"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-WEAK-PASSWORDS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1110.004"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
         "key": "T1078"
       },
       "to": {
@@ -225,11 +1336,121 @@
       "type": "EXPLOITS",
       "from": {
         "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-DEFAULT-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078.001"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-DEFAULT-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078.001"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078.002"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078.003"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1078.004"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-LEAKED-CREDENTIALS"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
         "key": "T1499"
       },
       "to": {
         "label": "Vulnerability",
         "key": "VULN-NO-RATE-LIMIT"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499.002"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-NO-RATE-LIMIT"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "T1499.003"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-NO-RATE-LIMIT"
+      }
+    },
+    {
+      "type": "EXPLOITS",
+      "from": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
+      },
+      "to": {
+        "label": "Vulnerability",
+        "key": "VULN-BROKEN-ACCESS-CONTROL"
       }
     },
     {
@@ -247,6 +1468,17 @@
       "type": "DESCRIBES",
       "from": {
         "label": "Document",
+        "key": "DOC-PASSWORD-RESET"
+      },
+      "to": {
+        "label": "Control",
+        "key": "CTRL-PASSWORD-RESET"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
         "key": "DOC-SESSION-REVOCATION"
       },
       "to": {
@@ -258,7 +1490,95 @@
       "type": "DESCRIBES",
       "from": {
         "label": "Document",
+        "key": "DOC-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Control",
+        "key": "CTRL-SESSION-REVOCATION"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
         "key": "DOC-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1037"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Control",
+        "key": "CTRL-IP-BLOCKING"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SERVICE-OUTAGE"
+      },
+      "to": {
+        "label": "Control",
+        "key": "CTRL-IP-BLOCKING"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SERVICE-OUTAGE"
+      },
+      "to": {
+        "label": "Control",
+        "key": "CTRL-SERVICE-RESTART"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-M1036"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1036"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-M1032"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1032"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-M1027"
+      },
+      "to": {
+        "label": "Control",
+        "key": "M1027"
+      }
+    },
+    {
+      "type": "DESCRIBES",
+      "from": {
+        "label": "Document",
+        "key": "DOC-M1037"
       },
       "to": {
         "label": "Control",
@@ -285,6 +1605,17 @@
       "to": {
         "label": "Threat",
         "key": "T1078"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-IP-BLOCKING"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
       }
     },
     {
@@ -307,6 +1638,105 @@
       "to": {
         "label": "Threat",
         "key": "T1499"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.002"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110-001"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.001"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110-003"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.003"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1110-004"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1110.004"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1078"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1078"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-T1499"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "T1499"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-OWASP-A01"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
       }
     }
   ]

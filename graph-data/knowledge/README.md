@@ -22,6 +22,7 @@ Builds the Threat / Control / Vulnerability / Document knowledge with Neo4j LLM 
 6. Download the result as JSON (Export / Download result > JSON).
 7. Save it as `graph-data/knowledge/security-knowledge.raw.json`.
 8. Tell Claude the file is saved so it can normalise IDs (T1110, M1032, VULN-WEAK-PASSWORDS, DOC-PASSWORD-RESET, ...) and build the seed.
+9. Curate: `python3 graph-data/knowledge/curate.py` (Python 3, stdlib only). It reads the raw export and writes `security-knowledge.json` (the seed) and `CURATION.md` (every merge, dropped category and curated addition, with final counts). The alias/merge table, the kept set and the official MITRE mitigation tables are explicit data at the top of `curate.py`; change them there and re-run, never edit the two outputs by hand.
 
 After `security-knowledge.json` changes, reset the local Neo4j so removed or renamed knowledge does not linger (seeding only MERGEs): `docker compose down -v`, or run `MATCH (n) WHERE n:Threat OR n:Control OR n:Vulnerability OR n:Document DETACH DELETE n` and restart graph-service. See `../README.md`.
 

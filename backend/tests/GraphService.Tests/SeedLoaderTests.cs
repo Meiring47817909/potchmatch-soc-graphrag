@@ -49,22 +49,30 @@ public class SeedLoaderTests(Neo4jFixture fx)
         Assert.Equal(6, nodes["Service"]);
         Assert.Equal(3, nodes["Role"]);
         Assert.Equal(6, nodes["Asset"]);
-        Assert.Equal(3, nodes["Threat"]);
-        Assert.Equal(4, nodes["Control"]);
-        Assert.Equal(3, nodes["Vulnerability"]);
-        Assert.Equal(5, nodes["Document"]);
+        Assert.Equal(16, nodes["Threat"]); // 3 app-structure stubs merge into the 16 curated threats
+        Assert.Equal(11, nodes["Control"]);
+        Assert.Equal(6, nodes["Vulnerability"]);
+        Assert.Equal(15, nodes["Document"]);
 
         var rels = await RelCounts();
         foreach (var type in new[] { "TARGETS", "EXPLOITS", "MITIGATES", "DEPENDS_ON", "EXPOSES", "DESCRIBES", "SUPPORTS_RESPONSE_TO", "USES", "REQUIRES_ROLE" })
             Assert.True(rels.GetValueOrDefault(type) >= 1, $"no {type} relationships");
         Assert.Equal(nodes["Endpoint"], rels["EXPOSES"]);
         Assert.Equal(9, rels["TARGETS"]);
-        Assert.Equal(5, rels["MITIGATES"]);
+        Assert.Equal(44, rels["MITIGATES"]);
+        Assert.Equal(20, rels["EXPLOITS"]);
+        Assert.Equal(12, rels["DESCRIBES"]);
+        Assert.Equal(14, rels["SUPPORTS_RESPONSE_TO"]);
 
         // every seeded endpoint has method/path/protected
         await using var session = fx.Driver.AsyncSession();
         var cursor = await session.RunAsync(
             "MATCH (e:Endpoint) WHERE e.method IS NULL OR e.path IS NULL OR e.protected IS NULL OR e.key <> e.method + ' ' + e.path RETURN count(e) AS bad");
+        Assert.Equal(0, (await cursor.SingleAsync())["bad"].As<long>());
+
+        // every knowledge node comes from the curated Graph Builder export (no fixture data left)
+        cursor = await session.RunAsync(
+            "MATCH (n) WHERE (n:Threat OR n:Control OR n:Vulnerability OR n:Document) AND NOT coalesce(n.origin, '') IN ['extracted', 'curated'] RETURN count(n) AS bad");
         Assert.Equal(0, (await cursor.SingleAsync())["bad"].As<long>());
     }
 
