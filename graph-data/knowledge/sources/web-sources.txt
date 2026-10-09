@@ -1,0 +1,14 @@
+# Official pages to add in Graph Builder as Web sources (one URL at a time).
+# MITRE ATT&CK(R) (c) The MITRE Corporation, used under the ATT&CK Terms of Use
+# (https://attack.mitre.org/resources/terms-of-use/). OWASP Top 10:2025, CC BY-SA 4.0.
+https://attack.mitre.org/techniques/T1110/
+https://attack.mitre.org/techniques/T1110/001/
+https://attack.mitre.org/techniques/T1110/003/
+https://attack.mitre.org/techniques/T1110/004/
+https://attack.mitre.org/techniques/T1078/
+https://attack.mitre.org/techniques/T1499/
+https://attack.mitre.org/mitigations/M1036/
+https://attack.mitre.org/mitigations/M1032/
+https://attack.mitre.org/mitigations/M1027/
+https://attack.mitre.org/mitigations/M1037/
+https://owasp.org/Top10/2025/A01_2025-Broken_Access_Control/
