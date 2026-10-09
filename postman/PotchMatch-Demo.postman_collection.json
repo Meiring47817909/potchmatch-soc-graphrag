@@ -989,7 +989,7 @@
                 "controls"
               ]
             },
-            "description": "Mitigations (MITRE T1110: M1036, M1032, M1027) and the response document DOC-PASSWORD-RESET. Wait for the graph sync (~15 s) after the alert appears; 404 means it has not synced yet."
+            "description": "Controls for T1110 from the curated knowledge seed: MITRE mitigations M1036, M1032, M1027, M1018 and the procedure control CTRL-PASSWORD-RESET, with the response document DOC-PASSWORD-RESET. Wait for the graph sync (~15 s) after the alert appears; 404 means it has not synced yet."
           },
           "event": [
             {

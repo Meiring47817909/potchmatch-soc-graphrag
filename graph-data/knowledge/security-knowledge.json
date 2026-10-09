@@ -639,14 +639,11 @@
       "label": "Document",
       "key": "DOC-T1110-004",
       "properties": {
-        "origin": "extracted",
+        "origin": "curated",
         "title": "MITRE ATT&CK T1110.004 Credential Stuffing",
         "kind": "MITRE",
         "url": "https://attack.mitre.org/techniques/T1110/004/",
-        "description": "MITRE ATT&CK sub-technique page for Credential Stuffing.",
-        "rawNames": [
-          "T1110.004"
-        ]
+        "description": "MITRE ATT&CK sub-technique page for Credential Stuffing."
       }
     },
     {

@@ -279,7 +279,11 @@ NODES = [
     dict(label="Document", key="DOC-T1110-004", title="MITRE ATT&CK T1110.004 Credential Stuffing", kind="MITRE",
          url="https://attack.mitre.org/techniques/T1110/004/",
          desc=(None, "MITRE ATT&CK sub-technique page for Credential Stuffing."),
-         raw=[D("T1110.004")]),
+         raw=[],
+         why="one Document per official source page. The export has a Document named 'T1110.004', but its "
+             "description ('Reference document or identifier for Password Spraying technique') and its only "
+             "Document-Threat edge (to Password Spraying) do not describe the T1110.004 Credential Stuffing page, "
+             "so it is not merged and this node is added by hand."),
     dict(label="Document", key="DOC-T1078", title="MITRE ATT&CK T1078 Valid Accounts", kind="MITRE",
          url="https://attack.mitre.org/techniques/T1078/",
          desc=(None, "MITRE ATT&CK technique page for Valid Accounts and its four sub-techniques."), raw=[],
@@ -372,10 +376,7 @@ SOURCE_PAGE_EDGES = [
 ]
 
 # Raw edges between kept nodes that are dropped on purpose (mis-extractions), with the reason.
-DROP_EDGES = {
-    ("SUPPORTS_RESPONSE_TO", D("T1110.004"), T("Password Spraying")):
-        "the T1110.004 page is Credential Stuffing; linking it to Password Spraying is a mis-extraction",
-}
+DROP_EDGES = {}
 
 # Allowed relationship shapes (curation rules).
 ALLOWED = {
@@ -401,6 +402,9 @@ RAW_CORRECTIONS = [
     ("Control 'M1026'", "M1027",
      "description is M1027 Password Policies text from the T1078.001 page (change default credentials); "
      "raw ID is wrong"),
+    ("Document 'T1110.004'", "not merged (DOC-T1110-004 is curated)",
+     "description says it is about Password Spraying and its only Document-Threat edge points to Password "
+     "Spraying; neither matches the T1110.004 Credential Stuffing page"),
     ("Threat 'Weak Passwords'", "VULN-WEAK-PASSWORDS",
      "extracted with label Threat; it is a weakness, so relabelled Vulnerability"),
     ("Threat 'Compromised Credentials'", "VULN-LEAKED-CREDENTIALS",
@@ -471,8 +475,10 @@ def main():
             cat = "relationship shape not allowed"
         elif f == t:
             reason, cat = "self-loop after merging both ends into one node", "self-loop after merge"
-        elif rel["type"] == "MITIGATES" and re.fullmatch(r"M1\d{3}", f) and t in MITRE_MITIGATIONS \
-                and f not in MITRE_MITIGATIONS[t]:
+        elif rel["type"] == "MITIGATES" and re.fullmatch(r"M1\d{3}", f) and t not in MITRE_MITIGATIONS:
+            reason = f"{t} is not a MITRE technique with a checked mitigation table, so {f} -> {t} cannot be confirmed"
+            cat = "mitigation target not a checked MITRE technique"
+        elif rel["type"] == "MITIGATES" and re.fullmatch(r"M1\d{3}", f) and f not in MITRE_MITIGATIONS[t]:
             reason, cat = f"MITRE does not list {f} as a mitigation of {t}", "mitigation not listed by MITRE"
         if reason:
             drops["both ends kept: " + cat] += 1
@@ -628,7 +634,10 @@ def write_curation(raw_nodes, raw_rels, seed_nodes, seed_rels, extracted, curate
       "Document-DESCRIBES->Control, Document-SUPPORTS_RESPONSE_TO->Threat, and (for MITRE mitigations) the "
       "official MITRE page lists the mitigation for that technique (`MITRE_MITIGATIONS`, checked on "
       "attack.mitre.org). Duplicates collapse to one edge. Missing required edges, MITRE-listed mitigation "
-      "links the extraction missed, and source-page links are added as curated with a justification.")
+      "links the extraction missed, and source-page links are added as curated with a justification. "
+      "The kept MITRE mitigations are only those the extraction linked to a kept threat, so a technique's "
+      "MITIGATES list here is not MITRE's complete set (e.g. T1078 omits the MITRE-listed M1013, M1015 and "
+      "M1026, which the extraction did not link to a kept threat).")
     w("5. **Edge origin.** The seed format (`SeedRelationship`: type, from, to) has no relationship properties, "
       "so each relationship's origin is recorded in the table below instead of on the edge.")
     w("")

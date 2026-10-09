@@ -9,7 +9,7 @@
 1. **Scope.** Keep only the three threats PotchMatch detects (T1110, T1078, T1499), their sub-techniques found in the export, and OWASP A01:2025; the MITRE mitigations the export links to them; the procedure-level controls linked to a kept node; a few vulnerabilities they exploit; the four procedures and one document per official source page. Everything else is dropped (see *Dropped*).
 2. **Merge.** Every raw variant of an entity (e.g. `Brute Force`, `Brute Force (T1110)`, `T1110`, `T1110 Brute Force`) becomes one node keyed by its ATT&CK ID or a `VULN-*` / `DOC-*` / `CTRL-*` ID. The merged raw names are stored on the node as `rawNames`. The alias table is explicit data in `curate.py` (`NODES`).
 3. **Properties.** `name` (Threat/Control/Vulnerability) or `title` + `kind` (+ `url` for web pages) (Document) use the official name. `description` is based on the extracted description, tidied where the extraction was a fragment or a procedure example. `origin` is `extracted` if at least one raw node merged into it, `curated` if it was added by hand.
-4. **Relationships.** Raw relationships are re-pointed through the alias table and kept only if both ends are kept, the shape is one of Control-MITIGATES->Threat, Threat-EXPLOITS->Vulnerability, Document-DESCRIBES->Control, Document-SUPPORTS_RESPONSE_TO->Threat, and (for MITRE mitigations) the official MITRE page lists the mitigation for that technique (`MITRE_MITIGATIONS`, checked on attack.mitre.org). Duplicates collapse to one edge. Missing required edges, MITRE-listed mitigation links the extraction missed, and source-page links are added as curated with a justification.
+4. **Relationships.** Raw relationships are re-pointed through the alias table and kept only if both ends are kept, the shape is one of Control-MITIGATES->Threat, Threat-EXPLOITS->Vulnerability, Document-DESCRIBES->Control, Document-SUPPORTS_RESPONSE_TO->Threat, and (for MITRE mitigations) the official MITRE page lists the mitigation for that technique (`MITRE_MITIGATIONS`, checked on attack.mitre.org). Duplicates collapse to one edge. Missing required edges, MITRE-listed mitigation links the extraction missed, and source-page links are added as curated with a justification. The kept MITRE mitigations are only those the extraction linked to a kept threat, so a technique's MITIGATES list here is not MITRE's complete set (e.g. T1078 omits the MITRE-listed M1013, M1015 and M1026, which the extraction did not link to a kept threat).
 5. **Edge origin.** The seed format (`SeedRelationship`: type, from, to) has no relationship properties, so each relationship's origin is recorded in the table below instead of on the edge.
 
 ## Final counts
@@ -21,8 +21,8 @@ Raw export: 1427 nodes (320 Control, 335 Document, 551 Threat, 221 Vulnerability
 | Threat | 16 | 16 | 0 |
 | Control | 11 | 11 | 0 |
 | Vulnerability | 6 | 5 | 1 |
-| Document | 15 | 12 | 3 |
-| **Total** | **48** | **44** | **4** |
+| Document | 15 | 11 | 4 |
+| **Total** | **48** | **43** | **5** |
 
 | Relationship | Total | extracted | curated |
 |---|---|---|---|
@@ -78,7 +78,7 @@ Description column: the raw node whose extracted description the curated descrip
 | `DOC-T1110` | Document | MITRE ATT&CK T1110 Brute Force | extracted | `Techniques Of Brute Force (4)` | `Techniques Of Brute Force (4)` (rewritten) |
 | `DOC-T1110-001` | Document | MITRE ATT&CK T1110.001 Password Guessing | curated | - (added by curator) | curator |
 | `DOC-T1110-003` | Document | MITRE ATT&CK T1110.003 Password Spraying | curated | - (added by curator) | curator |
-| `DOC-T1110-004` | Document | MITRE ATT&CK T1110.004 Credential Stuffing | extracted | `T1110.004` | curator |
+| `DOC-T1110-004` | Document | MITRE ATT&CK T1110.004 Credential Stuffing | curated | - (added by curator) | curator |
 | `DOC-T1078` | Document | MITRE ATT&CK T1078 Valid Accounts | curated | - (added by curator) | curator |
 | `DOC-T1499` | Document | MITRE ATT&CK T1499 Endpoint Denial of Service | extracted | `Technique T1499` | `Technique T1499` (rewritten) |
 | `DOC-M1036` | Document | MITRE ATT&CK M1036 Account Use Policies | extracted | `M1036` | curator |
@@ -95,6 +95,7 @@ Description column: the raw node whose extracted description the curated descrip
 - Threat 'T1110.001' -> `T1110.001`: description is a procedure example (Wi-Fi brute force via wlanAPI); description replaced.
 - Threat 'T1499' -> `T1499`: description is a procedure example (web censorship); description replaced.
 - Control 'M1026' -> `M1027`: description is M1027 Password Policies text from the T1078.001 page (change default credentials); raw ID is wrong.
+- Document 'T1110.004' -> `not merged (DOC-T1110-004 is curated)`: description says it is about Password Spraying and its only Document-Threat edge points to Password Spraying; neither matches the T1110.004 Credential Stuffing page.
 - Threat 'Weak Passwords' -> `VULN-WEAK-PASSWORDS`: extracted with label Threat; it is a weakness, so relabelled Vulnerability.
 - Threat 'Compromised Credentials' -> `VULN-LEAKED-CREDENTIALS`: extracted with label Threat; T1078 EXPLOITS it, so relabelled Vulnerability.
 - Control 'Restricting Login Times' -> `M1036`: M1036 page: account use policies configure login attempt lockouts and specific login times.
@@ -110,6 +111,7 @@ Description column: the raw node whose extracted description the curated descrip
 - `VULN-NO-RATE-LIMIT` (Vulnerability, No rate limiting): not extracted as an entity; required ID (VULN-NO-RATE-LIMIT). The T1499 page describes exhausting resources with floods of requests and M1037 filtering/blocking of the attacking source; the IP-blocking procedure stops abusive traffic from one source. The extraction produced no matching weakness ('Resource Exhaustion' is the effect, not the missing control), so it is added by hand.
 - `DOC-T1110-001` (Document, MITRE ATT&CK T1110.001 Password Guessing): not extracted as an entity; one Document per official source page; the T1110.001 page is in sources/web-sources.txt but Graph Builder created no Document node for it.
 - `DOC-T1110-003` (Document, MITRE ATT&CK T1110.003 Password Spraying): not extracted as an entity; one Document per official source page; the T1110.003 page is in sources/web-sources.txt but Graph Builder created no Document node for it.
+- `DOC-T1110-004` (Document, MITRE ATT&CK T1110.004 Credential Stuffing): not extracted as an entity; one Document per official source page. The export has a Document named 'T1110.004', but its description ('Reference document or identifier for Password Spraying technique') and its only Document-Threat edge (to Password Spraying) do not describe the T1110.004 Credential Stuffing page, so it is not merged and this node is added by hand.
 - `DOC-T1078` (Document, MITRE ATT&CK T1078 Valid Accounts): not extracted as an entity; one Document per official source page; the T1078 page is in sources/web-sources.txt but Graph Builder created no Document node for it.
 
 ### Relationships
@@ -243,21 +245,20 @@ Description column: the raw node whose extracted description the curated descrip
 | ATT&CK detection analytics / strategies (ANxxxx, DETxxxx, 'Detection ...') | 51 |
 | Control: MITRE mitigations not linked to a kept threat | 4 |
 | Control: implementation detail, tools and controls not linked to a kept threat | 249 |
-| Document: cited reports, articles, vendor docs and page chrome (not a source page or procedure) | 248 |
+| Document: cited reports, articles, vendor docs and page chrome (not a source page or procedure) | 249 |
 | Document: numbered reference / citation placeholders | 39 |
 | Threat: other ATT&CK techniques outside T1110/T1078/T1499 | 61 |
 | Threat: threat groups, campaigns, software/tools, procedure examples and out-of-scope attack scenarios | 403 |
 | Vulnerability: not exploited by a kept threat (ports, platforms, CWEs, group-specific) | 198 |
-| **Total dropped** | **1253** |
+| **Total dropped** | **1254** |
 
-Kept from the raw export: 174 raw nodes merged into 44 curated nodes.
+Kept from the raw export: 173 raw nodes merged into 43 curated nodes.
 
 ### Raw relationships not kept
 
 | Reason | Count |
 |---|---|
-| an endpoint is not kept (dropped node) | 964 |
-| both ends kept: mis-extracted link | 1 |
+| an endpoint is not kept (dropped node) | 965 |
 | both ends kept: relationship shape not allowed | 5 |
 | Kept (collapsed into 68 extracted edges) | 130 |
 
@@ -265,7 +266,6 @@ Raw relationships between two kept nodes that were dropped:
 
 - Document 'Doc-Ip-Blocking' -DESCRIBES-> Document 'M1037' (= DESCRIBES DOC-IP-BLOCKING -> DOC-M1037): Document-DESCRIBES->Document is not an allowed relationship shape.
 - Document 'M1027 Password Policies' -MITIGATES-> Threat 'Distributed Password Spraying' (= MITIGATES DOC-M1027 -> T1110.003): Document-MITIGATES->Threat is not an allowed relationship shape.
-- Document 'T1110.004' -SUPPORTS_RESPONSE_TO-> Threat 'Password Spraying' (= SUPPORTS_RESPONSE_TO DOC-T1110-004 -> T1110.003): the T1110.004 page is Credential Stuffing; linking it to Password Spraying is a mis-extraction.
 - Threat 'Abuse Of Default Accounts' -EXPLOITS-> Threat 'Default Accounts' (= EXPLOITS T1078.001 -> T1078.001): Threat-EXPLOITS->Threat is not an allowed relationship shape.
 - Threat 'Brute Force' -EXPLOITS-> Threat 'Valid Accounts' (= EXPLOITS T1110 -> T1078): Threat-EXPLOITS->Threat is not an allowed relationship shape.
 - Threat 'Default Account Exploitation' -EXPLOITS-> Threat 'Default Accounts' (= EXPLOITS T1078.001 -> T1078.001): Threat-EXPLOITS->Threat is not an allowed relationship shape.
