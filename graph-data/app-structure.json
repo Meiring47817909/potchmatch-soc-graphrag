@@ -43,6 +43,13 @@
       }
     },
     {
+      "label": "Service",
+      "key": "rag-service",
+      "properties": {
+        "kind": "application"
+      }
+    },
+    {
       "label": "Role",
       "key": "Player",
       "properties": {}
@@ -118,6 +125,13 @@
       "key": "T1499",
       "properties": {
         "name": "Endpoint Denial of Service"
+      }
+    },
+    {
+      "label": "Threat",
+      "key": "OWASP-A01-2025",
+      "properties": {
+        "name": "A01:2025 Broken Access Control"
       }
     },
     {
@@ -406,6 +420,26 @@
       "properties": {
         "method": "GET",
         "path": "/api/graph/incidents/{id}",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "POST /api/rag/ask",
+      "properties": {
+        "method": "POST",
+        "path": "/api/rag/ask",
+        "protected": true,
+        "discovered": false
+      }
+    },
+    {
+      "label": "Endpoint",
+      "key": "GET /api/rag/status",
+      "properties": {
+        "method": "GET",
+        "path": "/api/rag/status",
         "protected": true,
         "discovered": false
       }
@@ -853,10 +887,54 @@
       }
     },
     {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "rag-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "POST /api/rag/ask"
+      }
+    },
+    {
+      "type": "EXPOSES",
+      "from": {
+        "label": "Service",
+        "key": "rag-service"
+      },
+      "to": {
+        "label": "Endpoint",
+        "key": "GET /api/rag/status"
+      }
+    },
+    {
       "type": "REQUIRES_ROLE",
       "from": {
         "label": "Endpoint",
         "key": "GET /api/graph/incidents/{id}"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "POST /api/rag/ask"
+      },
+      "to": {
+        "label": "Role",
+        "key": "Admin"
+      }
+    },
+    {
+      "type": "REQUIRES_ROLE",
+      "from": {
+        "label": "Endpoint",
+        "key": "GET /api/rag/status"
       },
       "to": {
         "label": "Role",
@@ -1073,6 +1151,28 @@
       }
     },
     {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "api-gateway"
+      },
+      "to": {
+        "label": "Service",
+        "key": "rag-service"
+      }
+    },
+    {
+      "type": "DEPENDS_ON",
+      "from": {
+        "label": "Service",
+        "key": "rag-service"
+      },
+      "to": {
+        "label": "Service",
+        "key": "graph-service"
+      }
+    },
+    {
       "type": "TARGETS",
       "from": {
         "label": "Threat",
@@ -1169,6 +1269,28 @@
       "to": {
         "label": "Service",
         "key": "payment-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
+      },
+      "to": {
+        "label": "Service",
+        "key": "graph-service"
+      }
+    },
+    {
+      "type": "TARGETS",
+      "from": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
+      },
+      "to": {
+        "label": "Service",
+        "key": "rag-service"
       }
     }
   ]

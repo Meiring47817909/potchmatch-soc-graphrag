@@ -46,7 +46,7 @@ public class SeedLoaderTests(Neo4jFixture fx)
         var nodes = await NodeCounts();
         foreach (var label in new[] { "Service", "Endpoint", "Asset", "Role", "Threat", "Control", "Vulnerability", "Document" })
             Assert.True(nodes.GetValueOrDefault(label) >= 1, $"no {label} nodes");
-        Assert.Equal(6, nodes["Service"]);
+        Assert.Equal(7, nodes["Service"]);
         Assert.Equal(3, nodes["Role"]);
         Assert.Equal(6, nodes["Asset"]);
         Assert.Equal(16, nodes["Threat"]); // 3 app-structure stubs merge into the 16 curated threats
@@ -58,11 +58,11 @@ public class SeedLoaderTests(Neo4jFixture fx)
         foreach (var type in new[] { "TARGETS", "EXPLOITS", "MITIGATES", "DEPENDS_ON", "EXPOSES", "DESCRIBES", "SUPPORTS_RESPONSE_TO", "USES", "REQUIRES_ROLE" })
             Assert.True(rels.GetValueOrDefault(type) >= 1, $"no {type} relationships");
         Assert.Equal(nodes["Endpoint"], rels["EXPOSES"]);
-        Assert.Equal(9, rels["TARGETS"]);
-        Assert.Equal(44, rels["MITIGATES"]);
+        Assert.Equal(11, rels["TARGETS"]);
+        Assert.Equal(46, rels["MITIGATES"]);
         Assert.Equal(20, rels["EXPLOITS"]);
         Assert.Equal(12, rels["DESCRIBES"]);
-        Assert.Equal(14, rels["SUPPORTS_RESPONSE_TO"]);
+        Assert.Equal(15, rels["SUPPORTS_RESPONSE_TO"]);
 
         // every seeded endpoint has method/path/protected
         await using var session = fx.Driver.AsyncSession();
@@ -74,6 +74,31 @@ public class SeedLoaderTests(Neo4jFixture fx)
         cursor = await session.RunAsync(
             "MATCH (n) WHERE (n:Threat OR n:Control OR n:Vulnerability OR n:Document) AND NOT coalesce(n.origin, '') IN ['extracted', 'curated'] RETURN count(n) AS bad");
         Assert.Equal(0, (await cursor.SingleAsync())["bad"].As<long>());
+    }
+
+    [Fact]
+    public async Task Seeds_OwaspA01HasControlsAndTargets()
+    {
+        await fx.ResetAsync();
+        await LoadRealAsync();
+        await using var session = fx.Driver.AsyncSession();
+
+        var cursor = await session.RunAsync(
+            "MATCH (:Control)-[m:MITIGATES]->(:Threat {id: 'OWASP-A01-2025'}) RETURN count(m) AS c");
+        Assert.True((await cursor.SingleAsync())["c"].As<long>() >= 2);
+
+        cursor = await session.RunAsync(
+            "MATCH (:Threat {id: 'OWASP-A01-2025'})-[:TARGETS]->(s:Service) RETURN collect(s.name) AS names");
+        var targets = (await cursor.SingleAsync())["names"].As<List<string>>();
+        Assert.Contains("rag-service", targets);
+        Assert.Contains("graph-service", targets);
+
+        cursor = await session.RunAsync(
+            "MATCH (:Service {name: 'rag-service'})-[:EXPOSES]->(e:Endpoint) " +
+            "OPTIONAL MATCH (e)-[:REQUIRES_ROLE]->(r:Role {name: 'Admin'}) RETURN count(e) AS endpoints, count(r) AS admin");
+        var row = await cursor.SingleAsync();
+        Assert.Equal(2, row["endpoints"].As<long>());
+        Assert.Equal(2, row["admin"].As<long>());
     }
 
     [Fact]

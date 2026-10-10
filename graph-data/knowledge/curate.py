@@ -357,6 +357,17 @@ EXTRA_CURATED_EDGES = [
      "procedure-session-revocation.md steps 2-3 (revoke tokens/sessions, disable account)."),
     ("DESCRIBES", "DOC-PASSWORD-RESET", "CTRL-PASSWORD-RESET",
      "procedure-password-reset.md steps 4-5 (reset link, new policy-compliant password)."),
+    # OWASP Top 10:2025 A01 "How to Prevent". These are curated edges (not MITRE technique mitigations), so the
+    # MITRE_MITIGATIONS gate, which applies to extracted Mxxxx -> technique edges only, does not apply.
+    ("MITIGATES", "M1018", "OWASP-A01-2025",
+     "OWASP A01:2025 'How to Prevent': except for public resources, deny by default and enforce least privilege "
+     "for every user and role; M1018 User Account Management is the corresponding control."),
+    ("MITIGATES", "CTRL-SESSION-REVOCATION", "OWASP-A01-2025",
+     "OWASP A01:2025 'How to Prevent': stateful session identifiers should be invalidated on the server after "
+     "logout, and JWTs should be short-lived or revocable; the session revocation control does this."),
+    ("SUPPORTS_RESPONSE_TO", "DOC-SESSION-REVOCATION", "OWASP-A01-2025",
+     "OWASP A01:2025 'How to Prevent': log access-control failures and alert admins when appropriate; the session "
+     "revocation procedure is the response once such a failure is confirmed."),
 ]
 
 # Source-page documents: each technique page supports response to its technique,

@@ -1157,6 +1157,17 @@
       "type": "MITIGATES",
       "from": {
         "label": "Control",
+        "key": "M1018"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
         "key": "M1017"
       },
       "to": {
@@ -1217,6 +1228,17 @@
       "to": {
         "label": "Threat",
         "key": "T1078"
+      }
+    },
+    {
+      "type": "MITIGATES",
+      "from": {
+        "label": "Control",
+        "key": "CTRL-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
       }
     },
     {
@@ -1602,6 +1624,17 @@
       "to": {
         "label": "Threat",
         "key": "T1078"
+      }
+    },
+    {
+      "type": "SUPPORTS_RESPONSE_TO",
+      "from": {
+        "label": "Document",
+        "key": "DOC-SESSION-REVOCATION"
+      },
+      "to": {
+        "label": "Threat",
+        "key": "OWASP-A01-2025"
       }
     },
     {

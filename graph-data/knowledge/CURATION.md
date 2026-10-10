@@ -26,11 +26,11 @@ Raw export: 1427 nodes (320 Control, 335 Document, 551 Threat, 221 Vulnerability
 
 | Relationship | Total | extracted | curated |
 |---|---|---|---|
-| MITIGATES | 44 | 34 | 10 |
+| MITIGATES | 46 | 34 | 12 |
 | EXPLOITS | 20 | 14 | 6 |
 | DESCRIBES | 12 | 10 | 2 |
-| SUPPORTS_RESPONSE_TO | 14 | 10 | 4 |
-| **Total** | **90** | **68** | **22** |
+| SUPPORTS_RESPONSE_TO | 15 | 10 | 5 |
+| **Total** | **93** | **68** | **25** |
 
 ## Merges (curated id <- raw names)
 
@@ -126,8 +126,10 @@ Description column: the raw node whose extracted description the curated descrip
 | `T1499` -EXPLOITS-> `VULN-NO-RATE-LIMIT` | T1499 page: endpoint DoS exhausts resources with floods of requests; IP-blocking procedure stops abusive traffic from one source. |
 | `T1499.002` -EXPLOITS-> `VULN-NO-RATE-LIMIT` | T1499.002 page: service exhaustion floods send more requests than the service can handle. |
 | `T1499.003` -EXPLOITS-> `VULN-NO-RATE-LIMIT` | T1499.003 page: application exhaustion floods repeat resource-intensive requests. |
+| `CTRL-SESSION-REVOCATION` -MITIGATES-> `OWASP-A01-2025` | OWASP A01:2025 'How to Prevent': stateful session identifiers should be invalidated on the server after logout, and JWTs should be short-lived or revocable; the session revocation control does this. |
 | `M1017` -MITIGATES-> `T1078.002` | MITRE T1078.002 page lists M1017 in its Mitigations table (not extracted) |
 | `M1017` -MITIGATES-> `T1078.004` | MITRE T1078.004 page lists M1017 in its Mitigations table (not extracted) |
+| `M1018` -MITIGATES-> `OWASP-A01-2025` | OWASP A01:2025 'How to Prevent': except for public resources, deny by default and enforce least privilege for every user and role; M1018 User Account Management is the corresponding control. |
 | `M1018` -MITIGATES-> `T1078` | MITRE T1078 page lists M1018 in its Mitigations table (not extracted) |
 | `M1018` -MITIGATES-> `T1078.002` | MITRE T1078.002 page lists M1018 in its Mitigations table (not extracted) |
 | `M1018` -MITIGATES-> `T1078.003` | MITRE T1078.003 page lists M1018 in its Mitigations table (not extracted) |
@@ -136,6 +138,7 @@ Description column: the raw node whose extracted description the curated descrip
 | `M1027` -MITIGATES-> `T1078.003` | MITRE T1078.003 page lists M1027 in its Mitigations table (not extracted) |
 | `M1027` -MITIGATES-> `T1078.004` | MITRE T1078.004 page lists M1027 in its Mitigations table (not extracted) |
 | `M1032` -MITIGATES-> `T1078.003` | MITRE T1078.003 page lists M1032 in its Mitigations table (not extracted) |
+| `DOC-SESSION-REVOCATION` -SUPPORTS_RESPONSE_TO-> `OWASP-A01-2025` | OWASP A01:2025 'How to Prevent': log access-control failures and alert admins when appropriate; the session revocation procedure is the response once such a failure is confirmed. |
 | `DOC-T1078` -SUPPORTS_RESPONSE_TO-> `T1078` | source page document: the official page documents this threat |
 | `DOC-T1110-001` -SUPPORTS_RESPONSE_TO-> `T1110.001` | source page document: the official page documents this threat |
 | `DOC-T1110-003` -SUPPORTS_RESPONSE_TO-> `T1110.003` | source page document: the official page documents this threat |
@@ -182,12 +185,14 @@ Description column: the raw node whose extracted description the curated descrip
 | `M1018` -MITIGATES-> `T1078.002` | curated | - |
 | `M1018` -MITIGATES-> `T1078.003` | curated | - |
 | `M1018` -MITIGATES-> `T1078.004` | curated | - |
+| `M1018` -MITIGATES-> `OWASP-A01-2025` | curated | - |
 | `M1017` -MITIGATES-> `T1078` | extracted | Control 'User Training' -MITIGATES-> Threat 'Valid Account Abuse' |
 | `M1017` -MITIGATES-> `T1078.002` | curated | - |
 | `M1017` -MITIGATES-> `T1078.004` | curated | - |
 | `M1051` -MITIGATES-> `T1110.001` | extracted | Control 'M1051' -MITIGATES-> Threat 'Password Guessing' |
 | `CTRL-IP-BLOCKING` -MITIGATES-> `T1499` | extracted | Control 'Gateway Blocking' -MITIGATES-> Threat 'Possible_Dos'<br>Control 'Ip Blocking' -MITIGATES-> Threat 'Traffic Flood' |
 | `CTRL-SESSION-REVOCATION` -MITIGATES-> `T1078` | extracted | Control 'Session And Account Revocation Control' -MITIGATES-> Threat 'Account Or Token Theft'<br>Control 'Session And Account Revocation Control' -MITIGATES-> Threat 'Unauthorised Endpoint Access' |
+| `CTRL-SESSION-REVOCATION` -MITIGATES-> `OWASP-A01-2025` | curated | - |
 | `CTRL-PASSWORD-RESET` -MITIGATES-> `T1110` | extracted | Control 'Password Reset' -MITIGATES-> Threat 'Guessed Credentials' |
 | `T1110` -EXPLOITS-> `VULN-WEAK-PASSWORDS` | curated | - |
 | `T1110` -EXPLOITS-> `VULN-EXPOSED-PASSWORD-HASHES` | extracted | Threat 'Brute Force' -EXPLOITS-> Vulnerability 'Obtained Password Hashes' |
@@ -223,6 +228,7 @@ Description column: the raw node whose extracted description the curated descrip
 | `DOC-M1037` -DESCRIBES-> `M1037` | curated | - |
 | `DOC-PASSWORD-RESET` -SUPPORTS_RESPONSE_TO-> `T1110` | extracted | Document 'Password Reset (Doc-Password-Reset)' -SUPPORTS_RESPONSE_TO-> Threat 'Brute Force (T1110)'<br>Document 'Reset' -SUPPORTS_RESPONSE_TO-> Threat 'Guessed Credentials'<br>Document 'Reset' -SUPPORTS_RESPONSE_TO-> Threat 'Multiple Failed Logins' |
 | `DOC-SESSION-REVOCATION` -SUPPORTS_RESPONSE_TO-> `T1078` | extracted | Document 'Doc-Session-Revocation' -SUPPORTS_RESPONSE_TO-> Threat 'Account Or Token Theft'<br>Document 'Doc-Session-Revocation' -SUPPORTS_RESPONSE_TO-> Threat 'Unauthorised Endpoint Access'<br>Document 'Session Revocation (Doc-Session-Revocation)' -SUPPORTS_RESPONSE_TO-> Threat 'Valid Accounts (T1078)' |
+| `DOC-SESSION-REVOCATION` -SUPPORTS_RESPONSE_TO-> `OWASP-A01-2025` | curated | - |
 | `DOC-IP-BLOCKING` -SUPPORTS_RESPONSE_TO-> `T1110` | extracted | Document 'Doc-Ip-Blocking' -SUPPORTS_RESPONSE_TO-> Threat 'Brute Force (T1110)' |
 | `DOC-IP-BLOCKING` -SUPPORTS_RESPONSE_TO-> `T1499` | extracted | Document 'Blocking' -SUPPORTS_RESPONSE_TO-> Threat 'Possible_Dos'<br>Document 'Doc-Ip-Blocking' -SUPPORTS_RESPONSE_TO-> Threat 'Endpoint Denial Of Service (T1499)'<br>Document 'Ip Blocking (Doc-Ip-Blocking)' -SUPPORTS_RESPONSE_TO-> Threat 'Abusive Traffic' |
 | `DOC-SERVICE-OUTAGE` -SUPPORTS_RESPONSE_TO-> `T1499` | extracted | Document 'Doc-Service-Outage' -SUPPORTS_RESPONSE_TO-> Threat 'Service Outage Attack'<br>Document 'Doc-Service-Outage' -SUPPORTS_RESPONSE_TO-> Threat 'Traffic Flood'<br>Document 'Service Outage Runbook (Doc-Service-Outage)' -SUPPORTS_RESPONSE_TO-> Threat 'Endpoint Denial Of Service (T1499)'<br>Document 'Service Outage Runbook (Doc-Service-Outage)' -SUPPORTS_RESPONSE_TO-> Threat 'Service Outage' |
