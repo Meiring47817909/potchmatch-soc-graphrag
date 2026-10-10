@@ -26,8 +26,9 @@ public class SchemaDescriberTests(Neo4jFixture fx)
 
         Assert.Contains("T1110", s.Samples.ThreatIds);
         Assert.Contains("identity-service", s.Samples.ServiceNames);
+        Assert.Contains(s.Samples.ThreatNames, n => n.Contains("Brute Force"));
         Assert.All(new[] { s.Samples.RuleNames, s.Samples.ThreatIds, s.Samples.Severities,
-            s.Samples.AlertStatuses, s.Samples.IncidentStatuses, s.Samples.ServiceNames }, l => Assert.True(l.Count <= 30));
+            s.Samples.AlertStatuses, s.Samples.IncidentStatuses, s.Samples.ServiceNames, s.Samples.ThreatNames }, l => Assert.True(l.Count <= 30));
 
         Assert.Equal(7, s.Examples.Count);
         Assert.All(s.Examples, e =>

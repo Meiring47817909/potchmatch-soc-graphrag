@@ -23,7 +23,8 @@ public sealed record SchemaRelType(string Type, IReadOnlyList<string> From, IRea
 
 public sealed record SchemaSamples(
     IReadOnlyList<string> RuleNames, IReadOnlyList<string> ThreatIds, IReadOnlyList<string> Severities,
-    IReadOnlyList<string> AlertStatuses, IReadOnlyList<string> IncidentStatuses, IReadOnlyList<string> ServiceNames);
+    IReadOnlyList<string> AlertStatuses, IReadOnlyList<string> IncidentStatuses, IReadOnlyList<string> ServiceNames,
+    IReadOnlyList<string>? ThreatNames = null);
 
 public sealed record SchemaExample(string Name, string Question, string Cypher);
 

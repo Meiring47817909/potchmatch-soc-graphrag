@@ -83,7 +83,7 @@ public static class Evidence
         [new SchemaLabel("Alert", "alertId", ["alertId", "ruleName", "severity"], 4),
          new SchemaLabel("Threat", "id", ["id", "name"], 10)],
         [new SchemaRelType("INDICATES", ["Alert"], ["Threat"], 3)],
-        new SchemaSamples(["MULTIPLE_FAILED_LOGINS"], ["T1110"], ["HIGH"], ["OPEN"], ["OPEN"], ["identity-service"]),
+        new SchemaSamples(["MULTIPLE_FAILED_LOGINS"], ["T1110"], ["HIGH"], ["OPEN"], ["OPEN"], ["identity-service"], ["T1110: Brute Force"]),
         [new SchemaExample("controls-for-alert", "Which controls relate to the alert with id $alertId?",
             "MATCH p = (a:Alert {alertId: $alertId})-[:INDICATES]->(t:Threat)<-[:MITIGATES]-(c:Control) RETURN p")]);
 

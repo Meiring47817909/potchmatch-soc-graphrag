@@ -69,6 +69,7 @@ public class SyncQuery
         var q = _db.Events.AsNoTracking()
             .Where(e => e.ReceivedAt <= settled
                         && e.EventType != "REQUEST_RECEIVED"
+                        && e.EventType != "RAG_QUERY" // rag-service usage telemetry, not a security event for the graph
                         && !_db.AlertEvents.Any(ae => ae.EventId == e.EventId));
         if (since is not null && afterId is null)
         {

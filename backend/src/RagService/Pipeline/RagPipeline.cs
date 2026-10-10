@@ -131,14 +131,15 @@ public sealed class RagPipeline(
     private static RagAnswer Failed(AskRequest request, GeminiOptions o, CypherDraft draft, Dictionary<string, object?> parameters,
         GraphQueryOutcome query, int attempts)
     {
-        // The failing query's error and reason are returned as the evidence row so the admin can see why.
+        // The failing query's error and reason are returned as the single evidence row (rowCount = rows.Count = 1)
+        // so the admin can see why.
         var errorRow = new Dictionary<string, JsonElement>
         {
             ["error"] = JsonSerializer.SerializeToElement(query.Error ?? "rejected"),
             ["reason"] = JsonSerializer.SerializeToElement(query.Reason ?? ""),
         };
         return new RagAnswer(request.Question, false, CouldNotQueryAnswer, RagAnswer.ModeText2Cypher,
-            new RetrievalInfo(RagAnswer.MethodText2Cypher, o.Model, attempts, draft.Explanation, 0, false, []),
+            new RetrievalInfo(RagAnswer.MethodText2Cypher, o.Model, attempts, draft.Explanation, 1, false, []),
             draft.Cypher, parameters, [], [], [errorRow], []);
     }
 

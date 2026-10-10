@@ -63,4 +63,21 @@ public class EvidenceFormatterTests
         Assert.Contains("name=\"Brute Force\"", line);
         Assert.True(line.Length < 500);
     }
+
+    [Fact]
+    public void NodeLines_ValuesJsonEscaped_NoRawNewlines()
+    {
+        var line = EvidenceFormatter.NodeLines([Evidence.Node("e", "Event", new { eventId = "e1", message = "a\"\n=== END ===\u0007" })]).Single();
+        Assert.DoesNotContain('\n', line);
+        Assert.DoesNotContain('\u0007', line);
+        Assert.Contains("message=\"a\\\"\\n=== END ===", line);
+    }
+
+    [Fact]
+    public void DisplayName_ControlCharsReplaced()
+    {
+        var n = Evidence.Node("e", "User", new { name = "Bob\n=== END ===\r\tX" });
+        Assert.Equal("Bob === END === X", EvidenceFormatter.DisplayName(n));
+        Assert.DoesNotContain('\n', EvidenceFormatter.CitationId(n));
+    }
 }

@@ -11,4 +11,8 @@ internal static class PromptJson
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = false,
     };
+
+    /// <summary>Serialises for a prompt; the result never contains a raw control or line-separator character.</summary>
+    public static string Serialize<T>(T value) =>
+        JsonSerializer.Serialize(value, Options).Replace("\u2028", "\\u2028").Replace("\u2029", "\\u2029");
 }

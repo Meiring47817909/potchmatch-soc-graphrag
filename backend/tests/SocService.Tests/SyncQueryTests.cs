@@ -101,6 +101,20 @@ public class SyncQueryTests
     }
 
     [Fact]
+    public async Task SyncEvents_ExcludesRagQuery()
+    {
+        using var db = TestDb.Create();
+        var t = DateTimeOffset.UtcNow;
+        var free = Ev("FAILED_LOGIN", t);
+        db.Events.AddRange(free, Ev("RAG_QUERY", t));
+        await db.SaveChangesAsync();
+
+        var result = await Query(db).GetEventsAsync(null, null, 500, default);
+
+        Assert.Equal(free.EventId, Assert.Single(result).Event.EventId);
+    }
+
+    [Fact]
     public async Task SyncEvents_TieAtPageBoundary_NothingSkipped()
     {
         using var db = TestDb.Create();

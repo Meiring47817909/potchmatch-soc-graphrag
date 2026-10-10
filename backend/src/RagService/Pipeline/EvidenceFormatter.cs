@@ -12,35 +12,40 @@ public static partial class EvidenceFormatter
     private static readonly string[] CitationKeys = ["id", "alertId", "incidentId", "eventId", "userId", "key", "name", "title"];
     private const int MaxPropertyChars = 240;
 
-    /// <summary>Human-readable node name: first non-empty of name, title, id, key, alertId, incidentId, eventId, userId, else the label.</summary>
-    public static string DisplayName(EvidenceNode node) => FirstString(node, DisplayKeys) ?? node.Label;
+    /// <summary>Human-readable node name: first non-empty of name, title, id, key, alertId, incidentId, eventId, userId, else the label.
+    /// Control and line-separator characters are replaced by spaces so a stored value cannot break the prompt layout.</summary>
+    public static string DisplayName(EvidenceNode node) => OneLine(FirstString(node, DisplayKeys) ?? node.Label);
 
     /// <summary>Identifier the answer should cite: the node's stable key (id, alertId, …), else name/title, else the element id.</summary>
-    public static string CitationId(EvidenceNode node) => FirstString(node, CitationKeys) ?? node.Id;
+    public static string CitationId(EvidenceNode node) => OneLine(FirstString(node, CitationKeys) ?? node.Id);
 
     /// <summary>Readable triples "{start} —{TYPE}→ {end}"; unknown endpoints fall back to their element id.</summary>
     public static IReadOnlyList<string> Triples(IReadOnlyList<EvidenceNode> nodes, IReadOnlyList<EvidenceRel> rels)
     {
         var byId = new Dictionary<string, EvidenceNode>();
         foreach (var n in nodes) byId.TryAdd(n.Id, n);
-        string Name(string id) => byId.TryGetValue(id, out var n) ? DisplayName(n) : id;
+        string Name(string id) => byId.TryGetValue(id, out var n) ? DisplayName(n) : OneLine(id);
         return rels.Select(r => $"{Name(r.Start)} —{r.Type}→ {Name(r.End)}").ToList();
     }
 
-    /// <summary>One line per node for the answer prompt: "[citeId] Label: key=value; …" with long values trimmed.</summary>
+    /// <summary>
+    /// One line per node for the answer prompt: "[citeId] Label: key=value; …". Every value is JSON-serialised
+    /// (quotes, newlines and control characters escaped) after trimming long strings, so attacker-controlled
+    /// values such as a typed login email cannot break out of the evidence block.
+    /// </summary>
     public static IReadOnlyList<string> NodeLines(IReadOnlyList<EvidenceNode> nodes) =>
         nodes.Select(n =>
         {
             var sb = new StringBuilder();
-            sb.Append('[').Append(CitationId(n)).Append("] ").Append(n.Label).Append(':');
+            sb.Append('[').Append(CitationId(n)).Append("] ").Append(OneLine(n.Label)).Append(':');
             var first = true;
             foreach (var (key, value) in n.Properties.OrderBy(p => p.Key, StringComparer.Ordinal))
             {
                 if (value.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined) continue;
                 var text = value.ValueKind == JsonValueKind.String
-                    ? $"\"{Trim(value.GetString()!)}\""
-                    : Trim(JsonSerializer.Serialize(value, PromptJson.Options));
-                sb.Append(first ? " " : "; ").Append(key).Append('=').Append(text);
+                    ? PromptJson.Serialize(Trim(value.GetString()!))
+                    : Trim(PromptJson.Serialize(value));
+                sb.Append(first ? " " : "; ").Append(OneLine(key)).Append('=').Append(text);
                 first = false;
             }
             return sb.ToString();
@@ -66,7 +71,10 @@ public static partial class EvidenceFormatter
             known.Add(n.Id);
             foreach (var k in CitationKeys)
                 if (n.Properties.TryGetValue(k, out var v) && v.ValueKind == JsonValueKind.String && v.GetString() is { Length: > 0 } s)
+                {
                     known.Add(s.Trim());
+                    known.Add(OneLine(s));
+                }
         }
         return Citations(answer).Where(c => !known.Contains(c)).ToList();
     }
@@ -92,6 +100,30 @@ public static partial class EvidenceFormatter
             if (!string.IsNullOrWhiteSpace(s)) return s.Trim();
         }
         return null;
+    }
+
+    /// <summary>Replaces control, format and line/paragraph-separator characters with spaces and collapses whitespace.</summary>
+    public static string OneLine(string s)
+    {
+        var sb = new StringBuilder(s.Length);
+        var space = false;
+        foreach (var c in s)
+        {
+            var cat = char.GetUnicodeCategory(c);
+            var blank = char.IsWhiteSpace(c) || char.IsControl(c) || cat is System.Globalization.UnicodeCategory.Format
+                or System.Globalization.UnicodeCategory.LineSeparator or System.Globalization.UnicodeCategory.ParagraphSeparator;
+            if (blank)
+            {
+                if (!space && sb.Length > 0) sb.Append(' ');
+                space = true;
+            }
+            else
+            {
+                sb.Append(c);
+                space = false;
+            }
+        }
+        return sb.ToString().TrimEnd();
     }
 
     private static string Trim(string s) => s.Length <= MaxPropertyChars ? s : s[..MaxPropertyChars] + "…";

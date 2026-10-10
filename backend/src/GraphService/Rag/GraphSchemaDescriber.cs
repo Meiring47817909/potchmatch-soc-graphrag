@@ -9,7 +9,8 @@ public sealed record RelTypeInfo(string Type, IReadOnlyList<string> From, IReadO
 
 public sealed record SchemaSamples(
     IReadOnlyList<string> RuleNames, IReadOnlyList<string> ThreatIds, IReadOnlyList<string> Severities,
-    IReadOnlyList<string> AlertStatuses, IReadOnlyList<string> IncidentStatuses, IReadOnlyList<string> ServiceNames);
+    IReadOnlyList<string> AlertStatuses, IReadOnlyList<string> IncidentStatuses, IReadOnlyList<string> ServiceNames,
+    IReadOnlyList<string> ThreatNames);
 
 public sealed record GraphSchemaDescription(
     IReadOnlyList<LabelInfo> Labels, IReadOnlyList<RelTypeInfo> RelationshipTypes,
@@ -48,7 +49,9 @@ public class GraphSchemaDescriber(IDriver driver)
             var samples = new SchemaSamples(
                 await Sample(tx, "Alert", "ruleName", ct), await Sample(tx, "Threat", "id", ct),
                 await Sample(tx, "Alert", "severity", ct), await Sample(tx, "Alert", "status", ct),
-                await Sample(tx, "Incident", "status", ct), await Sample(tx, "Service", "name", ct));
+                await Sample(tx, "Incident", "status", ct), await Sample(tx, "Service", "name", ct),
+                // "id: name" pairs so a prompt can map wording such as "brute force" to T1110.
+                await Strings(tx, $"MATCH (t:Threat) WHERE t.id IS NOT NULL AND t.name IS NOT NULL RETURN DISTINCT toString(t.id) + ': ' + toString(t.name) AS v ORDER BY v LIMIT {MaxSamples}", ct));
 
             return new GraphSchemaDescription(labels, types, samples, QueryExamples.All);
         }, tc => tc.WithTimeout(GuardedQueryRunner.Timeout));
