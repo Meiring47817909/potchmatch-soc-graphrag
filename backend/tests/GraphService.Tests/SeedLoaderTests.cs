@@ -49,7 +49,7 @@ public class SeedLoaderTests(Neo4jFixture fx)
         Assert.Equal(7, nodes["Service"]);
         Assert.Equal(3, nodes["Role"]);
         Assert.Equal(6, nodes["Asset"]);
-        Assert.Equal(16, nodes["Threat"]); // 3 app-structure stubs merge into the 16 curated threats
+        Assert.Equal(16, nodes["Threat"]); // 4 app-structure stubs merge into the 16 curated threats
         Assert.Equal(11, nodes["Control"]);
         Assert.Equal(6, nodes["Vulnerability"]);
         Assert.Equal(15, nodes["Document"]);
