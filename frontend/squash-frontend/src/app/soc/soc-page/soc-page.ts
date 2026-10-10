@@ -17,6 +17,13 @@ export class SocPage {
   readonly question = signal('');
   readonly context = signal<AskContext>({});
   readonly answer = signal<RagAnswer | null>(null);
+  // Whether the latest question carried an alert/incident id (drives the sync hint on unanswered results).
+  readonly askedWithContext = signal(false);
+
+  protected onAsking(ctx: AskContext): void {
+    this.answer.set(null);
+    this.askedWithContext.set(!!(ctx.alertId || ctx.incidentId));
+  }
 
   protected onAskAbout(e: AskAbout): void {
     this.question.set(e.question);

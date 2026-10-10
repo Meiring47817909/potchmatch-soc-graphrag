@@ -49,4 +49,33 @@ describe('App', () => {
     expect(el.querySelector('app-soc-page')).not.toBeNull();
     http.match(() => true);
   });
+
+  it('AdminProfileSave_DoesNotYankFromDashboardToSoc', async () => {
+    const fixture = TestBed.createComponent(App);
+    login('Admin');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('app-soc-page')).not.toBeNull();
+
+    (Array.from(el.querySelectorAll('button.nav-button')).find((b) =>
+      b.textContent?.includes('Dashboard'),
+    ) as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('app-soc-page')).toBeNull();
+
+    // Saving the profile replaces the player object but the role is unchanged.
+    TestBed.inject(Auth).currentPlayer.set({
+      playerId: 'p-1',
+      name: 'Renamed',
+      surname: 'User',
+      role: 'Admin',
+      clubId: 'c-1',
+    });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('app-soc-page')).toBeNull();
+    expect(el.querySelector('app-dashboard')).not.toBeNull();
+    http.match(() => true);
+  });
 });

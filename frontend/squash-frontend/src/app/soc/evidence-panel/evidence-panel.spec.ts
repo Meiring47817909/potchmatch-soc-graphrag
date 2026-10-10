@@ -35,10 +35,11 @@ const base = (over: Partial<RagAnswer> = {}): RagAnswer => ({
   ...over,
 });
 
-function render(a: RagAnswer) {
+function render(a: RagAnswer, hadContext = false) {
   TestBed.configureTestingModule({ imports: [EvidencePanel] });
   const fixture = TestBed.createComponent(EvidencePanel);
   fixture.componentRef.setInput('answer', a);
+  fixture.componentRef.setInput('hadContext', hadContext);
   fixture.detectChanges();
   return fixture.nativeElement as HTMLElement;
 }
@@ -94,5 +95,15 @@ describe('EvidencePanel', () => {
     const a = base();
     a.retrieval.model = '';
     expect(render(a).textContent).not.toContain('Model:');
+  });
+
+  it('EvidencePanel_UnansweredWithContext_ShowsSyncHint', () => {
+    const msg = 'New alerts can take up to a minute to reach the knowledge graph — try again shortly.';
+    const unanswered = base({ answered: false, answer: 'The knowledge graph has no evidence for this question.' });
+    expect(render(unanswered, true).querySelector('.sync-hint')?.textContent).toContain(msg);
+    TestBed.resetTestingModule();
+    expect(render(unanswered, false).querySelector('.sync-hint')).toBeNull();
+    TestBed.resetTestingModule();
+    expect(render(base(), true).querySelector('.sync-hint')).toBeNull();
   });
 });

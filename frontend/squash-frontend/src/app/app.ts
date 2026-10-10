@@ -1,4 +1,4 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { Map } from './map/map';
 import { ClubDetail } from './club-detail/club-detail';
 import { Login } from './login/login';
@@ -29,9 +29,14 @@ export class App {
     protected auth: Auth,
     private clubData: ClubData
   ) {
-    // An Admin lands on the SOC view as soon as they are logged in.
+    // An Admin lands on the SOC view when their role becomes Admin (login). Track only the role,
+    // not the whole player object, so saving a profile on the Dashboard does not switch views.
+    const role = computed(() => this.auth.currentPlayer()?.role ?? null);
+    let previousRole: string | null = null;
     effect(() => {
-      if (this.auth.currentPlayer()?.role === 'Admin') this.view.set('soc');
+      const current = role();
+      if (current === 'Admin' && previousRole !== 'Admin') this.view.set('soc');
+      previousRole = current;
     });
 
     // Keep the selected club in sync whenever ClubData refreshes (Map's

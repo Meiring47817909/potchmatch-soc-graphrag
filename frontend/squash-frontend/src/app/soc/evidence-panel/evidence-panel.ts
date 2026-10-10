@@ -14,6 +14,8 @@ import { GraphView } from '../graph-view/graph-view';
 })
 export class EvidencePanel {
   readonly answer = input.required<RagAnswer>();
+  // True when the question was asked about a specific alert/incident.
+  readonly hadContext = input(false);
 
   protected readonly triples = computed(() => toTriples(this.answer().nodes, this.answer().relationships));
   protected readonly hasGraph = computed(() => this.answer().nodes.length > 0);

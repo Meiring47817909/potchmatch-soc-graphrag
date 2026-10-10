@@ -4,10 +4,10 @@
   <app-ask-panel
     [question]="question()"
     [context]="context()"
-    (asking)="answer.set(null)"
+    (asking)="onAsking($event)"
     (answered)="answer.set($event)"
   ></app-ask-panel>
   @if (answer(); as a) {
-    <app-evidence-panel [answer]="a"></app-evidence-panel>
+    <app-evidence-panel [answer]="a" [hadContext]="askedWithContext()"></app-evidence-panel>
   }
 </div>

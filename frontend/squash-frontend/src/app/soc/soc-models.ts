@@ -41,7 +41,7 @@ export interface GraphIncident {
   severity: string;
   status: string;
   escalated: boolean;
-  priority: number | null;
+  priority: string | null;
   openedAt: string | null;
   lastAlertAt: string | null;
 }

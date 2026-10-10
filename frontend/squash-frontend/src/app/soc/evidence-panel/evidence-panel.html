@@ -2,6 +2,12 @@
   <h2>Answer</h2>
   <p class="answer" [class.unanswered]="!answer().answered">{{ answer().answer }}</p>
 
+  @if (!answer().answered && hadContext()) {
+    <p class="sync-hint" role="status">
+      New alerts can take up to a minute to reach the knowledge graph — try again shortly.
+    </p>
+  }
+
   @if (answer().retrieval.unverifiedCitations.length > 0) {
     <p class="warning" role="alert">
       Unverified citations (not found in the retrieved evidence):

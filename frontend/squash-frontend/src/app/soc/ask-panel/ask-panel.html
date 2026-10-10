@@ -2,11 +2,15 @@
   <h2>Ask the graph</h2>
   @if (status() && !status()!.enabled) {
     <p class="disabled-note" role="status">
-      Ask is disabled: {{ status()!.reason }}. Set GEMINI_API_KEY in backend/.env and restart rag-service.
+      Ask is disabled: {{ status()!.reason }}. Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container).
+      <button type="button" class="retry-status" (click)="retryStatus()">Retry</button>
     </p>
   }
   @if (statusError()) {
-    <p class="error" role="alert">{{ statusError() }}</p>
+    <p class="error status-error" role="alert">
+      {{ statusError() }}
+      <button type="button" class="retry-status" (click)="retryStatus()">Retry</button>
+    </p>
   }
   @if (contextLabel(); as label) {
     <p class="context-pill">

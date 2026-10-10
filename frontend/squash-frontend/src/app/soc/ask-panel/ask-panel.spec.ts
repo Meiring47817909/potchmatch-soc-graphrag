@@ -53,7 +53,9 @@ describe('AskPanel', () => {
   it('AskPanel_DisabledWhenRagDisabled', async () => {
     await setup({ enabled: false, model: null, reason: 'GEMINI_API_KEY is not set' });
     expect(root().textContent).toContain('GEMINI_API_KEY is not set');
-    expect(root().textContent).toContain('Set GEMINI_API_KEY in backend/.env and restart rag-service');
+    expect(root().textContent).toContain(
+      'Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container)',
+    );
     expect(textarea().disabled).toBe(true);
     expect(askButton().disabled).toBe(true);
   });
@@ -95,6 +97,68 @@ describe('AskPanel', () => {
     req = http.expectOne((r) => r.url.endsWith('/api/rag/ask'));
     expect(req.request.body.alertId).toBeUndefined();
     req.flush(answer());
+  });
+
+  it('AskPanel_Chips_AreSubjectFree', async () => {
+    await setup({ enabled: true, model: 'g', reason: null });
+    const chips = Array.from(root().querySelectorAll('.chips button')).map((b) => b.textContent?.trim());
+    expect(chips).not.toContain('Why was this alert created and what should be done?');
+    expect(chips).toContain('What controls can mitigate brute force attacks?');
+    expect(chips).not.toContain('What controls can mitigate this threat?');
+  });
+
+  it('AskPanel_StatusError_RetriesUpTo3TimesThenShowsErrorAndRetryRecovers', async () => {
+    vi.useFakeTimers();
+    try {
+      TestBed.configureTestingModule({
+        imports: [AskPanel],
+        providers: [provideHttpClient(), provideHttpClientTesting()],
+      });
+      http = TestBed.inject(HttpTestingController);
+      fixture = TestBed.createComponent(AskPanel);
+      fixture.detectChanges();
+      const fail = () =>
+        http
+          .expectOne((r) => r.url.endsWith('/api/rag/status'))
+          .flush({}, { status: 500, statusText: 'Server Error' });
+      fail();
+      expect(root().querySelector('.status-error')).toBeNull(); // still retrying
+      await vi.advanceTimersByTimeAsync(5000);
+      fail();
+      await vi.advanceTimersByTimeAsync(5000);
+      fail();
+      fixture.detectChanges();
+      expect(root().querySelector('.status-error')).not.toBeNull();
+      await vi.advanceTimersByTimeAsync(20000);
+      http.expectNone((r) => r.url.endsWith('/api/rag/status')); // gave up after 3 attempts
+
+      (root().querySelector('.retry-status') as HTMLButtonElement).click();
+      http.expectOne((r) => r.url.endsWith('/api/rag/status')).flush({ enabled: true, model: 'g', reason: null });
+      fixture.detectChanges();
+      expect(root().querySelector('.status-error')).toBeNull();
+      expect(textarea().disabled).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('AskPanel_DisabledNote_RetryRechecksStatus', async () => {
+    await setup({ enabled: false, model: null, reason: 'GEMINI_API_KEY is not set' });
+    (root().querySelector('.retry-status') as HTMLButtonElement).click();
+    http.expectOne((r) => r.url.endsWith('/api/rag/status')).flush({ enabled: true, model: 'g', reason: null });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root().querySelector('.disabled-note')).toBeNull();
+    expect(textarea().disabled).toBe(false);
+  });
+
+  it('AskPanel_AskingEmitsActiveContext', async () => {
+    await setup({ enabled: true, model: 'g', reason: null }, 'Why?', { alertId: 'ALT-1' });
+    let ctx: unknown;
+    fixture.componentInstance.asking.subscribe((c) => (ctx = c));
+    askButton().click();
+    expect(ctx).toEqual({ alertId: 'ALT-1', incidentId: undefined });
+    http.expectOne((r) => r.url.endsWith('/api/rag/ask')).flush(answer());
   });
 
   it('AskPanel_ChipFillsQuestionAndClearsContext', async () => {

@@ -11,7 +11,7 @@ const row = (over: Record<string, unknown> = {}) => ({
   severity: 'HIGH',
   status: 'OPEN',
   escalated: false,
-  priority: 2,
+  priority: 'P2',
   openedAt: '2026-10-10T10:00:00Z',
   lastAlertAt: '2026-10-10T10:05:00Z',
   ...over,
