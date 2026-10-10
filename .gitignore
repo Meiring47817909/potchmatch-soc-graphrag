@@ -7,3 +7,6 @@ dist/
 *.user
 docker-compose.log
 .superpowers/
+
+# Local secrets (Gemini API key)
+backend/.env

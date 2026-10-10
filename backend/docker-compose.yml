@@ -243,6 +243,28 @@ services:
     networks:
       - squash-net
 
+  rag-service:
+    build:
+      context: ./src/RagService
+    depends_on:
+      consul:
+        condition: service_healthy
+      graph-service:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      Gemini__ApiKey: "${GEMINI_API_KEY:-}"
+      Gemini__Model: "${GEMINI_MODEL:-gemini-2.5-flash}"
+      GraphQuery__Url: "http://graph-service:8080"
+      GraphQuery__Key: "dev-graph-query-key-change-me"
+      Consul__Address: "http://consul:8500"
+      ServiceRegistration__Address: "rag-service"
+      ServiceRegistration__HealthCheckHost: "rag-service"
+      SocIngest__Url: "http://soc-service:8080/api/events"
+      SocIngest__Key: "dev-soc-ingest-key-change-me"
+    networks:
+      - squash-net
+
   # --- Gateway ---
   # The only backend container exposed to the host beyond Consul/the databases -
   # reachable at http://localhost:5132. The frontend below is built to call it at
