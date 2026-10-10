@@ -1,5 +1,6 @@
-// Run in Aura Query (Neo4j 5). Returns ONE row: {nodes, relationships}.
+// Run in Neo4j Query (Aura or Neo4j Desktop, Neo4j 5+) on the Graph Builder database. Returns ONE row: {nodes, relationships}.
 // Graph Builder keeps the entity name in `id`; description (if any) in `description`.
+// properties(x).name is used instead of x.name so Neo4j does not warn (01N52) when no node has a `name` key.
 // Excludes Chunk nodes, uploaded-file Document nodes (they have fileName) and embeddings.
 MATCH (n)
 WHERE any(l IN labels(n) WHERE l IN ['Threat','Control','Vulnerability','Document'])
@@ -9,7 +10,7 @@ WITH collect(n) AS ns
 WITH ns,
   [n IN ns | {
     label: [l IN labels(n) WHERE l IN ['Threat','Control','Vulnerability','Document']][0],
-    name: coalesce(n.name, n.id),
+    name: coalesce(properties(n).name, n.id),
     id: n.id,
     description: n.description,
     properties: apoc.map.removeKeys(properties(n),
@@ -21,8 +22,8 @@ WHERE a IN ns AND b IN ns
 WITH nodes, collect(CASE WHEN r IS NULL THEN NULL ELSE {
     type: type(r),
     fromLabel: [l IN labels(a) WHERE l IN ['Threat','Control','Vulnerability','Document']][0],
-    fromName: coalesce(a.name, a.id),
+    fromName: coalesce(properties(a).name, a.id),
     toLabel: [l IN labels(b) WHERE l IN ['Threat','Control','Vulnerability','Document']][0],
-    toName: coalesce(b.name, b.id)
+    toName: coalesce(properties(b).name, b.id)
   } END) AS relationships
 RETURN nodes, relationships;
