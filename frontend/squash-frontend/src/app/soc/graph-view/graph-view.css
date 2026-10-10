@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.canvas {
+  height: 360px;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+}

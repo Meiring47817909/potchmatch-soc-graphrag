@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { GraphApi } from '../graph-api';
@@ -21,12 +22,16 @@ export class IncidentsPanel {
   protected readonly incidents = signal<GraphIncident[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly loading = signal(false);
+  private inflight?: Subscription;
   protected readonly status = signal('');
 
   constructor() {
     this.load();
     const timer = setInterval(() => this.load(), REFRESH_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(timer);
+      this.inflight?.unsubscribe();
+    });
   }
 
   protected setStatusFilter(value: string): void {
@@ -35,8 +40,10 @@ export class IncidentsPanel {
   }
 
   protected load(): void {
+    // Cancel the previous request so a stale response can never overwrite a newer one.
+    this.inflight?.unsubscribe();
     this.loading.set(true);
-    this.api.getIncidents(this.status()).subscribe({
+    this.inflight = this.api.getIncidents(this.status()).subscribe({
       next: (incidents) => {
         this.incidents.set(incidents);
         this.error.set(null);

@@ -52,6 +52,22 @@ describe('AlertsPanel', () => {
     req.flush([alert()]);
   });
 
+  it('AlertsPanel_CancelsStaleRequestWhenReloading', async () => {
+    await setup();
+    const component = fixture.componentInstance as unknown as { load(): void };
+    component.load(); // auto-refresh in flight
+    const stale = http.expectOne((r) => r.url.endsWith('/api/soc/alerts'));
+    const select = root().querySelector('select[name="status"]') as HTMLSelectElement;
+    select.value = 'OPEN';
+    select.dispatchEvent(new Event('change'));
+    const fresh = http.expectOne((r) => r.url.endsWith('/api/soc/alerts'));
+    expect(stale.cancelled).toBe(true);
+    fresh.flush([alert({ ruleName: 'NEW_RULE_X' })]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root().textContent).toContain('NEW_RULE_X');
+  });
+
   it('AlertsPanel_AcknowledgeCallsPatch', async () => {
     await setup();
     (root().querySelector('button.ack') as HTMLButtonElement).click();

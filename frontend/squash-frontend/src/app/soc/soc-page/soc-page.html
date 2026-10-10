@@ -1,4 +1,12 @@
 <div class="soc-page">
   <app-alerts-panel (askAbout)="onAskAbout($event)"></app-alerts-panel>
   <app-incidents-panel (askAbout)="onAskAbout($event)"></app-incidents-panel>
+  <app-ask-panel
+    [question]="question()"
+    [context]="context()"
+    (answered)="answer.set($event)"
+  ></app-ask-panel>
+  @if (answer(); as a) {
+    <app-evidence-panel [answer]="a"></app-evidence-panel>
+  }
 </div>

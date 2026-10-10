@@ -53,6 +53,20 @@ describe('IncidentsPanel', () => {
     ]);
   });
 
+  it('IncidentsPanel_CancelsStaleRequestWhenReloading', async () => {
+    await setup([row()]);
+    const component = fixture.componentInstance as unknown as { load(): void; setStatusFilter(v: string): void };
+    component.load(); // auto-refresh in flight
+    const stale = http.expectOne((r) => r.url.endsWith('/api/graph/incidents'));
+    component.setStatusFilter('OPEN');
+    const fresh = http.expectOne((r) => r.url.endsWith('/api/graph/incidents'));
+    expect(stale.cancelled).toBe(true);
+    fresh.flush({ query: 'incidents', cypher: '', parameters: {}, nodes: [], relationships: [], rows: [row({ title: 'Fresh one' })] });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root().textContent).toContain('Fresh one');
+  });
+
   it('IncidentsPanel_ShowsEscalatedBadge', async () => {
     await setup([row({ escalated: true }), row({ incidentId: 'inc-2', escalated: false })]);
     expect(root().querySelectorAll('.badge-escalated').length).toBe(1);

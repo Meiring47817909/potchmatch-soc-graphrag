@@ -1,0 +1,36 @@
+<section class="panel">
+  <h2>Ask the graph</h2>
+  @if (status() && !status()!.enabled) {
+    <p class="disabled-note" role="status">
+      Ask is disabled: {{ status()!.reason }}. Set GEMINI_API_KEY in backend/.env and restart rag-service.
+    </p>
+  }
+  @if (statusError()) {
+    <p class="error" role="alert">{{ statusError() }}</p>
+  }
+  <form (submit)="$event.preventDefault(); ask()">
+    <textarea
+      name="question"
+      rows="3"
+      [maxLength]="maxLength"
+      [disabled]="!enabled"
+      [value]="text()"
+      (input)="edit($any($event.target).value)"
+      placeholder="Ask a security question about the knowledge graph"
+    ></textarea>
+    <div class="chips">
+      @for (e of examples; track e) {
+        <button type="button" [disabled]="!enabled" (click)="useExample(e)">{{ e }}</button>
+      }
+    </div>
+    <div class="actions">
+      <span class="count">{{ text().length }}/{{ maxLength }}</span>
+      <button type="submit" [disabled]="!enabled || loading() || text().trim().length === 0">
+        {{ loading() ? 'Asking…' : 'Ask' }}
+      </button>
+    </div>
+  </form>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</section>

@@ -1,0 +1,69 @@
+<section class="evidence">
+  <h2>Answer</h2>
+  <p class="answer" [class.unanswered]="!answer().answered">{{ answer().answer }}</p>
+
+  @if (answer().retrieval.unverifiedCitations.length > 0) {
+    <p class="warning" role="alert">
+      Unverified citations (not found in the retrieved evidence):
+      {{ answer().retrieval.unverifiedCitations.join(', ') }}
+    </p>
+  }
+
+  <h3>Retrieval</h3>
+  <p class="retrieval">
+    <span>{{ answer().retrieval.method }}</span> ·
+    <span>Model: {{ answer().retrieval.model }}</span> ·
+    <span>Attempts: {{ answer().retrieval.attempts }}</span> ·
+    <span>Rows: {{ answer().retrieval.rowCount }}</span>
+    @if (answer().retrieval.truncated) {
+      · <span class="truncated">truncated</span>
+    }
+  </p>
+  @if (answer().retrieval.explanation) {
+    <p class="explanation">{{ answer().retrieval.explanation }}</p>
+  }
+
+  @if (hasGraph()) {
+    <h3>Graph</h3>
+    <app-graph-view [nodes]="answer().nodes" [rels]="answer().relationships"></app-graph-view>
+  }
+
+  @if (triples().length > 0) {
+    <h3>Relationships</h3>
+    <ul class="triples">
+      @for (t of triples(); track $index) {
+        <li>{{ t }}</li>
+      }
+    </ul>
+  }
+
+  @if (showRows()) {
+    <h3>Rows</h3>
+    <pre class="rows">{{ answer().rows | json }}</pre>
+  }
+
+  @if (answer().cypher) {
+    <h3>Cypher</h3>
+    <pre class="cypher">{{ answer().cypher }}</pre>
+  }
+  @if (hasParameters()) {
+    <h3>Parameters</h3>
+    <pre class="params">{{ answer().parameters | json }}</pre>
+  }
+
+  @if (answer().sources.length > 0) {
+    <h3>Sources</h3>
+    <ul class="sources">
+      @for (s of answer().sources; track s.id) {
+        <li>
+          @if (s.url) {
+            <a [href]="s.url" target="_blank" rel="noopener noreferrer">{{ s.name || s.id }}</a>
+          } @else {
+            {{ s.name || s.id }}
+          }
+          <span class="source-id">({{ s.id }})</span>
+        </li>
+      }
+    </ul>
+  }
+</section>

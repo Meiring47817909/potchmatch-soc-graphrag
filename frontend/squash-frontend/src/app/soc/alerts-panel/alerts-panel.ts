@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { SocApi } from '../soc-api';
@@ -21,13 +22,17 @@ export class AlertsPanel {
   protected readonly alerts = signal<SocAlert[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly loading = signal(false);
+  private inflight?: Subscription;
   protected readonly status = signal('');
   protected readonly severity = signal('');
 
   constructor() {
     this.load();
     const timer = setInterval(() => this.load(), REFRESH_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(timer);
+      this.inflight?.unsubscribe();
+    });
   }
 
   protected setStatusFilter(value: string): void {
@@ -41,8 +46,10 @@ export class AlertsPanel {
   }
 
   protected load(): void {
+    // Cancel the previous request so a stale response can never overwrite a newer one.
+    this.inflight?.unsubscribe();
     this.loading.set(true);
-    this.api.getAlerts({ status: this.status(), severity: this.severity() }).subscribe({
+    this.inflight = this.api.getAlerts({ status: this.status(), severity: this.severity() }).subscribe({
       next: (alerts) => {
         this.alerts.set(alerts);
         this.error.set(null);
