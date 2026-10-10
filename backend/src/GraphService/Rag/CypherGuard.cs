@@ -38,11 +38,22 @@ public static class CypherGuard
     };
 
     private static readonly string[] AllowedApocPrefixes = ["apoc.map.", "apoc.coll.", "apoc.text.", "apoc.convert."];
+    private static readonly string[] AllowedBuiltinNamespaces =
+        ["date.", "datetime.", "localdatetime.", "localtime.", "time.", "duration.", "point.", "vector."];
     private const string DeniedApocFunction = "apoc.convert.setjsonproperty";
 
     public static CypherGuardResult Check(string? cypher, int defaultLimit = 200)
     {
         if (string.IsNullOrWhiteSpace(cypher)) return Reject("Query is empty", cypher);
+
+        foreach (var ch in cypher)
+        {
+            if (ch is '\t' or '\r' or '\n') continue;
+            var cat = char.GetUnicodeCategory(ch);
+            // Neo4j treats U+001C..U+001F (and other oddities) as whitespace, the tokeniser does not.
+            if (cat is System.Globalization.UnicodeCategory.Control or System.Globalization.UnicodeCategory.Format)
+                return Reject("Control characters are not allowed", cypher);
+        }
 
         var toks = Tokenize(cypher);
         var count = toks.Count;
@@ -60,7 +71,9 @@ public static class CypherGuard
         {
             var t = toks[i];
             if (t.Kind != Kind.Word && t.Kind != Kind.Quoted) continue;
-            if (i > 0 && (IsPunct(toks[i - 1], '.') || IsPunct(toks[i - 1], '$'))) continue;
+            // Skip property names (n.set) and parameters ($set), but not the operand of a '..' range (list slice).
+            if (i > 0 && (IsPunct(toks[i - 1], '$')
+                || (IsPunct(toks[i - 1], '.') && !(i > 1 && IsPunct(toks[i - 2], '.'))))) continue;
 
             if (t.Kind == Kind.Word)
             {
@@ -110,6 +123,7 @@ public static class CypherGuard
     private static bool FunctionAllowed(string name)
     {
         var lower = name.ToLowerInvariant();
+        if (AllowedBuiltinNamespaces.Any(p => lower.StartsWith(p, StringComparison.Ordinal))) return true;
         return lower != DeniedApocFunction && AllowedApocPrefixes.Any(p => lower.StartsWith(p, StringComparison.Ordinal));
     }
 

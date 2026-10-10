@@ -49,6 +49,12 @@ public class CypherGuardTests
     [InlineData("RETURN db.labels()", "db.labels")]
     [InlineData("RETURN dbms.components()", "dbms.components")]
     [InlineData("CALL (x) RETURN 1", "Procedure")]
+    [InlineData("LOAD\u001CCSV FROM 'file:///x' AS r RETURN r", "Control characters")]
+    [InlineData("RETURN apoc\u001C.create.node(['X'],{})", "Control characters")]
+    [InlineData("RETURN 1\u200D", "Control characters")]
+    [InlineData("RETURN [1,2,3][0..apoc.cypher.runFirstColumnSingle('x', {})]", "apoc.cypher.runFirstColumnSingle")]
+    [InlineData("RETURN [1,2,3][0.. `apoc`.create.vNode(['X'])]", "apoc.create.vNode")]
+    [InlineData("RETURN [1,2,3][..apoc.create.vNode(['X'])]", "apoc.create.vNode")]
     public void Guard_WriteOrAdmin_Rejected(string cypher, string expected)
     {
         var r = CypherGuard.Check(cypher);
@@ -65,6 +71,11 @@ public class CypherGuardTests
     [InlineData("RETURN apoc.map.merge({a:1},{b:2})")]
     [InlineData("RETURN apoc.convert.toJson({a:1})")]
     [InlineData("CALL db.labels YIELD label RETURN label")]
+    [InlineData("RETURN [1,2,3][0..datetime.truncate('day', datetime()).day]")]
+    [InlineData("RETURN duration.between(date('2020-01-01'), date()).days")]
+    [InlineData("MATCH (a),(b) RETURN point.distance(a.p, b.p)")]
+    [InlineData("RETURN vector.similarity.cosine([1.0, 2.0], [1.0, 2.0])")]
+    [InlineData("RETURN [1,2,3][0..2], [1,2,3][..1]")]
     [InlineData("CALL `db`.`LABELS`() YIELD label RETURN label")]
     [InlineData("CALL { MATCH (n) RETURN n } RETURN n")]
     [InlineData("MATCH (n) CALL (n) { MATCH (n)-[]->(m) RETURN m } RETURN m")]
