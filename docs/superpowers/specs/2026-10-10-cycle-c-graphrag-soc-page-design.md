@@ -25,7 +25,7 @@ Cycle C is done when:
 - Work continues in `squash-platform-phase2`; Phase 1 (`squash-platform`) is never touched.
 - Same stack and patterns: .NET 10 Web API, Serilog → SOC, Consul registration, Ocelot gateway, Docker Compose, Angular 22 (standalone components, signals) served by nginx. One `docker compose up` still starts everything.
 - **LLM:** Google Gemini via an AI Studio API key, called over HTTPS from the backend only. Key in `backend/.env` (`GEMINI_API_KEY`, git-ignored); model configurable (`GEMINI_MODEL`, default `gemini-2.5-flash`). No key is ever committed or sent to the browser.
-- **No key → feature disabled** (no template fallback): `/api/rag/status` reports it, `/api/rag/ask` returns 503 with an explanatory message, the Ask box is disabled with instructions. Everything else works.
+- **No key → feature disabled** (no template fallback): `/api/rag/status` reports it, `/api/rag/ask` returns 503 with an explanatory message, the Ask box is disabled with instructions (set the key in `backend/.env`, then `docker compose up -d rag-service`; a plain `restart` keeps the old environment). Everything else works.
 - GraphService remains the only component with Neo4j credentials (database-per-service).
 - Admin-only: RAG and the SOC page are for the Admin role; players/coaches are denied at the gateway and in each service.
 
@@ -53,7 +53,7 @@ Admin (Angular SOC view) ──► Gateway ──► /api/soc/*   SocService   (
 - .NET 10 Web API; Serilog with `ServiceName = "rag-service"` shipping to SocService like the other services; Consul registration with health check; JWT bearer validation like the other services; `[Authorize(Roles = "Admin")]`.
 - `GET /api/rag/status` → `{ enabled: bool, model: string|null, reason: string|null }` (`reason` = "GEMINI_API_KEY is not set" when disabled).
 - `POST /api/rag/ask` → body `{ question: string (1..500 chars), alertId?: string, incidentId?: string }` → `RagAnswer` (§5.4).
-- Clients: `IGeminiClient` (typed HttpClient to the Gemini `generateContent` REST API, JSON-mode responses, 30 s timeout) and `IGraphQueryClient` (typed HttpClient to GraphService internal endpoints with header `X-Graph-Query-Key`).
+- Clients: `IGeminiClient` (typed HttpClient to the Gemini `generateContent` REST API, JSON-mode responses, 25 s timeout, `Gemini:ThinkingBudget` default 0) and `IGraphQueryClient` (typed HttpClient to GraphService internal endpoints with header `X-Graph-Query-Key`).
 - Schema cache: 10 minutes.
 
 ### 4.2 Changed: GraphService
@@ -168,7 +168,7 @@ Synced GRAPH_ACCESS alerts get `INDICATES → OWASP-A01-2025` and `AFFECTS → g
 - Components under `src/app/soc/`: `soc-page` (layout), `alerts-panel`, `incidents-panel`, `ask-panel`, `evidence-panel`, `graph-view`; services `soc-api` (alerts, status PATCH, rules), `graph-api` (incidents), `rag-api` (status, ask). Existing auth interceptor supplies the token; API base from `core/api-config.ts`.
 - **Alerts panel**: table from `GET /api/soc/alerts` with status/severity/rule filters; columns time, rule, severity, affected user, service, status; actions Acknowledge / Resolve (`PATCH /api/soc/alerts/{id}/status`), and **Why?** (fills the Ask box with "Why was this alert created and what should be done?" and sets `alertId`). Refresh button + 30 s auto-refresh.
 - **Incidents panel**: `GET /api/graph/incidents`; columns title, subject, priority, escalated badge, alert count, last alert; **Ask** fills "What does the graph know about this incident, its affected services and possible response actions?" and sets `incidentId`.
-- **Ask panel**: textarea (max 500), example-question chips (spec §5.1 list), Ask button; disabled with the status `reason` + "Set GEMINI_API_KEY in backend/.env and restart rag-service" when `enabled` is false; loading and error states (503 messages shown verbatim).
+- **Ask panel**: textarea (max 500), example-question chips (spec §5.1 list), Ask button; disabled with the status `reason` + "Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container)" when `enabled` is false; loading and error states (503 messages shown verbatim).
 - **Evidence panel**: answer text; retrieval-method line (method, model, attempts, rows, truncated) + explanation; **graph view** (Cytoscape.js, nodes coloured by label, labels = display name, relationship type on edges, `cose` layout, fit to container); relationships list as readable lines; Cypher + parameters in a monospace block; sources list with links (`url`) or IDs.
 - New dependency: `cytoscape` (+ `@types/cytoscape`), pinned versions.
 

@@ -48,6 +48,18 @@ Seeding only ever MERGEs. Editing a seed file adds and updates nodes and relatio
 
   then `docker compose restart graph-service`. (Services, endpoints, assets and roles from `app-structure.json` are not covered by this query; use the volume reset if you removed any of those.)
 
+## Cycle C live test (GraphRAG Ask panel)
+
+1. Copy `backend/.env.example` to `backend/.env` and set `GEMINI_API_KEY`.
+2. Start the stack with `docker compose up -d --build` in `backend/`. If it is already running, use `docker compose up -d rag-service` instead: it recreates the container so the new key is picked up (`docker compose restart` keeps the old environment).
+3. In Postman run the `Phase 2 - SOC` folder (failed logins), then wait about 45 s for the alerts to sync into the graph (alert detection itself takes about 30 s).
+4. Open the SOC page as admin and click **Why?** on a Multiple Failed Logins alert.
+5. Try the example questions in the Ask panel (controls for brute force, impact if payment-service fails, high severity users).
+6. Run the Rule 5 probe at the end of the `Phase 2 - RAG` folder and check that a `GRAPH_ACCESS` alert appears.
+7. Check the escalated incident in the Incidents panel.
+
+In every answer watch `retrieval.attempts` (2 means the generated Cypher needed a repair) and `retrieval.unverifiedCitations` (should be empty).
+
 ## Inspecting the graph in Neo4j Desktop / Browser
 
 With the compose stack running (Neo4j publishes `7474` and `7687`):

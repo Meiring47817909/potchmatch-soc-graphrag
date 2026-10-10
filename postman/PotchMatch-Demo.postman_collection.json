@@ -325,7 +325,7 @@
     },
     {
       "name": "Phase 2 — SOC",
-      "description": "Cycle A SOC pipeline demo. Run top to bottom: log in as admin, send 'Failed Login x1' five times, wait ~15 s, then list/inspect alerts. Needs the seeded admin (admin@potchmatch.local). The final request needs a player token in {{authToken}}.",
+      "description": "Cycle A SOC pipeline demo. Run top to bottom: log in as admin, send 'Failed Login x1' five times, wait ~30 s for alert detection, then list/inspect alerts. Needs the seeded admin (admin@potchmatch.local). The final request needs a player token in {{authToken}}.",
       "item": [
         {
           "name": "Login Admin",
@@ -457,7 +457,7 @@
                 }
               ]
             },
-            "description": "Wait ~15 s after the failed logins (the rule engine runs every 15 s). Stores the id of the first Multiple Failed Logins alert as {{alertId}} (Rule 1 raises two: account and IP)."
+            "description": "Wait ~30 s for alert detection after the failed logins (the rule engine runs every 15 s). Stores the id of the first Multiple Failed Logins alert as {{alertId}} (Rule 1 raises two: account and IP)."
           },
           "event": [
             {
@@ -989,7 +989,7 @@
                 "controls"
               ]
             },
-            "description": "Controls for T1110 from the curated knowledge seed: MITRE mitigations M1036, M1032, M1027, M1018 and the procedure control CTRL-PASSWORD-RESET, with the response document DOC-PASSWORD-RESET. Wait for the graph sync (~15 s) after the alert appears; 404 means it has not synced yet."
+            "description": "Controls for T1110 from the curated knowledge seed: MITRE mitigations M1036, M1032, M1027, M1018 and the procedure control CTRL-PASSWORD-RESET, with the response document DOC-PASSWORD-RESET. Wait ~45 s for the graph sync after the alert appears; 404 means it has not synced yet."
           },
           "event": [
             {
@@ -1139,7 +1139,7 @@
                   "    pm.expect(escalated.priority).to.eql('HIGH');",
                   "  });",
                   "} else {",
-                  "  console.warn('No escalated incident yet: run the failed logins and the player-calls-SOC (403) step, then wait ~15 s for the graph sync.');",
+                  "  console.warn('No escalated incident yet: run the failed logins and the player-calls-SOC (403) step, then wait ~45 s for the graph sync.');",
                   "}",
                   "const chosen = escalated || rows[0];",
                   "if (chosen) pm.environment.set('incidentId', chosen.incidentId);"
@@ -1235,7 +1235,7 @@
     },
     {
       "name": "Phase 2 — RAG",
-      "description": "Cycle C GraphRAG assistant, admin only. Run the 'Phase 2 — SOC' folder first (failed logins), wait ~45 s for the graph sync, then run this folder top to bottom. Ask requests need a Gemini API key on the rag-service (otherwise 503 rag_disabled). The Rule 5 probe needs the folder 2 player registered.",
+      "description": "Cycle C GraphRAG assistant, admin only. Run the 'Phase 2 — SOC' folder first (failed logins), wait ~45 s for the graph sync, then run this folder top to bottom. Ask requests need a Gemini API key on the rag-service (otherwise 503 rag_disabled). The Rule 5 probe needs the folder 2 player registered. Waits: ~30 s for alert detection, ~45 s for the graph sync.\n\nCycle C live test checklist:\n1. Copy backend/.env.example to backend/.env and set GEMINI_API_KEY.\n2. Start the stack: docker compose up -d --build (or, if it is already running, docker compose up -d rag-service to recreate rag-service with the key).\n3. Run the 'Phase 2 — SOC' folder (failed logins), then wait ~45 s for the alerts to sync into the graph.\n4. Open the SOC page as admin and click Why? on a Multiple Failed Logins alert.\n5. Try the three example questions in the Ask panel (controls, payment-service impact, high severity users).\n6. Run the Rule 5 probe at the end of this folder (three 403s, then a ~30 s wait) and check the GRAPH_ACCESS alert.\n7. Check the escalated incident in the Incidents panel.\nWatch retrieval.attempts (2 means the Cypher needed a repair) and retrieval.unverifiedCitations (should be empty) in each answer.",
       "item": [
         {
           "name": "Login Admin",
@@ -1759,9 +1759,18 @@
                 }
               ]
             },
-            "description": "Wait ~30 s after the three 403s (SOC detection runs every 15 s), then send this. Asserts a GRAPH_ACCESS alert exists."
+            "description": "The pre-request script waits ~30 s for alert detection after the three 403s (SOC detection runs every 15 s), then the request is sent. Asserts a GRAPH_ACCESS alert exists."
           },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "setTimeout(() => {}, 30000);"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
