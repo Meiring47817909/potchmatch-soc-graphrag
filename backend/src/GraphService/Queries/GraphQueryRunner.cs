@@ -16,6 +16,30 @@ public class GraphQueryRunner(IDriver driver)
             return await cursor.ToListAsync(ct);
         });
 
+        var (nodes, rels, rows) = RecordShaper.Shape(records);
+
+        return new GraphQueryResult(name, cypher, parameters, nodes, rels, rows);
+    }
+
+    public async Task<bool> ExistsAsync(string cypher, IReadOnlyDictionary<string, object?> parameters, CancellationToken ct)
+    {
+        var args = parameters.ToDictionary(kv => kv.Key, kv => kv.Value);
+        await using var session = driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
+        return await session.ExecuteReadAsync(async tx =>
+        {
+            var cursor = await tx.RunAsync(cypher, args);
+            var records = await cursor.ToListAsync(ct);
+            return records.Count > 0 && records[0][0].As<bool>();
+        });
+    }
+}
+
+/// <summary>Shapes driver records into evidence form: graph values into nodes/relationships, scalars into table rows.</summary>
+internal static class RecordShaper
+{
+    public static (List<GraphNodeDto> Nodes, List<GraphRelDto> Relationships, List<IReadOnlyDictionary<string, object?>> Rows)
+        Shape(IEnumerable<IRecord> records)
+    {
         var nodes = new Dictionary<string, GraphNodeDto>();
         var rels = new Dictionary<string, GraphRelDto>();
         var rows = new List<IReadOnlyDictionary<string, object?>>();
@@ -32,19 +56,7 @@ public class GraphQueryRunner(IDriver driver)
             if (row.Count > 0) rows.Add(row);
         }
 
-        return new GraphQueryResult(name, cypher, parameters, nodes.Values.ToList(), rels.Values.ToList(), rows);
-    }
-
-    public async Task<bool> ExistsAsync(string cypher, IReadOnlyDictionary<string, object?> parameters, CancellationToken ct)
-    {
-        var args = parameters.ToDictionary(kv => kv.Key, kv => kv.Value);
-        await using var session = driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
-        return await session.ExecuteReadAsync(async tx =>
-        {
-            var cursor = await tx.RunAsync(cypher, args);
-            var records = await cursor.ToListAsync(ct);
-            return records.Count > 0 && records[0][0].As<bool>();
-        });
+        return (nodes.Values.ToList(), rels.Values.ToList(), rows);
     }
 
     private static bool IsGraphValue(object? v) => v is INode or IRelationship or IPath;

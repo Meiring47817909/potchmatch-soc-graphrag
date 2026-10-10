@@ -111,4 +111,11 @@ public class MappingTests
         Assert.Equal("unknown", SubjectResolver.Resolve(null, [], [], null));
         Assert.Equal("unknown", SubjectResolver.Resolve(" ", [" "], [" "], " "));
     }
+
+    [Fact]
+    public void RuleThreatMap_GraphAccess_MapsToOwaspA01()
+    {
+        Assert.True(RuleThreatMap.TryGetThreatId("GRAPH_ACCESS", out var id));
+        Assert.Equal("OWASP-A01-2025", id);
+    }
 }

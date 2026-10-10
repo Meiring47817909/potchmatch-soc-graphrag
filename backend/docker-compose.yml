@@ -231,6 +231,7 @@ services:
       Neo4j__User: "neo4j"
       Neo4j__Password: "potchmatch-dev"
       GraphSync__Key: "dev-graph-sync-key-change-me"
+      GraphQuery__Key: "dev-graph-query-key-change-me"
       GraphSync__SocUrl: "http://soc-service:8080"
       GraphSync__IdentityUrl: "http://identity-service:8080"
       GraphSeed__Directory: "/app/graph-data"

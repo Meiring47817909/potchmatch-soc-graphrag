@@ -9,6 +9,7 @@ public static class RuleThreatMap
         ["Unauthorised Endpoint Access"] = "T1078",
         ["POSSIBLE_DOS"] = "T1499",
         ["SERVICE_FAILURE"] = "T1499",
+        ["GRAPH_ACCESS"] = "OWASP-A01-2025",
     };
 
     public static bool TryGetThreatId(string ruleName, out string threatId)

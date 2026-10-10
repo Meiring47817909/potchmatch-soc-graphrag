@@ -48,6 +48,8 @@ builder.Services.AddHttpClient<IIdentitySyncClient, IdentitySyncClient>((sp, htt
     http.BaseAddress = new Uri(sp.GetRequiredService<IOptions<GraphSyncOptions>>().Value.IdentityUrl));
 builder.Services.AddSingleton<GraphWriter>();
 builder.Services.AddSingleton<GraphService.Queries.GraphQueryRunner>();
+builder.Services.AddSingleton<GraphService.Rag.GuardedQueryRunner>();
+builder.Services.AddSingleton<GraphService.Rag.GraphSchemaDescriber>();
 builder.Services.Configure<IncidentOptions>(builder.Configuration.GetSection("Incidents"));
 builder.Services.AddSingleton<IIncidentCorrelation, IncidentWriter>();
 builder.Services.AddHostedService<SyncWorker>();
