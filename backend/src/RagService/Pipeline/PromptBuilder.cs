@@ -144,7 +144,7 @@ public static class PromptBuilder
         5. Return paths so the relationships become visible evidence: bind patterns as p = (...)-[...]->(...) and RETURN the paths (or collect(p) AS paths),
            together with readable scalar columns (ids, names, titles, severities, statuses, timestamps, descriptions, urls).
         6. For "why", "what should be done", "how do we respond / mitigate / fix" questions:
-           a. When an alert or incident is provided (or named), start from it: (Incident)-[:CONTAINS]->(Alert)-[:INDICATES]->(Threat)<-[:MITIGATES]-(Control).
+           a. When an alert is provided (or named), start at the Alert: (Alert)-[:INDICATES]->(Threat)<-[:MITIGATES]-(Control). When an incident is provided, start at the Incident and add (Incident)-[:CONTAINS]->(Alert) first.
               For "why was it created" also follow (User)-[:TRIGGERED]->(Event)-[:CREATED_ALERT]->(Alert) and (Alert)-[:AFFECTS]->(Service).
            b. When the question names a threat or attack (for example "brute force", "T1110", "broken access control"), start at the Threat
               without requiring an Alert: match t.id = $threatId or toLower(t.name) CONTAINS toLower($threatName) (map wording to ids with the Threat list
