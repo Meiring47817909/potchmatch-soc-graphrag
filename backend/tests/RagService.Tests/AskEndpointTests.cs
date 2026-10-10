@@ -95,7 +95,8 @@ public class AskEndpointTests
     {
         var body = Body(await Ask(new FakeGemini(), new FakeGraph(), new AskRequest("Why?", null, null), new GeminiOptions()), 503);
         Assert.Equal("rag_disabled", body.GetProperty("error").GetString());
-        Assert.StartsWith("GEMINI_API_KEY is not set", body.GetProperty("message").GetString());
+        Assert.Equal("GEMINI_API_KEY is not set. Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container).",
+            body.GetProperty("message").GetString());
     }
 
     [Theory]

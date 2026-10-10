@@ -135,7 +135,7 @@ public static class PromptBuilder
            The query runs in a read-only transaction behind a validator that rejects anything else.
         2. CALL of a procedure is allowed only for db.labels(), db.relationshipTypes() and db.propertyKeys().
            Built-in functions are fine (count, collect, size, coalesce, toUpper, toLower, toString, nodes, relationships, length, ...).
-           The only qualified functions allowed are apoc.map.*, apoc.coll.*, apoc.text.*, apoc.convert.* and the date., datetime., localdatetime., localtime., time., duration., point. and vector. namespaces.
+           The only qualified functions allowed are in the date., datetime., localdatetime., localtime., time., duration., point. and vector. namespaces.
         3. Never use a Cypher keyword as a variable, alias or map key (for example set, start, end, create, delete, remove, merge, drop, use, show, stop, call, load, match, return).
            Use names such as ctrl, svc, startedAt.
         4. Never inline values: when an alert id is provided use $alertId; when an incident id is provided use $incidentId.

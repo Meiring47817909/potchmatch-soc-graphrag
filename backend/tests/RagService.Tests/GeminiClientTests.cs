@@ -40,6 +40,28 @@ public class GeminiClientTests
     }
 
     [Fact]
+    public async Task Gemini_DefaultOptions_SendsThinkingBudgetZero()
+    {
+        var h = FakeHandler.Json(HttpStatusCode.OK, Ok);
+        await Make(h).GenerateAsync("s", "u", CancellationToken.None);
+        using var doc = JsonDocument.Parse(h.Body!);
+        var budget = doc.RootElement.GetProperty("generationConfig").GetProperty("thinkingConfig").GetProperty("thinkingBudget");
+        Assert.Equal(0, budget.GetInt32());
+    }
+
+    [Fact]
+    public async Task Gemini_ThinkingBudgetNull_OmitsThinkingConfig()
+    {
+        var h = FakeHandler.Json(HttpStatusCode.OK, Ok);
+        await Make(h, new GeminiOptions { ApiKey = "k", ThinkingBudget = null }).GenerateAsync("s", "u", CancellationToken.None);
+        using var doc = JsonDocument.Parse(h.Body!);
+        Assert.False(doc.RootElement.GetProperty("generationConfig").TryGetProperty("thinkingConfig", out _));
+    }
+
+    [Fact]
+    public void Gemini_DefaultTimeout_Is25Seconds() => Assert.Equal(25, new GeminiOptions().TimeoutSeconds);
+
+    [Fact]
     public async Task Gemini_ReturnsCandidateText()
     {
         var text = await Make(FakeHandler.Json(HttpStatusCode.OK, Ok)).GenerateAsync("s", "u", CancellationToken.None);

@@ -255,6 +255,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       Gemini__ApiKey: "${GEMINI_API_KEY:-}"
       Gemini__Model: "${GEMINI_MODEL:-gemini-2.5-flash}"
+      Gemini__ThinkingBudget: "${GEMINI_THINKING_BUDGET-0}"
       GraphQuery__Url: "http://graph-service:8080"
       GraphQuery__Key: "dev-graph-query-key-change-me"
       Consul__Address: "http://consul:8500"

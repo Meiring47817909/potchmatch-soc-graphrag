@@ -58,6 +58,7 @@ public class RagPipelineTests
         Assert.Contains("T1110: Brute Force", gemini.Calls[0].System);
         Assert.DoesNotContain("filled in by the caller", gemini.Calls[0].System);
         Assert.Contains("put a value for every $parameter", gemini.Calls[0].System);
+        Assert.DoesNotContain("apoc", gemini.Calls[0].System);
         Assert.Contains("(dep:Service)-[:DEPENDS_ON*1..]->(x:Service", gemini.Calls[0].System);
         Assert.Contains("without requiring an Alert", gemini.Calls[0].System);
     }

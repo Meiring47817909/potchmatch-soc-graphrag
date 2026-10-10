@@ -13,7 +13,7 @@ public sealed class RagDisabledException() : Exception("GEMINI_API_KEY is not se
 public static class RagMessages
 {
     public const string LlmBusy = "The language model is busy or unavailable; try again in a minute.";
-    public const string RagDisabled = "GEMINI_API_KEY is not set; add it to backend/.env and restart rag-service.";
+    public const string RagDisabled = "GEMINI_API_KEY is not set. Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container).";
     public const string GraphUnavailable = "The knowledge graph service is unavailable; try again shortly.";
 
     public static string LlmRejected(int statusCode) =>

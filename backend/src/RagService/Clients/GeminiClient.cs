@@ -19,7 +19,7 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
         {
             systemInstruction = new { parts = new[] { new { text = systemPrompt } } },
             contents = new[] { new { role = "user", parts = new[] { new { text = userPrompt } } } },
-            generationConfig = new { temperature = 0, responseMimeType = "application/json" },
+            generationConfig = BuildGenerationConfig(),
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"models/{_o.Model}:generateContent")
@@ -63,6 +63,13 @@ public sealed class GeminiClient(HttpClient http, IOptions<GeminiOptions> option
             logger.LogWarning("Gemini returned an unreadable response");
             throw new LlmUnavailableException(RagMessages.LlmBusy, ex);
         }
+    }
+
+    private Dictionary<string, object> BuildGenerationConfig()
+    {
+        var cfg = new Dictionary<string, object> { ["temperature"] = 0, ["responseMimeType"] = "application/json" };
+        if (_o.ThinkingBudget is { } budget) cfg["thinkingConfig"] = new { thinkingBudget = budget };
+        return cfg;
     }
 
     /// <summary>Concatenates every text part of the first candidate (skipping thought parts); null when there is none.</summary>
