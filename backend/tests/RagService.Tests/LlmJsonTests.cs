@@ -30,4 +30,19 @@ public class LlmJsonTests
         var q = LlmJson.Parse<Q>("x {\"cypher\":\"RETURN {a:1}\", \"o\":{\"k\":1}} y");
         Assert.Equal("RETURN {a:1}", q!.Cypher);
     }
+
+    [Theory]
+    [InlineData("{\"cypher\":\"MATCH (n) RETURN n\"} and then {not json}")]
+    [InlineData("Answer: {\"cypher\":\"MATCH (n) RETURN n\"}\nNote: braces } like this")]
+    public void TrailingBraces_FallsBackToFirstBalancedObject(string text)
+    {
+        Assert.Equal("MATCH (n) RETURN n", LlmJson.Parse<Q>(text)!.Cypher);
+    }
+
+    [Fact]
+    public void BalancedScan_IsStringAware()
+    {
+        var q = LlmJson.Parse<Q>("{\"cypher\":\"RETURN '}' AS x, \\\"{\\\" AS y\"} trailing }");
+        Assert.Equal("RETURN '}' AS x, \"{\" AS y", q!.Cypher);
+    }
 }

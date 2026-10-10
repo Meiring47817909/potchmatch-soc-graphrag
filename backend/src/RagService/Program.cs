@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using RagService.Clients;
 using RagService.Logging;
 using RagService.Options;
+using RagService.Pipeline;
 using Serilog;
 using Serilog.Filters;
 using Serilog.Formatting.Compact;
@@ -75,7 +76,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<RagPipeline>();
+
+// Question validation (empty / > 500 chars) is done in RagController so every 400 has the
+// { error: "invalid_question", message } body; the implicit [Required] on non-nullable strings would
+// otherwise short-circuit an empty question into a ProblemDetails response.
+builder.Services.AddControllers(o => o.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 var app = builder.Build();
 

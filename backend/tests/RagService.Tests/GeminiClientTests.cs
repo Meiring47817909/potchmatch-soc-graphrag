@@ -11,10 +11,11 @@ public class GeminiClientTests
 {
     private const string Ok = """{"candidates":[{"content":{"parts":[{"text":"{\"cypher\":\"MATCH (n) RETURN n\"}"}]}}]}""";
 
-    private static GeminiClient Make(FakeHandler h, GeminiOptions? o = null)
+    private static GeminiClient Make(FakeHandler h, GeminiOptions? o = null, ListLogger<GeminiClient>? log = null)
     {
         o ??= new GeminiOptions { ApiKey = "secret-key" };
-        return new GeminiClient(new HttpClient(h) { BaseAddress = new Uri(o.BaseUrl) }, Microsoft.Extensions.Options.Options.Create(o));
+        return new GeminiClient(new HttpClient(h) { BaseAddress = new Uri(o.BaseUrl) }, Microsoft.Extensions.Options.Options.Create(o),
+            log ?? new ListLogger<GeminiClient>());
     }
 
     [Fact]
@@ -94,5 +95,56 @@ public class GeminiClientTests
     {
         var c = Make(FakeHandler.Json(HttpStatusCode.OK, Ok), new GeminiOptions());
         await Assert.ThrowsAsync<RagDisabledException>(() => c.GenerateAsync("s", "u", CancellationToken.None));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 400)]
+    [InlineData(HttpStatusCode.Unauthorized, 401)]
+    [InlineData(HttpStatusCode.Forbidden, 403)]
+    [InlineData(HttpStatusCode.NotFound, 404)]
+    public async Task Gemini_ClientError_RejectedMessage_LogsStatusOnly(HttpStatusCode code, int n)
+    {
+        var log = new ListLogger<GeminiClient>();
+        var ex = await Assert.ThrowsAsync<LlmUnavailableException>(() =>
+            Make(FakeHandler.Json(code, """{"error":{"message":"API key not valid"}}"""), log: log)
+                .GenerateAsync("system-prompt-text", "user-prompt-text", CancellationToken.None));
+
+        Assert.Equal($"The language model rejected the request (HTTP {n}); check GEMINI_API_KEY and GEMINI_MODEL.", ex.Message);
+        Assert.Contains(log.Messages, m => m.Contains(n.ToString()));
+        Assert.DoesNotContain(log.Messages, m => m.Contains("secret-key") || m.Contains("prompt-text"));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.TooManyRequests)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    public async Task Gemini_BusyOrServerError_BusyMessage(HttpStatusCode code)
+    {
+        var log = new ListLogger<GeminiClient>();
+        var ex = await Assert.ThrowsAsync<LlmUnavailableException>(() =>
+            Make(FakeHandler.Json(code, "{}"), log: log).GenerateAsync("s", "u", CancellationToken.None));
+        Assert.Equal("The language model is busy or unavailable; try again in a minute.", ex.Message);
+        Assert.Contains(log.Messages, m => m.Contains(((int)code).ToString()));
+        Assert.DoesNotContain(log.Messages, m => m.Contains("secret-key"));
+    }
+
+    [Fact]
+    public async Task Gemini_Timeout_BusyMessage()
+    {
+        var ex = await Assert.ThrowsAsync<LlmUnavailableException>(() =>
+            Make(new FakeHandler(_ => throw new TaskCanceledException("t"))).GenerateAsync("s", "u", CancellationToken.None));
+        Assert.Equal("The language model is busy or unavailable; try again in a minute.", ex.Message);
+    }
+
+    [Fact]
+    public async Task Gemini_MultipleTextParts_Concatenated_ThoughtsSkipped()
+    {
+        const string body = """
+            {"candidates":[{"content":{"parts":[
+              {"text":"thinking...","thought":true},
+              {"text":"{\"cypher\":\"MATCH (n) "},
+              {"text":"RETURN n\"}"}]}}]}
+            """;
+        var text = await Make(FakeHandler.Json(HttpStatusCode.OK, body)).GenerateAsync("s", "u", CancellationToken.None);
+        Assert.Equal("{\"cypher\":\"MATCH (n) RETURN n\"}", text);
     }
 }
