@@ -89,4 +89,10 @@ describe('EvidencePanel', () => {
     expect(el.textContent).toContain('Syntax error near X');
     expect(el.querySelector('app-graph-view')).toBeNull();
   });
+
+  it('EvidencePanel_HidesModelWhenEmpty', () => {
+    const a = base();
+    a.retrieval.model = '';
+    expect(render(a).textContent).not.toContain('Model:');
+  });
 });

@@ -34,4 +34,18 @@ describe('GraphView', () => {
     fixture.destroy();
     expect(instances[0].destroy).toHaveBeenCalled();
   });
+
+  it('GraphView_RedrawsOnInputChange', async () => {
+    TestBed.configureTestingModule({ imports: [GraphView] });
+    const fixture = TestBed.createComponent(GraphView);
+    fixture.componentRef.setInput('nodes', nodes);
+    fixture.componentRef.setInput('rels', rels);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(instances.length).toBe(1));
+    fixture.componentRef.setInput('nodes', [...nodes, { id: '3', label: 'Control', properties: {} }]);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(instances.length).toBe(2));
+    expect(instances[0].destroy).toHaveBeenCalled();
+    expect(instances[1].opts.elements.length).toBe(4);
+  });
 });

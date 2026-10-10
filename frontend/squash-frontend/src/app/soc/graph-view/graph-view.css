@@ -9,3 +9,7 @@
   border-radius: 6px;
   background: #f8fafc;
 }
+
+.failed {
+  color: #b91c1c;
+}

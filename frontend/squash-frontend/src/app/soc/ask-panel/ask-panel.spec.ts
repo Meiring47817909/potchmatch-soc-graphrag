@@ -64,7 +64,10 @@ describe('AskPanel', () => {
     expect(textarea().maxLength).toBe(500);
     let emitted: RagAnswer | undefined;
     fixture.componentInstance.answered.subscribe((a) => (emitted = a));
+    let asking = 0;
+    fixture.componentInstance.asking.subscribe(() => asking++);
     askButton().click();
+    expect(asking).toBe(1);
     const req = http.expectOne((r) => r.url.endsWith('/api/rag/ask'));
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ question: 'Why?', alertId: 'ALT-1', incidentId: undefined });
@@ -73,15 +76,51 @@ describe('AskPanel', () => {
     expect(emitted?.answer).toBe('Because [ALT-1]');
   });
 
-  it('AskPanel_ChipFillsQuestionAndDropsContextWhenEdited', async () => {
+  it('AskPanel_ContextSurvivesTypedEditAndClearsViaPill', async () => {
+    await setup({ enabled: true, model: 'g', reason: null }, 'Why?', { alertId: 'ALT-1' });
+    expect(root().querySelector('.context-pill')?.textContent).toContain('alert ALT-1');
+    textarea().value = 'Why was it raised?';
+    textarea().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    askButton().click();
+    let req = http.expectOne((r) => r.url.endsWith('/api/rag/ask'));
+    expect(req.request.body).toEqual({ question: 'Why was it raised?', alertId: 'ALT-1', incidentId: undefined });
+    req.flush(answer());
+    await fixture.whenStable();
+    fixture.detectChanges();
+    (root().querySelector('.clear-context') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(root().querySelector('.context-pill')).toBeNull();
+    askButton().click();
+    req = http.expectOne((r) => r.url.endsWith('/api/rag/ask'));
+    expect(req.request.body.alertId).toBeUndefined();
+    req.flush(answer());
+  });
+
+  it('AskPanel_ChipFillsQuestionAndClearsContext', async () => {
     await setup({ enabled: true, model: 'g', reason: null }, 'Why?', { alertId: 'ALT-1' });
     (root().querySelector('.chips button') as HTMLButtonElement).click();
     fixture.detectChanges();
+    expect(root().querySelector('.context-pill')).toBeNull();
     askButton().click();
     const req = http.expectOne((r) => r.url.endsWith('/api/rag/ask'));
     expect(req.request.body.alertId).toBeUndefined();
     expect(req.request.body.question.length).toBeGreaterThan(10);
     req.flush(answer());
+  });
+
+  it('AskPanel_ShowsInvalidQuestionMessageVerbatimOn400', async () => {
+    await setup({ enabled: true, model: 'g', reason: null }, 'Why?');
+    askButton().click();
+    http
+      .expectOne((r) => r.url.endsWith('/api/rag/ask'))
+      .flush(
+        { error: 'invalid_question', message: 'Question must be 1..500 characters.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(root().textContent).toContain('Question must be 1..500 characters.');
   });
 
   it('AskPanel_ShowsServerMessageVerbatimOn503', async () => {

@@ -27,6 +27,7 @@ export class AskPanel {
   readonly question = input('');
   readonly context = input<AskContext>({});
   readonly answered = output<RagAnswer>();
+  readonly asking = output<void>();
 
   protected readonly maxLength = MAX_QUESTION;
   protected readonly examples = EXAMPLES;
@@ -35,7 +36,8 @@ export class AskPanel {
   protected readonly statusError = signal<string | null>(null);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
-  // Alert/incident context applies only to the question it was set with; editing the text drops it.
+  // Alert/incident context survives free-text edits; it is cleared by the pill, an example chip,
+  // or when a panel's Why?/Ask replaces it.
   private readonly activeContext = signal<AskContext>({});
 
   constructor() {
@@ -55,11 +57,22 @@ export class AskPanel {
 
   protected edit(value: string): void {
     this.text.set(value);
-    this.activeContext.set({});
   }
 
   protected useExample(example: string): void {
-    this.edit(example);
+    this.text.set(example);
+    this.clearContext();
+  }
+
+  protected clearContext(): void {
+    this.activeContext.set({});
+  }
+
+  protected contextLabel(): string | null {
+    const c = this.activeContext();
+    if (c.alertId) return `alert ${c.alertId}`;
+    if (c.incidentId) return `incident ${c.incidentId}`;
+    return null;
   }
 
   protected ask(): void {
@@ -67,6 +80,7 @@ export class AskPanel {
     if (!this.enabled || this.loading() || question.length === 0) return;
     this.loading.set(true);
     this.error.set(null);
+    this.asking.emit();
     const ctx = this.activeContext();
     this.api.ask({ question, alertId: ctx.alertId, incidentId: ctx.incidentId }).subscribe({
       next: (a) => {

@@ -8,6 +8,12 @@
   @if (statusError()) {
     <p class="error" role="alert">{{ statusError() }}</p>
   }
+  @if (contextLabel(); as label) {
+    <p class="context-pill">
+      Context: {{ label }}
+      <button type="button" class="clear-context" aria-label="Remove context" (click)="clearContext()">✕</button>
+    </p>
+  }
   <form (submit)="$event.preventDefault(); ask()">
     <textarea
       name="question"

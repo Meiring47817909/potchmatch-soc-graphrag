@@ -4,6 +4,7 @@
   <app-ask-panel
     [question]="question()"
     [context]="context()"
+    (asking)="answer.set(null)"
     (answered)="answer.set($event)"
   ></app-ask-panel>
   @if (answer(); as a) {

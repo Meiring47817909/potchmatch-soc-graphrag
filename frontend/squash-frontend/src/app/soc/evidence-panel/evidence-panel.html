@@ -12,7 +12,9 @@
   <h3>Retrieval</h3>
   <p class="retrieval">
     <span>{{ answer().retrieval.method }}</span> ·
-    <span>Model: {{ answer().retrieval.model }}</span> ·
+    @if (answer().retrieval.model) {
+      <span>Model: {{ answer().retrieval.model }}</span> ·
+    }
     <span>Attempts: {{ answer().retrieval.attempts }}</span> ·
     <span>Rows: {{ answer().retrieval.rowCount }}</span>
     @if (answer().retrieval.truncated) {

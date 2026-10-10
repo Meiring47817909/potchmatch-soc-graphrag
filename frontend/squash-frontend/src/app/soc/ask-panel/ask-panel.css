@@ -45,3 +45,20 @@ textarea {
 .error {
   color: #b91c1c;
 }
+
+.context-pill {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #075985;
+  font-size: 0.8rem;
+}
+
+.clear-context {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+}

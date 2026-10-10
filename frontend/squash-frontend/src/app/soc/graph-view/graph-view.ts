@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, effect, inject, input, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core';
 import type { Core, StylesheetJson } from 'cytoscape';
 import { EvidenceNode, EvidenceRel } from '../soc-models';
 import { toCytoscapeElements } from '../evidence-mapping';
@@ -64,6 +64,7 @@ export class GraphView {
   private cy: Core | null = null;
   private run = 0;
   private destroyed = false;
+  protected readonly failed = signal(false);
 
   constructor() {
     effect(() => {
@@ -79,14 +80,19 @@ export class GraphView {
 
   private async draw(elements: ReturnType<typeof toCytoscapeElements>): Promise<void> {
     const run = ++this.run;
-    const { default: cytoscape } = await import('cytoscape');
-    if (this.destroyed || run !== this.run) return;
-    this.cy?.destroy();
-    this.cy = cytoscape({
-      container: this.canvas().nativeElement,
-      elements,
-      style: STYLE,
-      layout: { name: 'cose', animate: false, fit: true },
-    });
+    try {
+      const { default: cytoscape } = await import('cytoscape');
+      if (this.destroyed || run !== this.run) return;
+      this.cy?.destroy();
+      this.cy = cytoscape({
+        container: this.canvas().nativeElement,
+        elements,
+        style: STYLE,
+        layout: { name: 'cose', animate: false, fit: true },
+      });
+      this.failed.set(false);
+    } catch {
+      if (!this.destroyed && run === this.run) this.failed.set(true);
+    }
   }
 }
