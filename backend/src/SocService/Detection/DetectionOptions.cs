@@ -6,6 +6,7 @@ public class DetectionOptions
 
     public FailedLoginsOptions FailedLogins { get; set; } = new();
     public UnauthorisedAccessOptions UnauthorisedAccess { get; set; } = new();
+    public GraphAccessOptions GraphAccess { get; set; } = new();
     public RequestRateOptions RequestRate { get; set; } = new();
     public ServiceFailureOptions ServiceFailure { get; set; } = new();
     public int EngineIntervalSeconds { get; set; } = 15;
@@ -20,6 +21,13 @@ public class DetectionOptions
     {
         public int Threshold { get; set; } = 3;
         public int WindowMinutes { get; set; } = 5;
+    }
+
+    public class GraphAccessOptions
+    {
+        public int Threshold { get; set; } = 3;
+        public int WindowMinutes { get; set; } = 5;
+        public List<string> SensitivePathPrefixes { get; set; } = ["/api/graph/", "/api/rag/"];
     }
 
     public class RequestRateOptions

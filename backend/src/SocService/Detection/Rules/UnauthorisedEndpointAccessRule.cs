@@ -25,7 +25,8 @@ public class UnauthorisedEndpointAccessRule(IOptions<DetectionOptions> options) 
         var from = now - Window;
 
         var groups = events
-            .Where(e => InputEventTypes.Contains(e.EventType) && e.Timestamp >= from)
+            .Where(e => InputEventTypes.Contains(e.EventType) && e.Timestamp >= from
+                        && !SensitivePaths.IsSensitive(e.Endpoint, options.Value.GraphAccess.SensitivePathPrefixes))
             .Select(e => new
             {
                 Event = e,

@@ -42,6 +42,7 @@ builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.Multipl
 builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.UnauthorisedEndpointAccessRule>();
 builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.AbnormalRequestRateRule>();
 builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.ServiceFailureRule>();
+builder.Services.AddSingleton<IDetectionRule, SocService.Detection.Rules.GraphAccessRule>();
 builder.Services.AddScoped<DetectionEngine>();
 builder.Services.AddHostedService<DetectionWorker>();
 

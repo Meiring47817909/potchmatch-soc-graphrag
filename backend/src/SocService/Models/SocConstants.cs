@@ -22,5 +22,6 @@ public static class SocConstants
         public const string UnauthorisedAccess = "Unauthorised Endpoint Access";
         public const string RequestRate = "POSSIBLE_DOS";
         public const string ServiceFailure = "SERVICE_FAILURE";
+        public const string GraphAccess = "GRAPH_ACCESS";
     }
 }
