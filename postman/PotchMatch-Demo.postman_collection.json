@@ -1234,6 +1234,551 @@
       ]
     },
     {
+      "name": "Phase 2 — RAG",
+      "description": "Cycle C GraphRAG assistant, admin only. Run the 'Phase 2 — SOC' folder first (failed logins), wait ~45 s for the graph sync, then run this folder top to bottom. Ask requests need a Gemini API key on the rag-service (otherwise 503 rag_disabled). The Rule 5 probe needs the folder 2 player registered.",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@potchmatch.local\",\n  \"password\": \"Admin@12345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Seeded admin account. Stores the JWT in {{adminToken}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin login OK (200)', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('adminToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "RAG status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/rag/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rag",
+                "status"
+              ]
+            },
+            "description": "Returns { enabled, model, reason }. enabled is false when no Gemini API key is configured; the ask requests then return 503 rag_disabled."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const s = pm.response.json();",
+                  "pm.test('status has enabled + model', () => { pm.expect(s).to.have.property('enabled'); pm.expect(s).to.have.property('model'); });"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "List SOC alerts (pick graphAlertId)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/soc/alerts?status=OPEN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "soc",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                }
+              ]
+            },
+            "description": "Stores the id of the first Multiple Failed Logins alert as {{graphAlertId}}. Generate failed logins first (SOC folder) and wait ~45 s for the graph sync."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const alerts = pm.response.json();",
+                  "const a = Array.isArray(alerts) ? alerts.find(x => x.ruleName === 'Multiple Failed Logins') : undefined;",
+                  "pm.test('A Multiple Failed Logins alert exists', () => pm.expect(a, 'no alert yet').to.exist);",
+                  "if (a) pm.environment.set('graphAlertId', a.alertId);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ask: why was this alert created?",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Why was this alert created and what should be done?\",\n  \"alertId\": \"{{graphAlertId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rag/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rag",
+                "ask"
+              ]
+            },
+            "description": "GraphRAG question about the selected alert. The answer is grounded in the Cypher evidence (nodes, relationships, rows) returned alongside it."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('answer is non-empty', () => pm.expect(r.answer, 'answer').to.be.a('string').and.not.empty);",
+                  "pm.test('cypher is non-empty', () => pm.expect(r.cypher, 'cypher').to.be.a('string').and.not.empty);",
+                  "if (r.answered) pm.test('evidence has nodes', () => pm.expect(r.nodes.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ask: controls for brute force",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What controls can mitigate brute force attacks?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rag/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rag",
+                "ask"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('answer is non-empty', () => pm.expect(r.answer, 'answer').to.be.a('string').and.not.empty);",
+                  "pm.test('cypher is non-empty', () => pm.expect(r.cypher, 'cypher').to.be.a('string').and.not.empty);",
+                  "if (r.answered) pm.test('evidence has nodes', () => pm.expect(r.nodes.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Ask: impact if payment-service fails",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is the likely impact if payment-service fails?\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/rag/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "rag",
+                "ask"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const r = pm.response.json();",
+                  "pm.test('answer is non-empty', () => pm.expect(r.answer, 'answer').to.be.a('string').and.not.empty);",
+                  "pm.test('cypher is non-empty', () => pm.expect(r.cypher, 'cypher').to.be.a('string').and.not.empty);",
+                  "if (r.answered) pm.test('evidence has nodes', () => pm.expect(r.nodes.length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Rule 5 probe: Login player",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Run the folder 2 'Register Player' first. Stores the player JWT in {{authToken}}."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logged in (200)', () => pm.response.to.have.status(200));",
+                  "pm.environment.set('authToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Rule 5 probe: player calls graph #1 (expect 403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graph/incidents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "graph",
+                "incidents"
+              ]
+            },
+            "description": "Forbidden sensitive-path request. Three within 5 minutes raise a GRAPH_ACCESS alert (HIGH)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Player is forbidden (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Rule 5 probe: player calls graph #2 (expect 403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graph/incidents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "graph",
+                "incidents"
+              ]
+            },
+            "description": "Forbidden sensitive-path request. Three within 5 minutes raise a GRAPH_ACCESS alert (HIGH)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Player is forbidden (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Rule 5 probe: player calls graph #3 (expect 403)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/graph/incidents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "graph",
+                "incidents"
+              ]
+            },
+            "description": "Forbidden sensitive-path request. Three within 5 minutes raise a GRAPH_ACCESS alert (HIGH)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Player is forbidden (403)', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Rule 5 probe: wait, then list alerts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/soc/alerts?status=OPEN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "soc",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                }
+              ]
+            },
+            "description": "Wait ~30 s after the three 403s (SOC detection runs every 15 s), then send this. Asserts a GRAPH_ACCESS alert exists."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const alerts = pm.response.json();",
+                  "pm.test('A GRAPH_ACCESS alert exists', () => pm.expect(Array.isArray(alerts) && alerts.some(x => x.ruleName === 'GRAPH_ACCESS'), 'no GRAPH_ACCESS alert yet').to.be.true);"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "0. Reference (optional, not part of the main flow)",
       "item": [
         {
