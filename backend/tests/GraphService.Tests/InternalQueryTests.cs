@@ -5,6 +5,7 @@ using GraphService.Rag;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Neo4j.Driver;
 
 namespace GraphService.Tests;
@@ -42,6 +43,74 @@ public class InternalQueryTests(Neo4jFixture fx)
         var c = Controller(await DeadDriverAsync(), header);
         Assert.IsType<UnauthorizedResult>(await c.Query(Req("MATCH (n) RETURN n"), default));
         Assert.IsType<UnauthorizedResult>(await c.Schema(default));
+    }
+
+    [Fact]
+    public async Task InternalQuery_NoKeyAndNoBody_401()
+    {
+        var c = Controller(await DeadDriverAsync(), null);
+        Assert.IsType<UnauthorizedResult>(await c.Query(null, default));
+
+        // The filter runs before model binding, so an invalid body cannot turn a missing key into a 400.
+        var http = new DefaultHttpContext
+        {
+            RequestServices = new ServiceCollection()
+                .AddSingleton<IConfiguration>(Config(Key)).BuildServiceProvider(),
+        };
+        var ctx = new Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext(
+            new ActionContext(http, new Microsoft.AspNetCore.Routing.RouteData(),
+                new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor()), []);
+        new InternalQueryKeyAttribute().OnAuthorization(ctx);
+        Assert.IsType<UnauthorizedResult>(ctx.Result);
+        http.Request.Headers["X-Graph-Query-Key"] = Key;
+        var ok = new Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext(ctx, []);
+        new InternalQueryKeyAttribute().OnAuthorization(ok);
+        Assert.Null(ok.Result);
+    }
+
+    private sealed class ThrowingRunner(Exception ex) : GuardedQueryRunner(null!)
+    {
+        public override Task<GuardedQueryResult> RunAsync(string cypher, IReadOnlyDictionary<string, object?> p, CancellationToken ct) =>
+            throw ex;
+    }
+
+    private sealed class ThrowingDescriber(Exception ex) : GraphSchemaDescriber(null!)
+    {
+        public override Task<GraphSchemaDescription> DescribeAsync(CancellationToken ct) => throw ex;
+    }
+
+    public static IEnumerable<object[]> Neo4jFailures() =>
+    [
+        [new AuthenticationException("bad credentials secret-detail")],
+        [new DatabaseException("db detail")],
+        [new ProtocolException("protocol detail")],
+    ];
+
+    [Theory]
+    [MemberData(nameof(Neo4jFailures))]
+    public async Task InternalQuery_OtherNeo4jFailures_503Generic(Neo4jException ex)
+    {
+        var c = new InternalQueryController(new ThrowingRunner(ex), new ThrowingDescriber(ex), Config(Key))
+        { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+        c.Request.Headers["X-Graph-Query-Key"] = Key;
+        var q = Assert.IsType<ObjectResult>(await c.Query(Req("MATCH (n) RETURN n"), default));
+        Assert.Equal(503, q.StatusCode);
+        Assert.Equal("graph_unavailable", Err(q.Value, "error"));
+        Assert.Null(Err(q.Value, "reason"));
+        Assert.Null(Err(q.Value, "message"));
+        Assert.Equal(503, Assert.IsType<ObjectResult>(await c.Schema(default)).StatusCode);
+    }
+
+    [Fact]
+    public async Task InternalSchema_ClientException_503Generic()
+    {
+        var ex = new ClientException("Neo.ClientError.Security.Forbidden", "forbidden detail");
+        var c = new InternalQueryController(new ThrowingRunner(ex), new ThrowingDescriber(ex), Config(Key))
+        { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+        c.Request.Headers["X-Graph-Query-Key"] = Key;
+        var s = Assert.IsType<ObjectResult>(await c.Schema(default));
+        Assert.Equal(503, s.StatusCode);
+        Assert.Null(Err(s.Value, "reason"));
     }
 
     [Fact]
@@ -135,5 +204,5 @@ public class InternalQueryTests(Neo4jFixture fx)
     }
 
     private static string? Err(object? body, string prop) =>
-        body!.GetType().GetProperty(prop)!.GetValue(body) as string;
+        body!.GetType().GetProperty(prop)?.GetValue(body) as string;
 }

@@ -20,7 +20,7 @@ public class GraphSchemaDescriber(IDriver driver)
 {
     public const int MaxSamples = 30;
 
-    public async Task<GraphSchemaDescription> DescribeAsync(CancellationToken ct)
+    public virtual async Task<GraphSchemaDescription> DescribeAsync(CancellationToken ct)
     {
         await using var session = driver.AsyncSession(o => o.WithDefaultAccessMode(AccessMode.Read));
         return await session.ExecuteReadAsync(async tx =>
@@ -51,7 +51,7 @@ public class GraphSchemaDescriber(IDriver driver)
                 await Sample(tx, "Incident", "status", ct), await Sample(tx, "Service", "name", ct));
 
             return new GraphSchemaDescription(labels, types, samples, QueryExamples.All);
-        });
+        }, tc => tc.WithTimeout(GuardedQueryRunner.Timeout));
     }
 
     private static Task<List<string>> Sample(IAsyncQueryRunner tx, string label, string prop, CancellationToken ct) =>

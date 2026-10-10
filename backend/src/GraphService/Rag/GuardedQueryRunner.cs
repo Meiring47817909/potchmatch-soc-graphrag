@@ -18,7 +18,7 @@ public class GuardedQueryRunner(IDriver driver)
     public const int MaxRecords = 200;
     public static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
 
-    public async Task<GuardedQueryResult> RunAsync(string cypher,
+    public virtual async Task<GuardedQueryResult> RunAsync(string cypher,
         IReadOnlyDictionary<string, object?> parameters, CancellationToken ct)
     {
         var args = parameters.ToDictionary(kv => kv.Key, kv => kv.Value);
