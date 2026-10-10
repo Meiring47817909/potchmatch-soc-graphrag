@@ -1,15 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { Map } from './map/map';
 import { ClubDetail } from './club-detail/club-detail';
 import { Login } from './login/login';
 import { Dashboard } from './dashboard/dashboard';
+import { SocPage } from './soc/soc-page/soc-page';
 import { SquashClub } from './models/squash-domain';
 import { Auth } from './services/auth';
 import { ClubData } from './services/club-data';
 
 @Component({
   selector: 'app-root',
-  imports: [Map, ClubDetail, Login, Dashboard],
+  imports: [Map, ClubDetail, Login, Dashboard, SocPage],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
@@ -22,12 +23,17 @@ export class App {
 
   // Which top-level page is showing: the map+club-detail view, or the
   // Dashboard (reached via the "Dashboard" button in the top bar).
-  protected readonly view = signal<'map' | 'dashboard'>('map');
+  protected readonly view = signal<'map' | 'dashboard' | 'soc'>('map');
 
   constructor(
     protected auth: Auth,
     private clubData: ClubData
   ) {
+    // An Admin lands on the SOC view as soon as they are logged in.
+    effect(() => {
+      if (this.auth.currentPlayer()?.role === 'Admin') this.view.set('soc');
+    });
+
     // Keep the selected club in sync whenever ClubData refreshes (Map's
     // initial load, or after accepting/hosting a challenge), so the detail
     // panel reflects the latest backend state without needing a re-click.
@@ -53,6 +59,10 @@ export class App {
 
   protected showDashboard(): void {
     this.view.set('dashboard');
+  }
+
+  protected showSoc(): void {
+    this.view.set('soc');
   }
 
   protected logout(): void {

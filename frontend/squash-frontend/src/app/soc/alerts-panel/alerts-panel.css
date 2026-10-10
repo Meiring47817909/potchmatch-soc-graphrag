@@ -1,0 +1,12 @@
+.panel { font-family: sans-serif; padding: 12px 16px; }
+header { display: flex; align-items: center; gap: 16px; }
+header h2 { margin: 0; flex: 1; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+.actions { white-space: nowrap; }
+.actions button { margin-right: 4px; }
+.error { color: #b71c1c; background: #fdecea; padding: 8px; border-radius: 4px; }
+.sev { padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; }
+.sev-high { background: #ffcdd2; color: #b71c1c; }
+.sev-medium { background: #ffe0b2; color: #e65100; }
+.sev-low { background: #c8e6c9; color: #1b5e20; }

@@ -1,0 +1,57 @@
+<section class="panel">
+  <header>
+    <h2>Incidents</h2>
+    <label>
+      Status
+      <select name="status" (change)="setStatusFilter($any($event.target).value)">
+        <option value="">All</option>
+        <option value="OPEN">Open</option>
+        <option value="RESOLVED">Resolved</option>
+      </select>
+    </label>
+  </header>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>Incident</th>
+        <th>Title</th>
+        <th>Subject</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Opened</th>
+        <th>Last alert</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (i of incidents(); track i.incidentId) {
+        <tr>
+          <td>{{ i.incidentId }}</td>
+          <td>
+            {{ i.title }}
+            @if (i.escalated) {
+              <span class="badge-escalated">ESCALATED</span>
+            }
+          </td>
+          <td>{{ i.subject }}</td>
+          <td>{{ i.severity }}</td>
+          <td>{{ i.status }}</td>
+          <td>{{ i.priority ?? '-' }}</td>
+          <td>{{ i.openedAt | date: 'short' }}</td>
+          <td>{{ i.lastAlertAt | date: 'short' }}</td>
+          <td><button type="button" class="ask" (click)="ask(i)">Ask</button></td>
+        </tr>
+      } @empty {
+        @if (!loading() && !error()) {
+          <tr><td colspan="9">No incidents.</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</section>

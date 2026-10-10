@@ -1,0 +1,66 @@
+<section class="panel">
+  <header>
+    <h2>Alerts</h2>
+    <label>
+      Status
+      <select name="status" (change)="setStatusFilter($any($event.target).value)">
+        <option value="">All</option>
+        <option value="OPEN">Open</option>
+        <option value="ACKNOWLEDGED">Acknowledged</option>
+        <option value="RESOLVED">Resolved</option>
+      </select>
+    </label>
+    <label>
+      Severity
+      <select name="severity" (change)="setSeverityFilter($any($event.target).value)">
+        <option value="">All</option>
+        <option value="HIGH">High</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="LOW">Low</option>
+      </select>
+    </label>
+  </header>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Rule</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>Affected</th>
+        <th>Description</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (a of alerts(); track a.alertId) {
+        <tr>
+          <td>{{ a.timestamp | date: 'short' }}</td>
+          <td>{{ a.ruleName }}</td>
+          <td><span class="sev sev-{{ a.severity.toLowerCase() }}">{{ a.severity }}</span></td>
+          <td>{{ a.status }}</td>
+          <td>{{ a.affectedService || a.affectedUser || a.affectedEntity || '-' }}</td>
+          <td>{{ a.description }}</td>
+          <td class="actions">
+            @if (a.status === 'OPEN') {
+              <button type="button" class="ack" (click)="change(a, 'ACKNOWLEDGED')">Acknowledge</button>
+            }
+            @if (a.status !== 'RESOLVED') {
+              <button type="button" class="resolve" (click)="change(a, 'RESOLVED')">Resolve</button>
+            }
+            <button type="button" class="why" (click)="why(a)">Why?</button>
+          </td>
+        </tr>
+      } @empty {
+        @if (!loading() && !error()) {
+          <tr><td colspan="7">No alerts.</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</section>
