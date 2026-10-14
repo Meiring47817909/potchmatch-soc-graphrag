@@ -1,0 +1,128 @@
+/* Shared look for the admin SOC page. Global (registered in angular.json) and scoped to
+   app-soc-page, because Tailwind's preflight strips borders and backgrounds from buttons,
+   inputs and headings, which left the SOC panels looking like plain text. */
+
+app-soc-page {
+  --soc-bg: #eef2f7;
+  --soc-card: #ffffff;
+  --soc-border: #d5dde8;
+  --soc-text: #1e293b;
+  --soc-muted: #64748b;
+  --soc-head: #f1f5f9;
+  --soc-row-alt: #f8fafc;
+  --soc-row-hover: #e8f0fb;
+  --soc-primary: #1565c0;
+  --soc-primary-dark: #0d47a1;
+  --soc-primary-soft: #e3effc;
+  --soc-ok: #2e7d32;
+  --soc-warn: #b45309;
+  --soc-danger: #b71c1c;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--soc-text);
+}
+
+/* Headings */
+app-soc-page h2 { font-size: 1.15rem; font-weight: 700; margin: 0; }
+app-soc-page h3 { font-size: 0.95rem; font-weight: 700; margin: 1rem 0 0.4rem; }
+
+/* Buttons: neutral by default, colour-coded by role */
+app-soc-page button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 11px;
+  border: 1px solid var(--soc-border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--soc-text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+app-soc-page button:hover:not(:disabled) { background: var(--soc-head); border-color: #b6c2d2; }
+app-soc-page button:focus-visible { outline: 2px solid var(--soc-primary); outline-offset: 2px; }
+app-soc-page button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+app-soc-page button.primary,
+app-soc-page form button[type='submit'] {
+  background: var(--soc-primary);
+  border-color: var(--soc-primary);
+  color: #fff;
+  padding: 6px 18px;
+  font-size: 0.9rem;
+}
+app-soc-page button.primary:hover:not(:disabled),
+app-soc-page form button[type='submit']:hover:not(:disabled) { background: var(--soc-primary-dark); border-color: var(--soc-primary-dark); }
+
+app-soc-page button.ack { border-color: #f0b35a; color: var(--soc-warn); background: #fff8eb; }
+app-soc-page button.ack:hover:not(:disabled) { background: #ffedc7; border-color: #e0952a; }
+app-soc-page button.resolve { border-color: #8cc690; color: var(--soc-ok); background: #f1f9f1; }
+app-soc-page button.resolve:hover:not(:disabled) { background: #dcf0dd; border-color: #5fae64; }
+app-soc-page button.why,
+app-soc-page button.ask { border-color: #9cc0ea; color: var(--soc-primary); background: var(--soc-primary-soft); }
+app-soc-page button.why:hover:not(:disabled),
+app-soc-page button.ask:hover:not(:disabled) { background: #cfe2f8; border-color: var(--soc-primary); }
+
+/* Form controls */
+app-soc-page input:not([type='checkbox']),
+app-soc-page select,
+app-soc-page textarea {
+  border: 1px solid var(--soc-border);
+  border-radius: 6px;
+  background: #fff;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--soc-text);
+}
+app-soc-page input:focus,
+app-soc-page select:focus,
+app-soc-page textarea:focus { outline: 2px solid var(--soc-primary-soft); border-color: var(--soc-primary); }
+app-soc-page input[type='checkbox'] { accent-color: var(--soc-primary); width: 15px; height: 15px; vertical-align: -2px; }
+app-soc-page label { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--soc-muted); font-weight: 600; }
+
+/* Tables */
+app-soc-page table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.83rem; }
+app-soc-page th {
+  position: sticky;
+  top: 0;
+  background: var(--soc-head);
+  color: #334155;
+  font-weight: 700;
+  text-align: left;
+  padding: 7px 9px;
+  border-bottom: 2px solid var(--soc-border);
+  white-space: nowrap;
+}
+app-soc-page td { padding: 6px 9px; border-bottom: 1px solid #e5eaf1; vertical-align: top; }
+app-soc-page tbody tr:nth-child(even of :not(.detail)) > td { background: var(--soc-row-alt); }
+app-soc-page tbody tr:hover > td { background: var(--soc-row-hover); }
+app-soc-page .scroll { overflow-x: auto; border: 1px solid var(--soc-border); border-radius: 8px; }
+app-soc-page .scroll table th:first-child { border-top-left-radius: 8px; }
+app-soc-page .scroll table th:last-child { border-top-right-radius: 8px; }
+app-soc-page tbody tr:last-child > td { border-bottom: none; }
+
+/* Badges */
+app-soc-page .sev,
+app-soc-page .status-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+app-soc-page .sev-critical, app-soc-page .sev-high { background: #fde2e2; color: var(--soc-danger); }
+app-soc-page .sev-medium { background: #ffedd5; color: #c2410c; }
+app-soc-page .sev-low, app-soc-page .sev-info { background: #dcfce7; color: #166534; }
+app-soc-page .status-open { background: #fde2e2; color: var(--soc-danger); }
+app-soc-page .status-acknowledged { background: #fef3c7; color: var(--soc-warn); }
+app-soc-page .status-resolved { background: #dcfce7; color: #166534; }
+
+/* Messages */
+app-soc-page .error { color: var(--soc-danger); background: #fdecea; border: 1px solid #f5c2c0; padding: 8px 12px; border-radius: 6px; }
+app-soc-page .note { color: var(--soc-muted); font-size: 0.84rem; margin: 6px 0 10px; }

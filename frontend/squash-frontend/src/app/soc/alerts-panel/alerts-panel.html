@@ -61,7 +61,7 @@
             <td class="nowrap" [title]="a.timestamp">{{ a.timestamp | date: "yyyy-MM-dd HH:mm:ss 'UTC'" : 'UTC' }}</td>
             <td>{{ a.ruleName }}</td>
             <td><span class="sev sev-{{ a.severity.toLowerCase() }}">{{ a.severity }}</span></td>
-            <td>{{ a.status }}</td>
+            <td><span class="status-badge status-{{ a.status.toLowerCase() }}">{{ a.status }}</span></td>
             <td class="clip" [title]="a.description">{{ a.description }}</td>
             <td class="count">{{ a.relatedEvents.length }}</td>
             <td>{{ a.affectedService ?? '-' }}</td>

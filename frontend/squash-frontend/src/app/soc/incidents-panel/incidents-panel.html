@@ -21,6 +21,7 @@
     <p class="error" role="alert">{{ message }}</p>
   }
 
+  <div class="scroll">
   <table>
     <thead>
       <tr>
@@ -46,8 +47,8 @@
             }
           </td>
           <td>{{ i.subject }}</td>
-          <td>{{ i.severity }}</td>
-          <td>{{ i.status }}</td>
+          <td><span class="sev sev-{{ i.severity.toLowerCase() }}">{{ i.severity }}</span></td>
+          <td><span class="status-badge status-{{ i.status.toLowerCase() }}">{{ i.status }}</span></td>
           <td>{{ i.priority ?? '-' }}</td>
           <td>{{ i.openedAt | date: 'short' }}</td>
           <td>{{ i.lastAlertAt | date: 'short' }}</td>
@@ -60,4 +61,5 @@
       }
     </tbody>
   </table>
+  </div>
 </section>

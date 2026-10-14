@@ -1,22 +1,27 @@
 <div class="soc-page">
-  <nav class="tabs" aria-label="SOC views">
-    <button type="button" class="tab-events" [class.active]="tab() === 'events'"
-      [attr.aria-pressed]="tab() === 'events'" (click)="tab.set('events')">Events</button>
-    <button type="button" class="tab-alerts" [class.active]="tab() === 'alerts'"
-      [attr.aria-pressed]="tab() === 'alerts'" (click)="tab.set('alerts')">Alerts</button>
-    <button type="button" class="tab-incidents" [class.active]="tab() === 'incidents'"
-      [attr.aria-pressed]="tab() === 'incidents'" (click)="tab.set('incidents')">Incidents (from the knowledge graph)</button>
-  </nav>
-  <app-events-panel [hidden]="tab() !== 'events'" [active]="tab() === 'events'"></app-events-panel>
-  <app-alerts-panel [hidden]="tab() !== 'alerts'" [active]="tab() === 'alerts'" (askAbout)="onAskAbout($event)"></app-alerts-panel>
-  <app-incidents-panel [hidden]="tab() !== 'incidents'" [active]="tab() === 'incidents'" (askAbout)="onAskAbout($event)"></app-incidents-panel>
-  <app-ask-panel
-    [question]="question()"
-    [context]="context()"
-    (asking)="onAsking($event)"
-    (answered)="answer.set($event)"
-  ></app-ask-panel>
-  @if (answer(); as a) {
-    <app-evidence-panel [answer]="a" [hadContext]="askedWithContext()"></app-evidence-panel>
-  }
+  <section class="card monitor">
+    <nav class="tabs" aria-label="SOC views">
+      <button type="button" class="tab tab-events" [class.active]="tab() === 'events'"
+        [attr.aria-pressed]="tab() === 'events'" (click)="tab.set('events')">Events</button>
+      <button type="button" class="tab tab-alerts" [class.active]="tab() === 'alerts'"
+        [attr.aria-pressed]="tab() === 'alerts'" (click)="tab.set('alerts')">Alerts</button>
+      <button type="button" class="tab tab-incidents" [class.active]="tab() === 'incidents'"
+        [attr.aria-pressed]="tab() === 'incidents'" (click)="tab.set('incidents')">Incidents (from the knowledge graph)</button>
+    </nav>
+    <app-events-panel [hidden]="tab() !== 'events'" [active]="tab() === 'events'"></app-events-panel>
+    <app-alerts-panel [hidden]="tab() !== 'alerts'" [active]="tab() === 'alerts'" (askAbout)="onAskAbout($event)"></app-alerts-panel>
+    <app-incidents-panel [hidden]="tab() !== 'incidents'" [active]="tab() === 'incidents'" (askAbout)="onAskAbout($event)"></app-incidents-panel>
+  </section>
+
+  <section class="card ask-card">
+    <app-ask-panel
+      [question]="question()"
+      [context]="context()"
+      (asking)="onAsking($event)"
+      (answered)="answer.set($event)"
+    ></app-ask-panel>
+    @if (answer(); as a) {
+      <app-evidence-panel [answer]="a" [hadContext]="askedWithContext()"></app-evidence-panel>
+    }
+  </section>
 </div>

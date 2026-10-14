@@ -1,12 +1,42 @@
-:host { display: block; font-family: sans-serif; padding: 0 16px 16px; }
+:host { display: block; padding: 0 18px 18px; }
 
 .evidence {
-  margin-top: 1rem;
+  border-top: 1px solid var(--soc-border);
+  padding-top: 14px;
 }
 
 .answer {
   white-space: pre-wrap;
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  background: #f5f9fe;
+  border: 1px solid #cfe0f5;
+  border-left: 4px solid var(--soc-primary);
+  border-radius: 6px;
+  line-height: 1.5;
 }
+
+.answer.unanswered {
+  background: #fffbeb;
+  border-color: #fcd9a4;
+  border-left-color: #f59e0b;
+}
+
+.retrieval {
+  font-size: 0.82rem;
+  color: var(--soc-muted);
+}
+
+.triples, .sources {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style: disc;
+  font-size: 0.85rem;
+}
+
+.sources a { color: var(--soc-primary); text-decoration: underline; }
+
+.sync-hint { color: var(--soc-muted); font-size: 0.85rem; }
 
 .warning {
   padding: 0.5rem 0.75rem;
@@ -36,6 +66,7 @@ pre {
 }
 
 .source-id {
+  margin-left: 4px;
   color: #64748b;
   font-size: 0.8rem;
 }

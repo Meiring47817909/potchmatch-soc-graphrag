@@ -1,6 +1,53 @@
-.soc-page { overflow-y: auto; height: 100%; }
-.tabs { display: flex; gap: 4px; padding: 10px 16px 0; border-bottom: 1px solid #ccc; font-family: sans-serif; }
-.tabs button { border: 1px solid #ccc; border-bottom: none; background: #f2f2f2; padding: 6px 14px;
-  border-radius: 6px 6px 0 0; cursor: pointer; margin-bottom: -1px; }
-.tabs button.active { background: #fff; font-weight: 600; border-bottom: 1px solid #fff; }
+.soc-page {
+  overflow-y: auto;
+  height: 100%;
+  background: var(--soc-bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: var(--soc-card);
+  border: 1px solid var(--soc-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  flex-shrink: 0;
+}
+
+/* Tabs sit on the card's top edge as an underlined strip. */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--soc-border);
+  background: #f8fafc;
+  border-radius: 10px 10px 0 0;
+}
+.tabs button.tab {
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--soc-muted);
+  padding: 11px 16px 9px;
+  font-size: 0.92rem;
+}
+.tabs button.tab:hover:not(:disabled) {
+  background: transparent;
+  color: var(--soc-text);
+  border-bottom-color: #c3cfde;
+}
+.tabs button.tab.active,
+.tabs button.tab.active:hover:not(:disabled) {
+  color: var(--soc-primary);
+  border-bottom-color: var(--soc-primary);
+}
+
+/* The Ask section is set apart with a blue accent. */
+.ask-card {
+  border-top: 4px solid var(--soc-primary);
+}
+
 [hidden] { display: none !important; }

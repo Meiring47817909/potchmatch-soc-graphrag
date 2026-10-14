@@ -1,11 +1,5 @@
-.scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-th, td { text-align: left; padding: 5px 7px; border-bottom: 1px solid #ddd; vertical-align: top; }
-th { font-family: monospace; white-space: nowrap; }
-.id { font-family: monospace; white-space: nowrap; cursor: help; }
+th { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78rem; }
+.id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; cursor: help; color: #475569; }
 .nowrap { white-space: nowrap; }
 .msg { min-width: 220px; }
-.sev { padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
-.sev-critical, .sev-high { background: #ffcdd2; color: #b71c1c; }
-.sev-medium { background: #ffe0b2; color: #e65100; }
-.sev-low, .sev-info { background: #c8e6c9; color: #1b5e20; }
+td:not(.msg) { white-space: nowrap; }

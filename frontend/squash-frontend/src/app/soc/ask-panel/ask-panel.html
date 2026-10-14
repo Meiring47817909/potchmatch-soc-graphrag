@@ -1,5 +1,8 @@
 <section class="panel">
-  <h2>Ask the graph</h2>
+  <div class="title">
+    <h2>Ask the graph</h2>
+    <p class="subtitle">Natural-language security questions, answered from the Neo4j knowledge graph with evidence.</p>
+  </div>
   @if (status() && !status()!.enabled) {
     <p class="disabled-note" role="status">
       Ask is disabled: {{ status()!.reason }}. Set GEMINI_API_KEY in backend/.env and run `docker compose up -d rag-service` (this recreates the container).
@@ -28,7 +31,7 @@
       (input)="edit($any($event.target).value)"
       placeholder="Ask a security question about the knowledge graph"
     ></textarea>
-    <div class="chips">
+    <div class="chips" aria-label="Example questions">
       @for (e of examples; track e) {
         <button type="button" [disabled]="!enabled" (click)="useExample(e)">{{ e }}</button>
       }
