@@ -40,16 +40,25 @@
           <th>affectedUser</th>
           <th>affectedEntity</th>
           <th>recommendedAction</th>
-          <th class="plain"></th>
+          <th class="plain"><span class="visually-hidden">Actions</span></th>
         </tr>
       </thead>
       <tbody>
         @for (a of alerts(); track a.alertId) {
           <tr class="alert-row" [class.open]="expanded() === a.alertId" (click)="toggle(a)">
-            <td class="id" [title]="a.alertId">
-              <span class="caret">{{ expanded() === a.alertId ? '▾' : '▸' }}</span>{{ shortId(a.alertId) }}
+            <td class="id">
+              <button
+                type="button"
+                class="expand"
+                [title]="a.alertId"
+                [attr.aria-expanded]="expanded() === a.alertId"
+                [attr.aria-label]="'Show details of alert ' + a.alertId"
+                (click)="toggle(a); $event.stopPropagation()"
+              >
+                <span class="caret" aria-hidden="true">{{ expanded() === a.alertId ? '▾' : '▸' }}</span>{{ shortId(a.alertId) }}
+              </button>
             </td>
-            <td class="nowrap" [title]="a.timestamp">{{ a.timestamp | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td class="nowrap" [title]="a.timestamp">{{ a.timestamp | date: "yyyy-MM-dd HH:mm:ss 'UTC'" : 'UTC' }}</td>
             <td>{{ a.ruleName }}</td>
             <td><span class="sev sev-{{ a.severity.toLowerCase() }}">{{ a.severity }}</span></td>
             <td>{{ a.status }}</td>
@@ -75,6 +84,8 @@
                 <dl>
                   <dt>alertId</dt>
                   <dd class="mono">{{ a.alertId }}</dd>
+                  <dt>timestamp</dt>
+                  <dd class="mono">{{ a.timestamp }}</dd>
                   <dt>description</dt>
                   <dd>{{ a.description }}</dd>
                   <dt>recommendedAction</dt>

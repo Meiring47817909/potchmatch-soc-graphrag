@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { Component, DestroyRef, inject, output, signal } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { GraphApi } from '../graph-api';
 import { AskAbout, GraphIncident } from '../soc-models';
@@ -17,6 +17,9 @@ const REFRESH_MS = 30_000;
 export class IncidentsPanel {
   private readonly api = inject(GraphApi);
 
+  /** False while the panel's tab is hidden: no loading or polling. */
+  readonly active = input(true);
+
   readonly askAbout = output<AskAbout>();
 
   protected readonly incidents = signal<GraphIncident[]>([]);
@@ -26,8 +29,13 @@ export class IncidentsPanel {
   protected readonly status = signal('');
 
   constructor() {
-    this.load();
-    const timer = setInterval(() => this.load(), REFRESH_MS);
+    // Load when the tab becomes visible; the 30 s refresh only runs while it is visible.
+    effect(() => {
+      if (this.active()) untracked(() => this.load());
+    });
+    const timer = setInterval(() => {
+      if (this.active()) this.load();
+    }, REFRESH_MS);
     inject(DestroyRef).onDestroy(() => {
       clearInterval(timer);
       this.inflight?.unsubscribe();

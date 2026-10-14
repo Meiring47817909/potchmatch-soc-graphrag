@@ -21,7 +21,7 @@
       @for (e of events(); track e.eventId) {
         <tr>
           <td class="id" [title]="e.eventId">{{ shortId(e.eventId) }}</td>
-          <td class="nowrap" [title]="e.timestamp">{{ e.timestamp | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+          <td class="nowrap" [title]="e.timestamp">{{ e.timestamp | date: "yyyy-MM-dd HH:mm:ss 'UTC'" : 'UTC' }}</td>
           <td>{{ e.serviceName }}</td>
           <td>{{ e.eventType }}</td>
           <td><span class="sev sev-{{ e.severity.toLowerCase() }}">{{ e.severity }}</span></td>

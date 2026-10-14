@@ -106,9 +106,7 @@ describe('AlertsPanel', () => {
 
   it('AlertsPanel_ShowsExactlyTheElevenSpecColumns', async () => {
     await setup([alert({ relatedEvents: ['e-1', 'e-2'] })]);
-    const headers = Array.from(root().querySelectorAll('thead th'))
-      .map((th) => th.textContent!.trim())
-      .filter((t) => t.length > 0);
+    const headers = Array.from(root().querySelectorAll('thead th:not(.plain)')).map((th) => th.textContent!.trim());
     expect(headers).toEqual([
       'alertId', 'timestamp', 'ruleName', 'severity', 'status', 'description',
       'relatedEvents', 'affectedService', 'affectedUser', 'affectedEntity', 'recommendedAction',
@@ -148,8 +146,42 @@ describe('AlertsPanel', () => {
     const emitted: AskAbout[] = [];
     fixture.componentInstance.askAbout.subscribe((e) => emitted.push(e));
     (root().querySelector('button.why') as HTMLButtonElement).click();
+    (root().querySelector('button.ack') as HTMLButtonElement).click();
+    (root().querySelector('button.resolve') as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(root().querySelector('tr.detail')).toBeNull();
     expect(emitted.length).toBe(1);
+    // Only the two PATCHes: no related-events fetch was fired.
+    expect(http.match((r) => r.url.endsWith('/api/soc/events')).length).toBe(0);
+    http.match((r) => r.method === 'PATCH').forEach((p) => p.flush(alert()));
+    http.match((r) => r.url.endsWith('/api/soc/alerts')).filter((g) => !g.cancelled).forEach((g) => g.flush([alert()]));
+  });
+
+  it('AlertsPanel_ExpandButtonIsKeyboardAccessible', async () => {
+    await setup();
+    const btn = root().querySelector('button.expand') as HTMLButtonElement;
+    expect(btn.getAttribute('aria-expanded')).toBe('false');
+    btn.click();
+    fixture.detectChanges();
+    expect(btn.getAttribute('aria-expanded')).toBe('true');
+    http.expectOne((r) => r.url.endsWith('/api/soc/events')).flush([]);
+  });
+
+  it('AlertsPanel_RefreshReloadsRelatedEventsAndCollapsesWhenAlertGone', async () => {
+    await setup();
+    (root().querySelector('tr.alert-row') as HTMLElement).click();
+    http.expectOne((r) => r.url.endsWith('/api/soc/events')).flush([]);
+    const component = fixture.componentInstance as unknown as { load(): void };
+
+    component.load();
+    http.expectOne((r) => r.url.endsWith('/api/soc/alerts')).flush([alert({ relatedEvents: ['e-1'] })]);
+    const again = http.expectOne((r) => r.url.endsWith('/api/soc/events'));
+    expect(again.request.params.get('alertId')).toBe('a-1');
+    again.flush([]);
+
+    component.load();
+    http.expectOne((r) => r.url.endsWith('/api/soc/alerts')).flush([]);
+    fixture.detectChanges();
+    expect(root().querySelector('tr.detail')).toBeNull();
   });
 });

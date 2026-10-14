@@ -25,3 +25,6 @@ th { font-family: monospace; white-space: nowrap; }
 .sev-critical, .sev-high { background: #ffcdd2; color: #b71c1c; }
 .sev-medium { background: #ffe0b2; color: #e65100; }
 .sev-low { background: #c8e6c9; color: #1b5e20; }
+.expand { font: inherit; background: none; border: none; padding: 0; cursor: pointer; white-space: nowrap; }
+.expand:focus-visible { outline: 2px solid #1565c0; outline-offset: 2px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

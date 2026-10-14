@@ -100,4 +100,15 @@ describe('EventsPanel', () => {
     expect(prev.disabled).toBe(false);
     expect(next.disabled).toBe(true);
   });
+
+  it('EventsPanel_ChoosingRequestReceivedOverridesTheHideToggle', async () => {
+    await setup();
+    const type = root().querySelector('input[name="type"]') as HTMLInputElement;
+    type.value = 'REQUEST_RECEIVED';
+    type.dispatchEvent(new Event('change'));
+    const req = nextReq();
+    expect(req.request.params.get('type')).toBe('REQUEST_RECEIVED');
+    expect(req.request.params.has('excludeType')).toBe(false);
+    req.flush([]);
+  });
 });

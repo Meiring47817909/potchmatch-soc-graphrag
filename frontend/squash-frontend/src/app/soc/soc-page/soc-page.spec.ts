@@ -46,4 +46,21 @@ describe('SocPage', () => {
     expect(hidden('app-incidents-panel')).toBe(false);
     expect(root.querySelector('app-ask-panel')).not.toBeNull();
   });
+
+  it('loads a hidden tab only when it is opened', async () => {
+    TestBed.configureTestingModule({
+      imports: [SocPage],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const fixture = TestBed.createComponent(SocPage);
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    expect(http.match((r) => r.url.endsWith('/api/soc/events')).length).toBe(0);
+    expect(http.match((r) => r.url.endsWith('/api/soc/alerts')).length).toBe(1);
+    http.match(() => true);
+
+    (fixture.nativeElement.querySelector('button.tab-events') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(http.match((r) => r.url.endsWith('/api/soc/events')).length).toBe(1);
+  });
 });
