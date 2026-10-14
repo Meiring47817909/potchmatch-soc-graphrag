@@ -53,10 +53,10 @@ Seeding only ever MERGEs. Editing a seed file adds and updates nodes and relatio
 1. Copy `backend/.env.example` to `backend/.env` and set `GEMINI_API_KEY`.
 2. Start the stack with `docker compose up -d --build` in `backend/`. If it is already running, use `docker compose up -d rag-service` instead: it recreates the container so the new key is picked up (`docker compose restart` keeps the old environment).
 3. In Postman run the `Phase 2 - SOC` folder (failed logins), then wait about 45 s for the alerts to sync into the graph (alert detection itself takes about 30 s).
-4. Open the SOC page as admin and click **Why?** on a Multiple Failed Logins alert.
+4. Open the SOC page as admin. The **Events** tab lists the stored events (13 spec fields; `REQUEST_RECEIVED` hidden by default). On the **Alerts** tab (11 spec fields), click a Multiple Failed Logins row to see its related events, then click **Why?**.
 5. Try the example questions in the Ask panel (controls for brute force, impact if payment-service fails, high severity users).
 6. Run the Rule 5 probe at the end of the `Phase 2 - RAG` folder and check that a `GRAPH_ACCESS` alert appears.
-7. Check the escalated incident in the Incidents panel.
+7. Check the escalated incident on the **Incidents (from the knowledge graph)** tab.
 
 In every answer watch `retrieval.attempts` (2 means the generated Cypher needed a repair) and `retrieval.unverifiedCitations` (should be empty).
 
