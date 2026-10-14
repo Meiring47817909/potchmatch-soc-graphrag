@@ -14,7 +14,8 @@ public static class EventsQuery
 
     public static async Task<List<SocEventResponse>> RunAsync(
         SocDbContext db, string? type, string? user, DateTimeOffset? from, DateTimeOffset? to,
-        int page, int pageSize, CancellationToken ct = default)
+        int page, int pageSize, CancellationToken ct = default,
+        string? excludeType = null, Guid? alertId = null)
     {
         pageSize = NormalisePageSize(pageSize);
         page = Math.Max(page, 1);
@@ -25,7 +26,10 @@ public static class EventsQuery
 
         var q = db.Events.AsNoTracking().AsQueryable();
         if (!string.IsNullOrWhiteSpace(type)) q = q.Where(e => e.EventType == type);
+        if (!string.IsNullOrWhiteSpace(excludeType)) q = q.Where(e => e.EventType != excludeType);
         if (!string.IsNullOrWhiteSpace(user)) q = q.Where(e => e.UserId == user);
+        if (alertId is { } aid)
+            q = q.Where(e => db.AlertEvents.Any(ae => ae.AlertId == aid && ae.EventId == e.EventId));
         if (from is not null) q = q.Where(e => e.Timestamp >= from);
         if (to is not null) q = q.Where(e => e.Timestamp <= to);
 

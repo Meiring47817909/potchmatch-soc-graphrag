@@ -15,6 +15,7 @@ public class SocEventsController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get(string? type, string? user, DateTimeOffset? from, DateTimeOffset? to,
+        string? excludeType, Guid? alertId,
         int page = 1, int pageSize = EventsQuery.DefaultPageSize, CancellationToken ct = default) =>
-        Ok(await EventsQuery.RunAsync(_db, type, user, from, to, page, pageSize, ct));
+        Ok(await EventsQuery.RunAsync(_db, type, user, from, to, page, pageSize, ct, excludeType, alertId));
 }
