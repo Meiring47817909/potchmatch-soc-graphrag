@@ -19,4 +19,31 @@ describe('SocPage', () => {
     expect(fixture.componentInstance.question()).toBe('q');
     expect(fixture.componentInstance.context()).toEqual({ alertId: 'a-1', incidentId: undefined });
   });
+
+  it('switches between the Events, Alerts and Incidents tabs', async () => {
+    TestBed.configureTestingModule({
+      imports: [SocPage],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const fixture = TestBed.createComponent(SocPage);
+    fixture.detectChanges();
+    TestBed.inject(HttpTestingController).match(() => true);
+    const root = fixture.nativeElement as HTMLElement;
+    const hidden = (sel: string) => (root.querySelector(sel) as HTMLElement).hidden;
+
+    expect(root.querySelector('.tabs')!.textContent).toContain('Incidents (from the knowledge graph)');
+    expect(hidden('app-alerts-panel')).toBe(false);
+    expect(hidden('app-events-panel')).toBe(true);
+
+    (root.querySelector('button.tab-events') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(hidden('app-events-panel')).toBe(false);
+    expect(hidden('app-alerts-panel')).toBe(true);
+    expect(hidden('app-incidents-panel')).toBe(true);
+
+    (root.querySelector('button.tab-incidents') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(hidden('app-incidents-panel')).toBe(false);
+    expect(root.querySelector('app-ask-panel')).not.toBeNull();
+  });
 });

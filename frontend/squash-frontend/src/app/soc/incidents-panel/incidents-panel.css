@@ -5,3 +5,4 @@ table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9r
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
 .error { color: #b71c1c; background: #fdecea; padding: 8px; border-radius: 4px; }
 .badge-escalated { margin-left: 6px; padding: 2px 6px; border-radius: 4px; background: #b71c1c; color: white; font-size: 0.7rem; font-weight: 700; }
+.note { color: #555; font-size: 0.85rem; margin: 6px 0; }

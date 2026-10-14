@@ -2,15 +2,18 @@ import { Subscription } from 'rxjs';
 import { Component, DestroyRef, inject, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { SocApi } from '../soc-api';
-import { AskAbout, SocAlert } from '../soc-models';
+import { AskAbout, SocAlert, SocEvent } from '../soc-models';
 import { describeHttpError } from '../http-error';
+import { EventsTable } from '../events-table/events-table';
+import { shortId } from '../short-id';
 
 const REFRESH_MS = 30_000;
 
-// Alerts table with status/severity filters, acknowledge/resolve, and a "Why?" button.
+// Alerts table with the 11 spec fields, status/severity filters, acknowledge/resolve and "Why?".
+// Clicking a row expands it to show the full description, recommended action and related events.
 @Component({
   selector: 'app-alerts-panel',
-  imports: [DatePipe],
+  imports: [DatePipe, EventsTable],
   templateUrl: './alerts-panel.html',
   styleUrl: './alerts-panel.css',
 })
@@ -25,6 +28,11 @@ export class AlertsPanel {
   private inflight?: Subscription;
   protected readonly status = signal('');
   protected readonly severity = signal('');
+  protected readonly expanded = signal<string | null>(null);
+  protected readonly related = signal<SocEvent[] | null>(null);
+  protected readonly relatedError = signal<string | null>(null);
+  private relatedReq?: Subscription;
+  protected readonly shortId = shortId;
 
   constructor() {
     this.load();
@@ -32,6 +40,7 @@ export class AlertsPanel {
     inject(DestroyRef).onDestroy(() => {
       clearInterval(timer);
       this.inflight?.unsubscribe();
+      this.relatedReq?.unsubscribe();
     });
   }
 
@@ -59,6 +68,21 @@ export class AlertsPanel {
         this.error.set(describeHttpError(err));
         this.loading.set(false);
       },
+    });
+  }
+
+  protected toggle(alert: SocAlert): void {
+    this.relatedReq?.unsubscribe();
+    if (this.expanded() === alert.alertId) {
+      this.expanded.set(null);
+      return;
+    }
+    this.expanded.set(alert.alertId);
+    this.related.set(null);
+    this.relatedError.set(null);
+    this.relatedReq = this.api.getEvents({ alertId: alert.alertId, pageSize: 200 }).subscribe({
+      next: (events) => this.related.set(events),
+      error: (err) => this.relatedError.set(describeHttpError(err)),
     });
   }
 

@@ -1,19 +1,24 @@
 import { Component, signal } from '@angular/core';
+import { EventsPanel } from '../events-panel/events-panel';
 import { AlertsPanel } from '../alerts-panel/alerts-panel';
 import { IncidentsPanel } from '../incidents-panel/incidents-panel';
 import { AskPanel } from '../ask-panel/ask-panel';
 import { EvidencePanel } from '../evidence-panel/evidence-panel';
 import { AskAbout, AskContext, RagAnswer } from '../soc-models';
 
-// Admin-only SOC view: alerts + incidents + Ask panel with its evidence. Panels emit askAbout;
+export type SocTab = 'events' | 'alerts' | 'incidents';
+
+// Admin-only SOC view: Events / Alerts / Incidents tabs above the Ask panel with its evidence.
+// Tabs are hidden rather than destroyed so each keeps its filters while you switch. Panels emit askAbout;
 // SocPage keeps the question/context signals the Ask panel takes as inputs and the latest answer.
 @Component({
   selector: 'app-soc-page',
-  imports: [AlertsPanel, IncidentsPanel, AskPanel, EvidencePanel],
+  imports: [EventsPanel, AlertsPanel, IncidentsPanel, AskPanel, EvidencePanel],
   templateUrl: './soc-page.html',
   styleUrl: './soc-page.css',
 })
 export class SocPage {
+  readonly tab = signal<SocTab>('alerts');
   readonly question = signal('');
   readonly context = signal<AskContext>({});
   readonly answer = signal<RagAnswer | null>(null);

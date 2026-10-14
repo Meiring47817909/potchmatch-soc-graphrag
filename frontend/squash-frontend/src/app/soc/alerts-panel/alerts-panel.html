@@ -25,42 +25,78 @@
     <p class="error" role="alert">{{ message }}</p>
   }
 
-  <table>
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Rule</th>
-        <th>Severity</th>
-        <th>Status</th>
-        <th>Affected</th>
-        <th>Description</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (a of alerts(); track a.alertId) {
+  <div class="scroll">
+    <table>
+      <thead>
         <tr>
-          <td>{{ a.timestamp | date: 'short' }}</td>
-          <td>{{ a.ruleName }}</td>
-          <td><span class="sev sev-{{ a.severity.toLowerCase() }}">{{ a.severity }}</span></td>
-          <td>{{ a.status }}</td>
-          <td>{{ a.affectedService || a.affectedUser || a.affectedEntity || '-' }}</td>
-          <td>{{ a.description }}</td>
-          <td class="actions">
-            @if (a.status === 'OPEN') {
-              <button type="button" class="ack" (click)="change(a, 'ACKNOWLEDGED')">Acknowledge</button>
-            }
-            @if (a.status !== 'RESOLVED') {
-              <button type="button" class="resolve" (click)="change(a, 'RESOLVED')">Resolve</button>
-            }
-            <button type="button" class="why" (click)="why(a)">Why?</button>
-          </td>
+          <th>alertId</th>
+          <th>timestamp</th>
+          <th>ruleName</th>
+          <th>severity</th>
+          <th>status</th>
+          <th>description</th>
+          <th>relatedEvents</th>
+          <th>affectedService</th>
+          <th>affectedUser</th>
+          <th>affectedEntity</th>
+          <th>recommendedAction</th>
+          <th class="plain"></th>
         </tr>
-      } @empty {
-        @if (!loading() && !error()) {
-          <tr><td colspan="7">No alerts.</td></tr>
+      </thead>
+      <tbody>
+        @for (a of alerts(); track a.alertId) {
+          <tr class="alert-row" [class.open]="expanded() === a.alertId" (click)="toggle(a)">
+            <td class="id" [title]="a.alertId">
+              <span class="caret">{{ expanded() === a.alertId ? '▾' : '▸' }}</span>{{ shortId(a.alertId) }}
+            </td>
+            <td class="nowrap" [title]="a.timestamp">{{ a.timestamp | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+            <td>{{ a.ruleName }}</td>
+            <td><span class="sev sev-{{ a.severity.toLowerCase() }}">{{ a.severity }}</span></td>
+            <td>{{ a.status }}</td>
+            <td class="clip" [title]="a.description">{{ a.description }}</td>
+            <td class="count">{{ a.relatedEvents.length }}</td>
+            <td>{{ a.affectedService ?? '-' }}</td>
+            <td>{{ a.affectedUser ?? '-' }}</td>
+            <td>{{ a.affectedEntity ?? '-' }}</td>
+            <td class="clip" [title]="a.recommendedAction">{{ a.recommendedAction }}</td>
+            <td class="actions" (click)="$event.stopPropagation()">
+              @if (a.status === 'OPEN') {
+                <button type="button" class="ack" (click)="change(a, 'ACKNOWLEDGED')">Acknowledge</button>
+              }
+              @if (a.status !== 'RESOLVED') {
+                <button type="button" class="resolve" (click)="change(a, 'RESOLVED')">Resolve</button>
+              }
+              <button type="button" class="why" (click)="why(a)">Why?</button>
+            </td>
+          </tr>
+          @if (expanded() === a.alertId) {
+            <tr class="detail">
+              <td colspan="12">
+                <dl>
+                  <dt>alertId</dt>
+                  <dd class="mono">{{ a.alertId }}</dd>
+                  <dt>description</dt>
+                  <dd>{{ a.description }}</dd>
+                  <dt>recommendedAction</dt>
+                  <dd>{{ a.recommendedAction }}</dd>
+                </dl>
+                <h3>relatedEvents ({{ a.relatedEvents.length }})</h3>
+                @if (relatedError(); as message) {
+                  <p class="error" role="alert">{{ message }}</p>
+                } @else if (related(); as events) {
+                  <app-events-table [events]="events" emptyText="No related events stored."></app-events-table>
+                } @else {
+                  <p class="muted">Loading related events…</p>
+                }
+              </td>
+            </tr>
+          }
+        } @empty {
+          @if (!loading() && !error()) {
+            <tr><td colspan="12">No alerts.</td></tr>
+          }
         }
-      }
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  </div>
 </section>

@@ -1,6 +1,6 @@
 <section class="panel">
   <header>
-    <h2>Incidents</h2>
+    <h2>Incidents (from the knowledge graph)</h2>
     <label>
       Status
       <select name="status" (change)="setStatusFilter($any($event.target).value)">
@@ -10,6 +10,12 @@
       </select>
     </label>
   </header>
+
+  <p class="note">
+    Incidents are not a SOC record type. GraphService groups related alerts into Incident nodes in Neo4j
+    (Incident CONTAINS Alert) — alerts for the same subject within a 30-minute window share one incident, escalated when two or more
+    rules fire.
+  </p>
 
   @if (error(); as message) {
     <p class="error" role="alert">{{ message }}</p>

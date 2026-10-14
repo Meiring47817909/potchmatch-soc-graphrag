@@ -1,0 +1,47 @@
+<section class="panel">
+  <header>
+    <h2>Events</h2>
+    <label>
+      eventType
+      <input name="type" list="soc-event-types" placeholder="all" (change)="setType($any($event.target).value)" />
+    </label>
+    <datalist id="soc-event-types">
+      <option value="FAILED_LOGIN"></option>
+      <option value="LOGIN_SUCCESS"></option>
+      <option value="UNAUTHORISED_ACCESS"></option>
+      <option value="AUTH_TOKEN_REJECTED"></option>
+      <option value="REQUEST_RECEIVED"></option>
+      <option value="INTER_SERVICE_CALL_FAILED"></option>
+      <option value="UNHANDLED_EXCEPTION"></option>
+      <option value="SERVICE_HEALTH_CRITICAL"></option>
+      <option value="BOOKING_CREATED"></option>
+      <option value="ESCROW_HELD"></option>
+      <option value="RAG_QUERY"></option>
+    </datalist>
+    <label>
+      userId
+      <input name="user" placeholder="all" (change)="setUser($any($event.target).value)" />
+    </label>
+    <label class="check">
+      <input
+        type="checkbox"
+        name="hideNoise"
+        [checked]="hideNoise()"
+        (change)="setHideNoise($any($event.target).checked)"
+      />
+      Hide REQUEST_RECEIVED
+    </label>
+  </header>
+
+  @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+  }
+
+  <app-events-table [events]="events()" [emptyText]="loading() ? 'Loading…' : 'No events.'"></app-events-table>
+
+  <footer>
+    <button type="button" class="prev" [disabled]="page() === 1" (click)="goTo(page() - 1)">Previous</button>
+    <span>Page {{ page() }}</span>
+    <button type="button" class="next" [disabled]="events().length < pageSize" (click)="goTo(page() + 1)">Next</button>
+  </footer>
+</section>

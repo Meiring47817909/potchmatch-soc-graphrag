@@ -2,7 +2,7 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AlertsPanel } from './alerts-panel';
-import { AskAbout, SocAlert } from '../soc-models';
+import { AskAbout, SocAlert, SocEvent } from '../soc-models';
 
 const alert = (over: Partial<SocAlert> = {}): SocAlert => ({
   alertId: 'a-1',
@@ -102,5 +102,54 @@ describe('AlertsPanel', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(root().textContent).toContain('Session expired — please log in again');
+  });
+
+  it('AlertsPanel_ShowsExactlyTheElevenSpecColumns', async () => {
+    await setup([alert({ relatedEvents: ['e-1', 'e-2'] })]);
+    const headers = Array.from(root().querySelectorAll('thead th'))
+      .map((th) => th.textContent!.trim())
+      .filter((t) => t.length > 0);
+    expect(headers).toEqual([
+      'alertId', 'timestamp', 'ruleName', 'severity', 'status', 'description',
+      'relatedEvents', 'affectedService', 'affectedUser', 'affectedEntity', 'recommendedAction',
+    ]);
+    const cells = root().querySelectorAll('tbody tr.alert-row td');
+    expect(cells[6].textContent!.trim()).toBe('2');
+    expect(cells[10].textContent).toContain('Lock the account');
+  });
+
+  it('AlertsPanel_RowClickExpandsAndLoadsRelatedEvents', async () => {
+    await setup([alert({ relatedEvents: ['e-1'] })]);
+    (root().querySelector('tr.alert-row') as HTMLElement).click();
+    fixture.detectChanges();
+    const req = http.expectOne((r) => r.url.endsWith('/api/soc/events'));
+    expect(req.request.params.get('alertId')).toBe('a-1');
+    const ev: SocEvent = {
+      eventId: 'e-1', timestamp: '2026-10-10T09:59:00Z', serviceName: 'identity-service',
+      eventType: 'FAILED_LOGIN', severity: 'MEDIUM', userId: 'u-1', sourceIp: '10.0.0.9',
+      endpoint: '/api/auth/login', httpMethod: 'POST', statusCode: 401, message: 'Bad password',
+      correlationId: 'c-1', affectedEntity: null,
+    };
+    req.flush([ev]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const detail = root().querySelector('tr.detail') as HTMLElement;
+    expect(detail.textContent).toContain('Lock the account');
+    expect(detail.querySelectorAll('app-events-table thead th').length).toBe(13);
+    expect(detail.textContent).toContain('Bad password');
+
+    (root().querySelector('tr.alert-row') as HTMLElement).click();
+    fixture.detectChanges();
+    expect(root().querySelector('tr.detail')).toBeNull();
+  });
+
+  it('AlertsPanel_ActionButtonsDoNotToggleRow', async () => {
+    await setup();
+    const emitted: AskAbout[] = [];
+    fixture.componentInstance.askAbout.subscribe((e) => emitted.push(e));
+    (root().querySelector('button.why') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(root().querySelector('tr.detail')).toBeNull();
+    expect(emitted.length).toBe(1);
   });
 });

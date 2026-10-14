@@ -17,6 +17,32 @@ export interface SocAlert {
   recommendedAction: string;
 }
 
+// SocService SocEventResponse.cs — the 13 spec event fields.
+export interface SocEvent {
+  eventId: string;
+  timestamp: string;
+  serviceName: string;
+  eventType: string;
+  severity: string;
+  userId: string | null;
+  sourceIp: string | null;
+  endpoint: string | null;
+  httpMethod: string | null;
+  statusCode: number | null;
+  message: string;
+  correlationId: string | null;
+  affectedEntity: string | null;
+}
+
+export interface EventFilter {
+  type?: string;
+  user?: string;
+  excludeType?: string;
+  alertId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface AlertFilter {
   status?: string;
   severity?: string;

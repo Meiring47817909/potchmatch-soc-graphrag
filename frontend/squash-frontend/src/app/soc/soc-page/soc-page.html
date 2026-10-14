@@ -1,6 +1,15 @@
 <div class="soc-page">
-  <app-alerts-panel (askAbout)="onAskAbout($event)"></app-alerts-panel>
-  <app-incidents-panel (askAbout)="onAskAbout($event)"></app-incidents-panel>
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" class="tab-events" [class.active]="tab() === 'events'"
+      [attr.aria-selected]="tab() === 'events'" (click)="tab.set('events')">Events</button>
+    <button type="button" role="tab" class="tab-alerts" [class.active]="tab() === 'alerts'"
+      [attr.aria-selected]="tab() === 'alerts'" (click)="tab.set('alerts')">Alerts</button>
+    <button type="button" role="tab" class="tab-incidents" [class.active]="tab() === 'incidents'"
+      [attr.aria-selected]="tab() === 'incidents'" (click)="tab.set('incidents')">Incidents (from the knowledge graph)</button>
+  </nav>
+  <app-events-panel [hidden]="tab() !== 'events'"></app-events-panel>
+  <app-alerts-panel [hidden]="tab() !== 'alerts'" (askAbout)="onAskAbout($event)"></app-alerts-panel>
+  <app-incidents-panel [hidden]="tab() !== 'incidents'" (askAbout)="onAskAbout($event)"></app-incidents-panel>
   <app-ask-panel
     [question]="question()"
     [context]="context()"

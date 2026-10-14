@@ -1,0 +1,7 @@
+.panel { font-family: sans-serif; padding: 12px 16px; }
+header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+header h2 { margin: 0; flex: 1; }
+header label { font-family: monospace; font-size: 0.85rem; }
+header .check { font-family: sans-serif; }
+footer { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.error { color: #b71c1c; background: #fdecea; padding: 8px; border-radius: 4px; }

@@ -1,0 +1,42 @@
+<div class="scroll">
+  <table class="events">
+    <thead>
+      <tr>
+        <th>eventId</th>
+        <th>timestamp</th>
+        <th>serviceName</th>
+        <th>eventType</th>
+        <th>severity</th>
+        <th>userId</th>
+        <th>sourceIp</th>
+        <th>endpoint</th>
+        <th>httpMethod</th>
+        <th>statusCode</th>
+        <th>message</th>
+        <th>correlationId</th>
+        <th>affectedEntity</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (e of events(); track e.eventId) {
+        <tr>
+          <td class="id" [title]="e.eventId">{{ shortId(e.eventId) }}</td>
+          <td class="nowrap" [title]="e.timestamp">{{ e.timestamp | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+          <td>{{ e.serviceName }}</td>
+          <td>{{ e.eventType }}</td>
+          <td><span class="sev sev-{{ e.severity.toLowerCase() }}">{{ e.severity }}</span></td>
+          <td>{{ e.userId ?? '-' }}</td>
+          <td>{{ e.sourceIp ?? '-' }}</td>
+          <td>{{ e.endpoint ?? '-' }}</td>
+          <td>{{ e.httpMethod ?? '-' }}</td>
+          <td>{{ e.statusCode ?? '-' }}</td>
+          <td class="msg">{{ e.message }}</td>
+          <td class="id" [title]="e.correlationId ?? ''">{{ shortId(e.correlationId) }}</td>
+          <td>{{ e.affectedEntity ?? '-' }}</td>
+        </tr>
+      } @empty {
+        <tr><td colspan="13">{{ emptyText() }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
