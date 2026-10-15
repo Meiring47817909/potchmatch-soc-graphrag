@@ -26,6 +26,7 @@
     <thead>
       <tr>
         <th>Incident</th>
+        <th>Rule</th>
         <th>Title</th>
         <th>Subject</th>
         <th>Severity</th>
@@ -40,6 +41,13 @@
       @for (i of incidents(); track i.incidentId) {
         <tr>
           <td>{{ i.incidentId }}</td>
+          <td class="rules">
+            @for (r of i.rules ?? []; track r) {
+              <span class="rule">{{ r }}</span>
+            } @empty {
+              -
+            }
+          </td>
           <td>
             {{ i.title }}
             @if (i.escalated) {
@@ -56,7 +64,7 @@
         </tr>
       } @empty {
         @if (!loading() && !error()) {
-          <tr><td colspan="9">No incidents.</td></tr>
+          <tr><td colspan="10">No incidents.</td></tr>
         }
       }
     </tbody>

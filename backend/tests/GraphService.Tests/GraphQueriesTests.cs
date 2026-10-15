@@ -116,6 +116,9 @@ public class GraphQueriesTests(Neo4jFixture fx)
         Assert.True((bool)inc["escalated"]!);
         Assert.Equal("HIGH", (string)inc["priority"]!);
         Assert.Equal("OPEN", (string)inc["status"]!);
+        // Distinct rule names of the contained alerts, sorted.
+        Assert.Equal(new[] { "Multiple Failed Logins", "Unauthorised Endpoint Access" },
+            ((System.Collections.IEnumerable)inc["rules"]!).Cast<object?>().Select(r => (string)r!).ToArray());
 
         var resolved = await Runner().RunAsync("incidents", GraphQueries.Incidents, P("status", "RESOLVED"), default);
         Assert.Empty(resolved.Rows);

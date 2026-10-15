@@ -14,6 +14,7 @@ const row = (over: Record<string, unknown> = {}) => ({
   priority: 'P2',
   openedAt: '2026-10-10T10:00:00Z',
   lastAlertAt: '2026-10-10T10:05:00Z',
+  rules: ['GRAPH_ACCESS', 'Unauthorised Endpoint Access'],
   ...over,
 });
 
@@ -70,5 +71,15 @@ describe('IncidentsPanel', () => {
   it('IncidentsPanel_ShowsEscalatedBadge', async () => {
     await setup([row({ escalated: true }), row({ incidentId: 'inc-2', escalated: false })]);
     expect(root().querySelectorAll('.badge-escalated').length).toBe(1);
+  });
+
+  it('IncidentsPanel_ShowsRuleColumnAfterIncident', async () => {
+    await setup([row(), row({ incidentId: 'inc-2', rules: [] })]);
+    const headers = Array.from(root().querySelectorAll('thead th')).map((th) => th.textContent!.trim());
+    expect(headers.slice(0, 2)).toEqual(['Incident', 'Rule']);
+    const rows = root().querySelectorAll('tbody tr');
+    const rules = Array.from(rows[0].querySelectorAll('td.rules .rule')).map((r) => r.textContent!.trim());
+    expect(rules).toEqual(['GRAPH_ACCESS', 'Unauthorised Endpoint Access']);
+    expect(rows[1].querySelector('td.rules')!.textContent!.trim()).toBe('-');
   });
 });

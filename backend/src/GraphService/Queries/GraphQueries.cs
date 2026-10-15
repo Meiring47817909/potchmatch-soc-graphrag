@@ -61,9 +61,12 @@ public static class GraphQueries
     public const string Incidents = """
         MATCH (i:Incident)
         WHERE $status IS NULL OR i.status = $status
+        OPTIONAL MATCH (i)-[:CONTAINS]->(a:Alert)
+        WITH i, a ORDER BY a.ruleName
+        WITH i, collect(DISTINCT a.ruleName) AS rules
         RETURN i, i.incidentId AS incidentId, i.title AS title, i.subject AS subject, i.severity AS severity,
                i.status AS status, i.escalated AS escalated, i.priority AS priority,
-               i.openedAt AS openedAt, i.lastAlertAt AS lastAlertAt
+               i.openedAt AS openedAt, i.lastAlertAt AS lastAlertAt, rules
         ORDER BY i.lastAlertAt DESC, i.incidentId
         """;
 

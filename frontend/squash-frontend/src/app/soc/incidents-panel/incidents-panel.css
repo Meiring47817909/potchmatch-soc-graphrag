@@ -3,3 +3,5 @@ header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 header h2 { flex: 1; }
 .error { margin: 0 0 10px; }
 .badge-escalated { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--soc-danger); color: white; font-size: 0.68rem; font-weight: 700; }
+.rules { white-space: nowrap; }
+.rule { display: block; width: fit-content; margin: 1px 0; padding: 1px 8px; border-radius: 999px; background: #eef2f7; border: 1px solid var(--soc-border); font-size: 0.75rem; font-weight: 600; color: #334155; }

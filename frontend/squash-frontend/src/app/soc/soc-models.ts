@@ -59,7 +59,7 @@ export interface GraphQueryResult {
   rows: Record<string, unknown>[];
 }
 
-// One row of GraphQueries.Incidents. The query returns no alert count, so none is modelled here.
+// One row of GraphQueries.Incidents.
 export interface GraphIncident {
   incidentId: string;
   title: string;
@@ -70,6 +70,8 @@ export interface GraphIncident {
   priority: string | null;
   openedAt: string | null;
   lastAlertAt: string | null;
+  /** Distinct ruleName of every alert the incident CONTAINS, sorted. */
+  rules?: string[];
 }
 
 // RagService
