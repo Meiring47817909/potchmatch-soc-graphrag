@@ -96,11 +96,24 @@ app-soc-page th {
   padding: 7px 9px;
   border-bottom: 2px solid var(--soc-border);
   white-space: nowrap;
+  z-index: 3;
 }
 app-soc-page td { padding: 6px 9px; border-bottom: 1px solid #e5eaf1; vertical-align: top; }
 app-soc-page tbody tr:nth-child(even of :not(.detail)) > td { background: var(--soc-row-alt); }
 app-soc-page tbody tr:hover > td { background: var(--soc-row-hover); }
-app-soc-page .scroll { overflow-x: auto; border: 1px solid var(--soc-border); border-radius: 8px; }
+/* Each table scrolls inside its own box (both directions) so the sticky header row stays
+   visible while scrolling the rows. A horizontally-scrolling wrapper on its own would make
+   it the sticky reference and the header would never stick. */
+app-soc-page .scroll {
+  overflow: auto;
+  max-height: 65vh;
+  border: 1px solid var(--soc-border);
+  border-radius: 8px;
+}
+/* Related events inside an expanded alert row: a smaller box of its own. */
+app-soc-page .detail .scroll { max-height: 320px; }
+/* Keep the nested header under the outer sticky header when both overlap. */
+app-soc-page .detail th { z-index: 2; }
 app-soc-page .scroll table th:first-child { border-top-left-radius: 8px; }
 app-soc-page .scroll table th:last-child { border-top-right-radius: 8px; }
 app-soc-page tbody tr:last-child > td { border-bottom: none; }

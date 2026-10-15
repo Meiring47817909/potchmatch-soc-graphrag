@@ -18,7 +18,7 @@ td.actions, th.plain {
   background: var(--soc-card);
   box-shadow: -6px 0 6px -6px rgba(15, 23, 42, 0.25);
 }
-th.plain { background: var(--soc-head); z-index: 2; }
+th.plain { background: var(--soc-head); z-index: 4; } /* top-right corner: sticky both ways */
 .alert-row.open > td.actions { background: var(--soc-primary-soft); }
 .actions button { margin-right: 4px; }
 button.expand,
