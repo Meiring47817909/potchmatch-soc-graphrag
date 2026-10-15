@@ -22,8 +22,10 @@
                        Same user, two rules                   -> ESCALATED incident in the graph
                     c. Anonymous graph probing                -> GRAPH_ACCESS (HIGH) for the source IP
                     d. Request flood (unless -SkipFlood)      -> POSSIBLE_DOS (HIGH)
-                    e. payment-service outage (unless -SkipOutage, needs docker)
+                    e. payment-service outage - only with -IncludeOutage (needs docker)
                                                               -> SERVICE_FAILURE (HIGH), auto-resolved
+                       Off by default so the outage can be demonstrated live
+                       (docker compose stop payment-service, accept a booking, start it again).
     4. Summary    - waits for detection and graph sync, then lists the alerts and incidents.
 
   Re-running is safe: existing users are logged in instead of registered. While an alert is still
@@ -35,14 +37,16 @@
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\seed-demo.ps1
 .EXAMPLE
-  powershell -ExecutionPolicy Bypass -File scripts\seed-demo.ps1 -SkipOutage -SkipFlood
+  powershell -ExecutionPolicy Bypass -File scripts\seed-demo.ps1 -SkipFlood
+.EXAMPLE
+  powershell -ExecutionPolicy Bypass -File scripts\seed-demo.ps1 -IncludeOutage
 #>
 param(
     [string]$BaseUrl = "http://127.0.0.1:5132",
     [string]$ComposeFile = (Join-Path $PSScriptRoot "..\backend\docker-compose.yml"),
     [string]$AdminEmail = "admin@potchmatch.local",
     [string]$AdminPassword = "Admin@12345",
-    [switch]$SkipOutage,
+    [switch]$IncludeOutage,
     [switch]$SkipFlood,
     [switch]$NoWait
 )
@@ -190,7 +194,7 @@ if (-not $SkipFlood) {
     Write-Ok "$flood unauthenticated requests sent"
 }
 
-if (-not $SkipOutage) {
+if ($IncludeOutage) {
     Write-Step "3e. payment-service outage (Rule 4 SERVICE_FAILURE)"
     $docker = Get-Command docker -ErrorAction SilentlyContinue
     if (-not $docker) {
