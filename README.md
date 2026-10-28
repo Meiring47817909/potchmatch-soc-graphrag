@@ -149,21 +149,31 @@ docs/                       detailed Phase 2 write-up and images
 
 ## Documentation
 
-[docs/PHASE2-REPORT.md](docs/PHASE2-REPORT.md) is the full Phase 2 write-up. It covers:
+- [docs/PHASE1-REPORT.md](docs/PHASE1-REPORT.md) covers the Phase 1 application: functionality, the full API, the architecture, and the three microservice patterns (Database per Service, Circuit Breaker + Retry, Saga).
+- [docs/PHASE2-REPORT.md](docs/PHASE2-REPORT.md) is the full Phase 2 write-up. It covers:
 
-- event collection;
-- every detection rule (purpose, inputs, condition, severity, response);
-- the alert model;
-- the graph model and data sources;
-- the graph queries;
-- the RAG pipeline;
-- design decisions and limitations.
+  - event collection;
+  - every detection rule (purpose, inputs, condition, severity, response);
+  - the alert model;
+  - the graph model and data sources;
+  - the graph queries;
+  - the RAG pipeline;
+  - design decisions and limitations.
 
-## Background
+## Background: two phases
 
-Built for the ITRI623 module in two phases:
+Built for the ITRI623 module in two phases. The git history shows both: the first commit is the Phase 1 baseline, and everything after it is Phase 2.
 
-1. A microservices application with an API gateway, service discovery, containerisation and resilience patterns.
-2. Its extension with SOC monitoring, a Neo4j security knowledge graph and GraphRAG.
+**Phase 1: the microservices application.** Players host fee-based squash challenges, coaches advertise paid coaching sessions, and accepting one holds the fee in escrow and pays out to the host. It's built as an API gateway (Ocelot) in front of Consul-registered Identity, Booking and Payment services, each with its own database, all containerised. It uses three patterns:
+
+- Database per Service;
+- Circuit Breaker + Retry (Polly);
+- an orchestration Saga with a compensating refund.
+
+| Phase 1 architecture |
+|---|
+| ![Phase 1 architecture](docs/images/architecture-phase1.png) |
+
+**Phase 2: security operations.** The system was extended with SOC event collection, detection rules and alerts, a Neo4j security knowledge graph and GraphRAG, as described above.
 
 The security knowledge is derived from [MITRE ATT&CK®](https://attack.mitre.org/) and the [OWASP Top 10:2025](https://owasp.org/Top10/2025/). It was extracted with the Neo4j LLM Graph Builder and then curated; see [`graph-data/knowledge/CURATION.md`](graph-data/knowledge/CURATION.md).
