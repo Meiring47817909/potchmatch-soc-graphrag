@@ -1,0 +1,91 @@
+digraph phase2 {
+  graph [fontname="DejaVu Sans", fontsize=13, rankdir=TB, splines=spline, nodesep=0.45, ranksep=0.9, pad=0.3, newrank=true];
+  node  [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", penwidth=1.1];
+  edge  [fontname="DejaVu Sans", fontsize=9.5, penwidth=1.2, arrowsize=0.8];
+
+  subgraph cluster_net {
+    label="Docker Compose Network (squash-net)"; style=dashed; color="#888888"; fontsize=14;
+
+    fe [label="Angular Frontend\n(nginx container, static build)\nPhase 2: Admin SOC page\n(Events / Alerts / Incidents tabs + Ask the graph)", fillcolor="#dae8f8", color="#3b5b8f"];
+    gw [label="API Gateway\n(Ocelot)\nsingle entry point, JWT auth,\nroutes /api/* to services\n/api/soc, /api/graph, /api/rag = Admin only\nemits REQUEST_RECEIVED / 401 / 403 events", fillcolor="#fde8c8", color="#b38600"];
+
+    subgraph cluster_id { label="IdentityService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+      id  [label="IdentityService\n(Auth + Players API)", fillcolor="#dbf0d9", color="#3e8a3e"];
+      idb [label="identity_db\n(PostgreSQL)", shape=cylinder, style=filled, fillcolor="#f0f0f0", color="#666666"]; }
+    subgraph cluster_bk { label="BookingService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+      bk  [label="BookingService\n(Challenges + Coaching\nSessions API)", fillcolor="#dbf0d9", color="#3e8a3e"];
+      bdb [label="booking_db\n(PostgreSQL)", shape=cylinder, style=filled, fillcolor="#f0f0f0", color="#666666"]; }
+    subgraph cluster_py { label="PaymentService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+      py  [label="PaymentService\n(Escrow + Wallet API)", fillcolor="#dbf0d9", color="#3e8a3e"];
+      pdb [label="payment_db\n(PostgreSQL)", shape=cylinder, style=filled, fillcolor="#f0f0f0", color="#666666"]; }
+
+    subgraph cluster_p2 {
+      label="Phase 2: SOC monitoring, knowledge graph and GraphRAG"; style="filled,rounded"; fillcolor="#fff6f6"; color="#c98a8a"; fontcolor="#8f2d2d";
+      subgraph cluster_soc { label="SocService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+        soc [label="SocService\nevent ingestion + storage\n5 detection rules (every 15 s)\nalerts API (ack / resolve)", fillcolor="#f8d7d7", color="#a33a3a"];
+        sdb [label="soc_db\n(PostgreSQL)\nEvents, Alerts, AlertEvents", shape=cylinder, style=filled, fillcolor="#f0f0f0", color="#666666"]; }
+      subgraph cluster_gs { label="GraphService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+        gs  [label="GraphService\nseeds + pull sync + incidents\n7 graph queries\nCypherGuard (read-only)", fillcolor="#d7eef4", color="#2b7a8f"];
+        n4j [label="Neo4j 5\n(knowledge graph)\nBrowser :7474 / Bolt :7687", shape=cylinder, style=filled, fillcolor="#e6f4ea", color="#2e7d4f"];
+        seeds [label="graph-data seeds\napp-structure.json\nsecurity-knowledge.json\n(MITRE ATT&CK / OWASP, curated)", shape=note, style=filled, fillcolor="#fffbe6", color="#a68b00", fontsize=10.5]; }
+      subgraph cluster_rag { label="RagService"; style=filled; fillcolor="#f5f5f5"; color="#dddddd";
+        rag [label="RagService\nGraphRAG (text2cypher)\nschema -> Cypher -> evidence\n-> grounded answer + citations", fillcolor="#ece0f7", color="#6a3d9a"]; }
+    }
+
+    consul [label="Consul\n(Service Registry)\nself-registration + health checks", fillcolor="#e4d7f0", color="#7a4fa0"];
+  }
+
+
+  // invisible placeholder where the external LLM box used to be (keeps the layout unchanged)
+  gemini [label="Google Gemini API\n(external LLM, HTTPS)\nkey in backend/.env", style=invis];
+  // client
+  fe -> gw [label="HTTPS / JWT bearer token", color="#3b5b8f", penwidth=1.5];
+
+  // gateway routes
+  gw -> id  [label="/api/auth/*\n/api/players/*", color="#b38600"];
+  gw -> bk  [label="/api/bookings/*", color="#b38600"];
+  gw -> py  [label="/api/payments/*", color="#b38600"];
+  gw -> soc [label="/api/soc/*", color="#b38600"];
+  gw -> gs  [label="/api/graph/*", color="#b38600"];
+  gw -> rag [label="/api/rag/*", color="#b38600"];
+
+  bk -> py [label="POST /api/payments/hold\n(Circuit Breaker + Retry - Polly)", color="#c45a00", penwidth=1.5, constraint=false];
+
+  // databases
+  id -> idb [label="owns", color="#3e8a3e"];
+  bk -> bdb [label="owns", color="#3e8a3e"];
+  py -> pdb [label="owns", color="#3e8a3e"];
+  soc -> sdb [label="owns", color="#3e8a3e"];
+  gs -> n4j [label="Bolt, MERGE writes", color="#2e7d4f"];
+  seeds -> gs [label="loaded at startup", color="#a68b00", style=dashed, arrowhead=vee];
+
+  // security events
+  edge [color="#a33a3a", style=dotted, penwidth=1.5, constraint=false];
+  gw  -> soc;
+  id  -> soc;
+  bk  -> soc;
+  py  -> soc;
+  rag -> soc [label="RAG_QUERY events", constraint=false];
+
+  // graph sync + rag
+  edge [style=solid, penwidth=1.4, constraint=false];
+  gs  -> soc [label="pull new alerts + events\nevery 15 s (X-Graph-Sync-Key)", color="#2b7a8f", constraint=false];
+  gs  -> id  [color="#2b7a8f", constraint=false];
+  rag -> gs  [label="schema + guarded\nread-only Cypher\n(X-Graph-Query-Key)", color="#6a3d9a", constraint=false];
+
+  // consul
+  edge [color="#7a4fa0", style=dashed, penwidth=1.1, fontcolor="#5a3a7a"];
+  gw -> consul [label="resolves service\naddress at request time", constraint=false];
+  {id bk py gs rag} -> consul [label="", arrowsize=0.6, constraint=false];
+  soc -> consul [arrowsize=0.6];
+  soc -> consul [label="polls health every 5 s\n-> SERVICE_HEALTH events", style=dotted, color="#a33a3a", fontcolor="#a33a3a", constraint=false];
+
+  rag -> gemini [style=invis, constraint=true];
+  // left-to-right order of the service row
+  {rank=same; id; bk; py; soc; gs; rag;}
+  id -> bk -> py -> soc -> gs -> rag [style=invis];
+  py -> consul [style=invis, minlen=2, weight=5, constraint=true];
+  
+
+  
+}

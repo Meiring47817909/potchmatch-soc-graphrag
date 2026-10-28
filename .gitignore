@@ -10,3 +10,7 @@ docker-compose.log
 
 # Local secrets (Gemini API key)
 backend/.env
+
+# Personal design notes (kept locally, not published)
+docs/superpowers/
+handout.md
