@@ -69,7 +69,7 @@ public class SyncWorkerTests(Neo4jFixture fx)
     {
         var h = await FreshAsync();
         h.Identity.Players.Add(SyncHarness.Player());
-        h.Soc.Events.Add(new SyncEventEnvelope(SyncHarness.FailedLogin(1, " Wickusvn@Gmail.com"), SyncHarness.T0));
+        h.Soc.Events.Add(new SyncEventEnvelope(SyncHarness.FailedLogin(1, " Wickus.Coach@Potchmatch.Demo"), SyncHarness.T0));
         await h.Worker.RunOnceAsync(Now, default);
 
         Assert.Equal(1, await h.CountAsync("MATCH (:User {userId:'11111111-1111-1111-1111-111111111111'})-[:TRIGGERED]->(:Event) RETURN count(*)"));

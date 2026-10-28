@@ -38,7 +38,7 @@ Request:
 {
   "name": "Wickus",
   "surname": "van Niekerk",
-  "email": "wickusvn@gmail.com",
+  "email": "wickus.coach@potchmatch.demo",
   "password": "ne4124ne",
   "clubId": "pcc",
   "isCoach": true
@@ -61,7 +61,7 @@ Response `200 OK`:
 
 Request:
 ```json
-{ "email": "wickusvn@gmail.com", "password": "ne4124ne" }
+{ "email": "wickus.coach@potchmatch.demo", "password": "ne4124ne" }
 ```
 
 Response `200 OK`: same shape as register above. Response `401 Unauthorized` on bad credentials.

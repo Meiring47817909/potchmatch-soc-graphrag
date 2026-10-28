@@ -102,19 +102,19 @@ internal sealed class SyncHarness
         (await QueryAsync(cypher))[0][0].As<long>();
 
     public static readonly Guid PlayerId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-    public const string Email = "wickusvn@gmail.com";
+    public const string Email = "wickus.coach@potchmatch.demo";
     public static readonly DateTimeOffset T0 = new(2026, 10, 8, 10, 0, 0, TimeSpan.Zero);
 
     public static SyncPlayer Player(string role = "Player", string email = Email, Guid? id = null) =>
         new(id ?? PlayerId, email, "Wickus", "Meiring", role);
 
-    public static SyncEvent FailedLogin(int n, string? userId = " Wickusvn@Gmail.com", string? endpoint = "/api/auth/login",
+    public static SyncEvent FailedLogin(int n, string? userId = " Wickus.Coach@Potchmatch.Demo", string? endpoint = "/api/auth/login",
         string service = "identity-service") =>
         new(Guid.Parse($"00000000-0000-0000-0000-{n:D12}"), T0.AddSeconds(n), service, "FAILED_LOGIN", "Warning",
             userId, "10.0.0.5", endpoint, "POST", 401, "Failed login", "corr-" + n, null);
 
     public static SyncAlert Alert(string status = "OPEN", int events = 5, string rule = "Multiple Failed Logins",
-        string? userId = " Wickusvn@Gmail.com", string? endpoint = "/api/auth/login", DateTimeOffset? updatedAt = null)
+        string? userId = " Wickus.Coach@Potchmatch.Demo", string? endpoint = "/api/auth/login", DateTimeOffset? updatedAt = null)
     {
         var evs = Enumerable.Range(1, events).Select(i => FailedLogin(i, userId, endpoint)).ToList();
         return new SyncAlert(Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001"), T0, updatedAt ?? T0.AddMinutes(1), rule, "High", status,

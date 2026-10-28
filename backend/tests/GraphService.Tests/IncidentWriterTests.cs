@@ -80,11 +80,11 @@ public class IncidentWriterTests(Neo4jFixture fx)
     {
         var h = await FreshAsync();
         await h.Writer.UpsertPlayersAsync([SyncHarness.Player()], default);
-        await h.Writer.UpsertAlertAsync(SyncHarness.Alert() with { AffectedUser = " Wickusvn@Gmail.com" }, default);
+        await h.Writer.UpsertAlertAsync(SyncHarness.Alert() with { AffectedUser = " Wickus.Coach@Potchmatch.Demo" }, default);
         await NewWriter(fx.Driver).CorrelateAsync(default);
         Assert.Equal("user:" + SyncHarness.PlayerId,
             (await h.QueryAsync("MATCH (i:Incident) RETURN i.subject"))[0][0].As<string>());
-        Assert.Equal("Activity from wickusvn@gmail.com: Multiple Failed Logins",
+        Assert.Equal("Activity from wickus.coach@potchmatch.demo: Multiple Failed Logins",
             (await h.QueryAsync("MATCH (i:Incident) RETURN i.title"))[0][0].As<string>());
     }
 

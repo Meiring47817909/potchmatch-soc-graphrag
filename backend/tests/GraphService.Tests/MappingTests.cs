@@ -54,8 +54,8 @@ public class MappingTests
     [Fact]
     public void UserMatcher_NormalisesEmail()
     {
-        Assert.Equal("wickusvn@gmail.com", UserMatcher.EmailKey(" Wickusvn@Gmail.com "));
-        Assert.Equal("email:wickusvn@gmail.com", UserMatcher.UnknownUserId(" Wickusvn@Gmail.com "));
+        Assert.Equal("wickus.coach@potchmatch.demo", UserMatcher.EmailKey(" Wickus.Coach@Potchmatch.Demo "));
+        Assert.Equal("email:wickus.coach@potchmatch.demo", UserMatcher.UnknownUserId(" Wickus.Coach@Potchmatch.Demo "));
     }
 
     [Fact]

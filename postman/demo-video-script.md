@@ -48,12 +48,12 @@ Two ways to run this — pick whichever your recording software makes easier:
 | **4:00–4:10** | Terminal | [Confirm `docker compose ps` shows everything healthy/running] "Everything's up, so let's demo it." |
 | **4:10–4:35** | Postman (folder "1. Coach — Register & Setup") + browser tab 1 side by side | [Click **Register Coach (Wickus)**, hit Send, show 200 + green test] "I'll register a coach — Wickus van Niekerk, at Potchefstroom Country Club, marked as a coach." |
 | **4:35–4:50** | Postman | [Click **Login Coach**, Send] "Logging in returns a JWT — you can see it's been captured automatically into a variable, so I'm not copy-pasting it around." |
-| **4:50–5:05** | Browser tab 1 (login form) | [Switch to the browser, type `wickusvn@gmail.com` / `ne4124ne` into the actual login form, click Log In] "I'll also log into the browser with the same account — Postman's login doesn't touch the browser at all, they're separate sessions, so this is what makes the Dashboard actually show his info." |
+| **4:50–5:05** | Browser tab 1 (login form) | [Switch to the browser, type `wickus.coach@potchmatch.demo` / `ne4124ne` into the actual login form, click Log In] "I'll also log into the browser with the same account — Postman's login doesn't touch the browser at all, they're separate sessions, so this is what makes the Dashboard actually show his info." |
 | **5:05–5:35** | Postman + browser tab 1 (Dashboard) | [Click **Update Coach Profile**, Send] "Now I'll fill in his coach profile — bio, coaching level, and an hourly rate of R100." [Switch to browser, refresh/open Dashboard] "And you can see that reflected immediately on the Dashboard's My Information panel." |
 | **5:35–6:05** | Postman + browser tab 1 | [Click **Create Coaching Session (7 Sept, R100)**, Send] "Now he posts a coaching session for the 7th of September, R100." [Switch to browser, show it appear as an open coaching session] "That's now visible on the club page for any player to book. Worth noting — this single action just wrote to `booking_db`, completely separate from IdentityService's `identity_db` we touched a moment ago. That's the Database-per-Service pattern: no service reaches into another's database." |
 | **6:05–6:15** | Browser tab 1 | [Click Log out] "I'll log the coach out." |
 | **6:15–6:45** | Postman (folder "2. Player — Register & Pay") | [Click **Register Player (Meiring)**, then **Login Player**, Send both] "Now I'll register and log in as a player — myself, Meiring van Niekerk, at the Potchefstroom Defence Squash Club." |
-| **6:45–7:00** | Browser tab 1 (login form) | [Log into the browser with `meiring@gmail.com` / `ne4124ne`, same reason as before] "And logging into the browser as him too, so the Dashboard reflects this session." |
+| **6:45–7:00** | Browser tab 1 (login form) | [Log into the browser with `meiring.player@potchmatch.demo` / `ne4124ne`, same reason as before] "And logging into the browser as him too, so the Dashboard reflects this session." |
 | **7:00–7:15** | Postman | [Click **Check Wallet Balance**, Send] "A brand-new wallet always starts at R0 — nothing staged here." |
 | **7:15–7:35** | Postman + browser tab 1 | [Click **Accept Coaching Session — expect 402**, Send, show the 402 + passing test] "If I try to accept the coaching session now, it correctly fails — 402, Insufficient Funds. That's a deliberate business-rule rejection coded into PaymentService, not a bug." [Show the same error surface in the UI] |
 | **7:35–7:45** | Terminal 2 | [Run `docker compose stop payment-service`] "Now let's see what happens when PaymentService itself goes down." |
@@ -73,7 +73,7 @@ Two ways to run this — pick whichever your recording software makes easier:
 |---|---|---|
 | Name / Surname | Wickus van Niekerk | Meiring van Niekerk |
 | Club | Potchefstroom Country Club (PCC) | Potchefstroom Defence Squash Club |
-| Email | wickusvn@gmail.com | meiring@gmail.com |
+| Email | wickus.coach@potchmatch.demo | meiring.player@potchmatch.demo |
 | Password | ne4124ne | ne4124ne |
 | Coach? | Yes | No |
 

@@ -112,12 +112,12 @@ Every stored event has the 13 fields required by the specification. Example: a f
   "serviceName": "identity-service",
   "eventType": "FAILED_LOGIN",
   "severity": "MEDIUM",
-  "userId": "wickusvn@gmail.com",
+  "userId": "wickus.coach@potchmatch.demo",
   "sourceIp": "172.18.0.1",
   "endpoint": "/api/auth/login",
   "httpMethod": "POST",
   "statusCode": 401,
-  "message": "Invalid email or password for login attempt as wickusvn@gmail.com",
+  "message": "Invalid email or password for login attempt as wickus.coach@potchmatch.demo",
   "correlationId": "9a8b7c6d-1111-2222-3333-444455556666",
   "affectedEntity": "login-endpoint"
 }
@@ -146,7 +146,7 @@ The SOC log is built in-house rather than with an external platform such as Bett
 
 ## 4. Threat detection rules (spec 3.3 / 11.4)
 
-A background worker in SocService runs every enabled rule over the recent events **every 15 seconds**. Each rule returns zero or more matches, and each match has a **deduplication key** (for example `Multiple Failed Logins:account:wickusvn@gmail.com`). While an alert with that key is still OPEN, new matching events are added to it instead of creating a duplicate alert. All thresholds are configurable in `appsettings.json` (`DetectionRules`).
+A background worker in SocService runs every enabled rule over the recent events **every 15 seconds**. Each rule returns zero or more matches, and each match has a **deduplication key** (for example `Multiple Failed Logins:account:wickus.coach@potchmatch.demo`). While an alert with that key is still OPEN, new matching events are added to it instead of creating a duplicate alert. All thresholds are configurable in `appsettings.json` (`DetectionRules`).
 
 ### Rule 1: Multiple Failed Logins
 
@@ -218,10 +218,10 @@ Alerts are stored in SocService (`Alerts` table) and linked to their events thro
   "ruleName": "Multiple Failed Logins",
   "severity": "HIGH",
   "status": "OPEN",
-  "description": "5 failed login attempts for wickusvn@gmail.com within 5 minutes.",
+  "description": "5 failed login attempts for wickus.coach@potchmatch.demo within 5 minutes.",
   "relatedEvents": ["0f1e2d3c-…", "1a2b3c4d-…", "2b3c4d5e-…", "3c4d5e6f-…", "4d5e6f70-…"],
   "affectedService": "identity-service",
-  "affectedUser": "wickusvn@gmail.com",
+  "affectedUser": "wickus.coach@potchmatch.demo",
   "affectedEntity": "/api/auth/login",
   "recommendedAction": "Temporarily block the source IP and verify whether the account is 
   compromised; consider forcing a password reset."

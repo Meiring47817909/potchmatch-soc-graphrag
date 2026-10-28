@@ -19,7 +19,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickusvn@gmail.com\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"pcc\",\n  \"isCoach\": true\n}",
+              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickus.coach@potchmatch.demo\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"pcc\",\n  \"isCoach\": true\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -50,7 +50,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"wickusvn@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "raw": "{\n  \"email\": \"wickus.coach@potchmatch.demo\",\n  \"password\": \"ne4124ne\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -84,7 +84,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickusvn@gmail.com\",\n  \"clubId\": \"pcc\",\n  \"rank\": \"Unranked\",\n  \"coachBio\": \"Level 2 SA Squash-certified coach with 8 years of experience developing club and provincial players. Focused on movement efficiency, shot accuracy, and match-day mental preparation.\",\n  \"coachingLevel\": \"SA Squash Level 2 Coach\",\n  \"hourlyRateZAR\": 100\n}",
+              "raw": "{\n  \"name\": \"Wickus\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"wickus.coach@potchmatch.demo\",\n  \"clubId\": \"pcc\",\n  \"rank\": \"Unranked\",\n  \"coachBio\": \"Level 2 SA Squash-certified coach with 8 years of experience developing club and provincial players. Focused on movement efficiency, shot accuracy, and match-day mental preparation.\",\n  \"coachingLevel\": \"SA Squash Level 2 Coach\",\n  \"hourlyRateZAR\": 100\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -154,7 +154,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Meiring\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"defence\",\n  \"isCoach\": false\n}",
+              "raw": "{\n  \"name\": \"Meiring\",\n  \"surname\": \"van Niekerk\",\n  \"email\": \"meiring.player@potchmatch.demo\",\n  \"password\": \"ne4124ne\",\n  \"clubId\": \"defence\",\n  \"isCoach\": false\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -185,7 +185,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "raw": "{\n  \"email\": \"meiring.player@potchmatch.demo\",\n  \"password\": \"ne4124ne\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -392,7 +392,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"wickusvn@gmail.com\",\n  \"password\": \"definitely-wrong-password\"\n}",
+              "raw": "{\n  \"email\": \"wickus.coach@potchmatch.demo\",\n  \"password\": \"definitely-wrong-password\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1570,7 +1570,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"meiring@gmail.com\",\n  \"password\": \"ne4124ne\"\n}",
+              "raw": "{\n  \"email\": \"meiring.player@potchmatch.demo\",\n  \"password\": \"ne4124ne\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

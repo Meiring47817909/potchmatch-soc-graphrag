@@ -31,14 +31,14 @@ public class MultipleFailedLoginsRuleTests
     [Fact]
     public void FailedLogins_FiveAttempts_SameAccount_Match()
     {
-        var events = Enumerable.Range(0, 5).Select(_ => Failed("wickusvn@gmail.com", null, TimeSpan.FromMinutes(1))).ToList();
+        var events = Enumerable.Range(0, 5).Select(_ => Failed("wickus.coach@potchmatch.demo", null, TimeSpan.FromMinutes(1))).ToList();
         var match = Assert.Single(NewRule().Evaluate(events, Now));
         Assert.Equal(5, match.EventIds.Count);
-        Assert.Equal("Multiple Failed Logins:account:wickusvn@gmail.com", match.DedupKey);
-        Assert.Equal("wickusvn@gmail.com", match.AffectedUser);
+        Assert.Equal("Multiple Failed Logins:account:wickus.coach@potchmatch.demo", match.DedupKey);
+        Assert.Equal("wickus.coach@potchmatch.demo", match.AffectedUser);
         Assert.Equal("identity-service", match.AffectedService);
         Assert.Equal("/api/auth/login", match.AffectedEntity);
-        Assert.Equal("5 failed login attempts for wickusvn@gmail.com within 5 minutes.", match.Description);
+        Assert.Equal("5 failed login attempts for wickus.coach@potchmatch.demo within 5 minutes.", match.Description);
     }
 
     [Fact]
@@ -62,9 +62,9 @@ public class MultipleFailedLoginsRuleTests
     [Fact]
     public void FailedLogins_NormalisesEmailCase()
     {
-        var users = new[] { "Wickusvn@Gmail.com ", "wickusvn@gmail.com", "WICKUSVN@GMAIL.COM", "wickusvn@gmail.com", " wickusvn@gmail.com" };
+        var users = new[] { "Wickus.Coach@Potchmatch.Demo ", "wickus.coach@potchmatch.demo", "WICKUS.COACH@POTCHMATCH.DEMO", "wickus.coach@potchmatch.demo", " wickus.coach@potchmatch.demo" };
         var events = users.Select(u => Failed(u, null, TimeSpan.FromMinutes(1))).ToList();
         var match = Assert.Single(NewRule().Evaluate(events, Now));
-        Assert.Equal("Multiple Failed Logins:account:wickusvn@gmail.com", match.DedupKey);
+        Assert.Equal("Multiple Failed Logins:account:wickus.coach@potchmatch.demo", match.DedupKey);
     }
 }
